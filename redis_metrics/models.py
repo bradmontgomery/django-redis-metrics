@@ -31,6 +31,13 @@ class R(object):
         ]
         return keys
 
+    def slugs(self):
+        """Return a set of metric slugs (i.e. those used to create Redis keys)
+        for this app."""
+        # TODO: automactially keep a list (or set) of all slugs, so we don't
+        # have to do a full scan when we decide to list the keys.
+        return list(set([k.split(":")[1] for k in self.r.keys()]))
+
     def metric(self, slug, num=1):
         """Records a metric, creating it if it doesn't exist or incrementing it
         if it does. All metrics are prefixed with 'm', and automatically
@@ -44,8 +51,6 @@ class R(object):
             m:<slug>:y:<yyyy>       # Year
 
         """
-        # TODO: automactially keep a list (or set) of all slugs, so we don't
-        # have to do a full scan when we decide to list the keys.
         day_key, week_key, month_key, year_key = self._build_keys(slug)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
@@ -80,7 +85,7 @@ class R(object):
         # TODO: there's probably a better way to get this data from Redis.
         results = []
         for slug in slug_list:
-            results.append(self.get_metric(slug))
+            results.append({slug: self.get_metric(slug)})
         return results
 
     # Gagues. Gagues have a different prefix "g:" in order to differentiate
