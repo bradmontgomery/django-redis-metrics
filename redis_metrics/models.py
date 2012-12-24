@@ -13,11 +13,10 @@ from django.template.defaultfilters import slugify
 class R(object):
 
     def __init__(self, *args, **kwargs):
-        self.r = redis.StrictRedis(
-            host=getattr(settings, 'REDIS_METRICS_HOST', 'localhost'),
-            port=int(getattr(settings, 'REDIS_METRICS_PORT', 6379)),
-            db=int(getattr(settings, 'REDIS_METRICS_DB', 0)),
-        )
+        self.host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
+        self.port = int(getattr(settings, 'REDIS_METRICS_PORT', 6379))
+        self.db = int(getattr(settings, 'REDIS_METRICS_DB', 0))
+        self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
 
     def _build_keys(self, slug):
         """Builds various keys for the given slug."""
