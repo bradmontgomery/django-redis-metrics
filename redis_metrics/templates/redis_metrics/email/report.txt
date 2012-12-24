@@ -1,0 +1,13 @@
+Here are your Redis metrics for {{ today }}!
+
+{% for report in metrics %}
+{% for slug, data in report.items %}
+
+=== {{ slug|upper }} ===
+Day:   {{ data.day }}
+Week:  {{ data.week }}
+Month: {{ data.month }}
+Year:  {{ data.year }}
+
+{% endfor %}
+{% endfor %}

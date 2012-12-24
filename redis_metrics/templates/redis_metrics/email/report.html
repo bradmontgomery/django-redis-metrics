@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<head><title>Redis Metrics</title>
+<body>
+<h1>Here are your Redis metrics!</h1>
+
+<table>
+<caption>Metrics Report for {{ today }}</caption>
+<thead>
+    <tr>
+    <th>Metric</th>
+    <th>Day</th>
+    <th>Week</th>
+    <th>Month</th>
+    <th>Year</th>
+    </tr>
+</thead>
+<tbody>
+{# [{'foo': {'day': '1', 'month': '1', 'week': '1', 'year': '1'} #}
+{% for report in metrics %}
+    {% for slug, data in report.items %}
+    <tr>
+    <td>{{ slug }}</td>
+    <td>{{ data.day }}</td>
+    <td>{{ data.week }}</td>
+    <td>{{ data.month }}</td>
+    <td>{{ data.year }}</td>
+    </tr>
+    {% endfor %}
+{% endfor %}
+<tbody>
+</table>
+</body>
+</html>
