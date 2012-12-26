@@ -13,8 +13,9 @@ offered by the Redis backend in ``django-app-metrics``. Major differences are:
 * currently no grouping of Metrics
 * no timing
 
-In addition, there are some built-in default views and templates for viewing
+*TODO* In addition, there are some built-in default views and templates for viewing
 metrics.
+
 
 Requirements
 ============
@@ -27,20 +28,9 @@ The only requirement for this app is `redis-py`_ and Django 1.4 or above.
 Installation
 ============
 
-eventually, ``pip install djanog-redis-metrics``.
+*TODO*: eventually, ``pip install django-redis-metrics``.
 
-Usage
-=====
-
-::
-
-  from redis_metrics import metric
-
-  # Increment the metric by one
-  metric('new_user_signup')
-
-  # Increment the metric by some other number
-  metric('new_user_signup', 4)
+To use the (nascent) built-in views, add ``redis_metrics`` to your ``INSTALLED_APPS``.
 
 
 Settings
@@ -52,3 +42,30 @@ Settings
 
 ``REDIS_METRICS_DB`` - redis database number to use, defaults to 0
 
+
+Usage
+=====
+
+Use the ``metric`` shortcut to start recording metrics.
+
+::
+
+  from redis_metrics import metric
+
+  # Increment the metric by one
+  metric('new-user-signup')
+
+  # Increment the metric by some other number
+  metric('new-user-signup', 4)
+
+There are also ``gague``'s.
+
+::
+
+  from redis_metrics import gague
+
+  # Create a gague
+  gague('total-downloads', 0)
+
+  # Update the gague
+  gague('total-downloads', 9999)
