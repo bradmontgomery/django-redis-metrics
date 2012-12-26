@@ -63,7 +63,8 @@ class R(object):
     def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)
         for this app."""
-        return self.r.smembers(self._metric_slugs_key)
+        keys = self.r.smembers(self._metric_slugs_key)
+        return set(s.split(":")[1] for s in keys)
 
     def metric(self, slug, num=1):
         """Records a metric, creating it if it doesn't exist or incrementing it
@@ -124,7 +125,8 @@ class R(object):
     def gague_slugs(self):
         """Return a set of Gagues slugs (i.e. those used to create Redis keys)
         for this app."""
-        return self.r.smembers(self._gague_slugs_key)
+        keys = self.r.smembers(self._gague_slugs_key)
+        return set(s.split(":")[1] for s in keys)
 
     def _gague_key(self, slug):
         """Make sure our slugs have a consistent format."""
