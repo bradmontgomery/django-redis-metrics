@@ -1,3 +1,3 @@
-from .utils import metric
+from .utils import gague, metric
 
 VERSION = (0, 1, 0)
