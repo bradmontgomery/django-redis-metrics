@@ -13,14 +13,44 @@ from django.template.defaultfilters import slugify
 class R(object):
 
     def __init__(self, *args, **kwargs):
-        self.host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
-        self.port = int(getattr(settings, 'REDIS_METRICS_PORT', 6379))
-        self.db = int(getattr(settings, 'REDIS_METRICS_DB', 0))
+        """Creates a connection to Redis, and sets the key used to store a
+        set of slugs for all metrics.
+
+        Valid keyword arguments:
+
+        * ``metric_slugs_key`` -- The key storing a set of all metrics slugs
+          (default is "metric-slugs")
+        * ``gague_slugs_key`` -- The key storing a set of all slugs for gagues
+          (default is "gague-slugs")
+        * ``host`` -- Redis host (default settings.REDIS_METRICS_HOST)
+        * ``port`` -- Redis port (default settings.REDIS_METRICS_PORT)
+        * ``db``   -- Redis DB (default settings.REDIS_METRICS_DB)
+
+        """
+        self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
+        self._gague_slugs_key = kwargs.get('gague_slugs_key', 'gague-slugs')
+
+        if 'host' in kwargs:
+            self.host = kwargs['host']
+        else:
+            self.host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
+
+        if 'port' in kwargs:
+            self.port = kwargs['port']
+        else:
+            self.port = int(getattr(settings, 'REDIS_METRICS_PORT', 6379))
+
+        if 'db' in kwargs:
+            self.db = kwargs['db']
+        else:
+            self.db = int(getattr(settings, 'REDIS_METRICS_DB', 0))
+
+        # Create the connection to Redis
         self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
 
     def _build_keys(self, slug):
         """Builds various keys for the given slug."""
-        slug = slugify(slug)
+        slug = slugify(slug)  # Make sure our slugs have a consistent format
         now = datetime.datetime.now()
         keys = [
             "m:{0}:{1}".format(slug, now.strftime("%Y-%m-%d")),  # Day
@@ -30,12 +60,10 @@ class R(object):
         ]
         return keys
 
-    def slugs(self):
+    def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)
         for this app."""
-        # TODO: automactially keep a list (or set) of all slugs, so we don't
-        # have to do a full scan when we decide to list the keys.
-        return list(set([k.split(":")[1] for k in self.r.keys()]))
+        return self.r.smembers(self._metric_slugs_key)
 
     def metric(self, slug, num=1):
         """Records a metric, creating it if it doesn't exist or incrementing it
@@ -51,6 +79,10 @@ class R(object):
 
         """
         day_key, week_key, month_key, year_key = self._build_keys(slug)
+
+        # Keep track of all of our keys
+        self.r.sadd(self._metric_slugs_key,
+            day_key, week_key, month_key, year_key)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method, so let's brute-force it for now.
@@ -89,12 +121,18 @@ class R(object):
 
     # Gagues. Gagues have a different prefix "g:" in order to differentiate
     # them from a metric of the same name.
+    def gague_slugs(self):
+        """Return a set of Gagues slugs (i.e. those used to create Redis keys)
+        for this app."""
+        return self.r.smembers(self._gague_slugs_key)
 
     def _gague_key(self, slug):
+        """Make sure our slugs have a consistent format."""
         return "g:{0}".format(slugify(slug))
 
     def gague(self, slug, current_value):
         k = self._gague_key(slug)
+        self.r.sadd(self._gague_slugs_key, k)  # keep track of all Gagues
         self.r.set(k, current_value)
 
     def get_gague(self, slug):
