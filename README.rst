@@ -49,23 +49,47 @@ Usage
 Use the ``metric`` shortcut to start recording metrics.
 
 ::
+    from redis_metrics import metric
 
-  from redis_metrics import metric
+    # Increment the metric by one
+    metric('new-user-signup')
 
-  # Increment the metric by one
-  metric('new-user-signup')
-
-  # Increment the metric by some other number
-  metric('new-user-signup', 4)
+    # Increment the metric by some other number
+    metric('new-user-signup', 4)
 
 There are also ``gague``'s.
 
 ::
 
-  from redis_metrics import gague
+    from redis_metrics import gague
 
-  # Create a gague
-  gague('total-downloads', 0)
+    # Create a gague
+    gague('total-downloads', 0)
 
-  # Update the gague
-  gague('total-downloads', 9999)
+    # Update the gague
+    gague('total-downloads', 9999)
+
+There's also an ``R`` class which is a lightweight wrapper around ``redis``.
+You can use it directly to set metrics or gagues and to retrieve data.
+
+::
+
+    >>> from redis_metrics.models import R
+    >>> r = R()
+    >>> r.metric('new-user-signup')
+    >>> r.get_metric('new-user-signup')
+    {'day': '29', 'month': '29', 'week': '29', 'year': '29'}
+
+    # list the slugs you've used to create metrics
+    >>> r.metric_slugs()
+    set(['new-user-signup', 'user-logins'])
+
+    # Get metrics for multiple slugs
+    >>> r.get_metrics(['repo-created', 'repo-updated'])
+    [
+        {'repo-created':
+            {'day': '7', 'month': '7', 'week': '7', 'year': '7'}},
+        {'repo-updated':
+            {'day': '29', 'month': '29', 'week': '29', 'year': '29'}}
+    ]
+
