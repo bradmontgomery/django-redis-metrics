@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load url from future %}
+
+{% block content %}
+    <h1>Metric Slugs</h1>
+
+    <ul>
+    {% for slug in metric_slugs %}
+        <li>
+            <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}

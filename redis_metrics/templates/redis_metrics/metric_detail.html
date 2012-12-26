@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Metric for <code>{{ slug }}</code></h1>
+
+    <table>
+        <thead>
+            <tr><th>Time Period</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Day</td><td>{{ metrics.day }}</td></tr>
+            <tr><td>Week</td><td>{{ metrics.week }}</td></tr>
+            <tr><td>Month</td><td>{{ metrics.month }}</td></tr>
+            <tr><td>Year</td><td>{{ metrics.year }}</td></tr>
+        </tbody>
+    </table>
+{% endblock %}
