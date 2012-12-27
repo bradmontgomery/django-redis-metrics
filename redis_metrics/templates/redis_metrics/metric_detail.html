@@ -1,7 +1,12 @@
-{% extends "base.html" %}
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
 
 {% block content %}
-    <h1>Metric for <code>{{ slug }}</code></h1>
+    <h1><code>{{ slug }}</code> metrics</h1>
+    <ul class="breadcrumb">
+    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+    <li class="active">{{ slug }}</li>
+    </ul>
 
     <table>
         <thead>
