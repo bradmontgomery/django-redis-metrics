@@ -48,17 +48,46 @@ class R(object):
         # Create the connection to Redis
         self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
 
-    def _build_keys(self, slug):
-        """Builds various keys for the given slug."""
+    def _date_range(self, since):
+        """Returns a generator that yields ``datetime.date`` objects from the
+        ``since`` date until *now*.
+
+        * ``since`` -- a ``datetime.date`` object.
+
+        """
+        now = datetime.date.today()
+        delta = now - since  # The timedelta from "since" to "now"
+        return (
+            now - datetime.timedelta(days=d) for d in range(delta.days + 1)
+        )
+
+    def _build_keys(self, slug, date=None, granularity='all'):
+        """Builds redis keys used to store metrics.
+
+        * ``slug`` -- a slug used for a metric, e.g. "user-signups"
+        * ``date`` -- (optional) A ``datetime.date`` or ``datetime.datetime``
+          objects used to generate the time period for the metric. If omitted,
+          the current date will be used.
+        * ``granularity`` -- Must be one of: "all" (default), "daily",
+          "weekly", "monthly", "yearly".
+
+        Returns a list of strings.
+
+        """
         slug = slugify(slug)  # Make sure our slugs have a consistent format
-        now = datetime.datetime.now()
-        keys = [
-            "m:{0}:{1}".format(slug, now.strftime("%Y-%m-%d")),  # Day
-            "m:{0}:w:{1}".format(slug, now.strftime("%U")),      # Week
-            "m:{0}:m:{1}".format(slug, now.strftime("%Y-%m")),   # Month
-            "m:{0}:y:{1}".format(slug, now.strftime("%Y")),      # Year
-        ]
-        return keys
+        if date is None:
+            date = datetime.date.today()
+
+        patterns = {
+            "daily": "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")),
+            "weekly": "m:{0}:w:{1}".format(slug, date.strftime("%U")),
+            "monthly": "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")),
+            "yearly": "m:{0}:y:{1}".format(slug, date.strftime("%Y")),
+        }
+        if granularity == 'all':
+            return patterns.values()
+        else:
+            return [patterns[granularity]]
 
     def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)
@@ -113,12 +142,34 @@ class R(object):
 
         Returns a list of dicts.
 
+        NOTE: This method calls ``get_metric`` for each slug in the
+        ``slug_list``, which really isn't very efficient.
+
         """
-        # TODO: there's probably a better way to get this data from Redis.
         results = []
         for slug in slug_list:
             results.append({slug: self.get_metric(slug)})
         return results
+
+    def get_metric_history(self, slug, since=None, granularity='daily'):
+        """Get history for a metric.
+
+        * ``since`` -- the date from which we start pulling metrics
+        * ``granularity`` -- daily, weekly, monthly, yearly
+
+        Returns a list of tuples containing the Redis key and the associated
+        metric::
+
+            >>> get_metric_history('test', granularity='weekly')
+            [
+                ('m:test:w:52', '15'),
+            ]
+
+        """
+        keys = set()  # redis keys
+        for date in self._date_range(since):
+            keys.update(set(self._build_keys(slug, date, granularity)))
+        return sorted(zip(keys, self.r.mget(keys)))
 
     # Gagues. Gagues have a different prefix "g:" in order to differentiate
     # them from a metric of the same name.
