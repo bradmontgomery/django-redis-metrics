@@ -48,18 +48,21 @@ class R(object):
         # Create the connection to Redis
         self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
 
-    def _date_range(self, since):
+    def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.date`` objects from the
-        ``since`` date until *now*.
+        ``since`` date until *now*. If ``since`` is omitted, returns dates for
+        one year.
 
-        * ``since`` -- a ``datetime.date`` object.
+        * ``since`` -- a ``datetime.date`` object or None.
 
         """
         now = datetime.date.today()
-        delta = now - since  # The timedelta from "since" to "now"
-        return (
-            now - datetime.timedelta(days=d) for d in range(delta.days + 1)
-        )
+        if since is None:
+            since_days = 365  # assume 1 year :-/
+        else:
+            delta = now - since  # The timedelta from "since" to "now"
+            since_days = delta.days + 1
+        return (now - datetime.timedelta(days=d) for d in range(since_days))
 
     def _build_keys(self, slug, date=None, granularity='all'):
         """Builds redis keys used to store metrics.
