@@ -8,6 +8,7 @@ import redis
 
 from django.conf import settings
 from django.template.defaultfilters import slugify
+from django.utils.datastructures import SortedDict
 
 
 class R(object):
@@ -81,12 +82,16 @@ class R(object):
         if date is None:
             date = datetime.date.today()
 
-        patterns = {
-            "daily": "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")),
-            "weekly": "m:{0}:w:{1}".format(slug, date.strftime("%U")),
-            "monthly": "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")),
-            "yearly": "m:{0}:y:{1}".format(slug, date.strftime("%Y")),
-        }
+        # we want to keep the order, here: daily, weekly, monthly, yearly
+        patterns = SortedDict()
+        patterns.insert(0, "daily",
+            "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
+        patterns.insert(1, "weekly",
+            "m:{0}:w:{1}".format(slug, date.strftime("%U")))
+        patterns.insert(2, "monthly",
+            "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
+        patterns.insert(3, "yearly",
+            "m:{0}:y:{1}".format(slug, date.strftime("%Y")))
         if granularity == 'all':
             return patterns.values()
         else:
@@ -163,7 +168,8 @@ class R(object):
         Returns a list of tuples containing the Redis key and the associated
         metric::
 
-            >>> get_metric_history('test', granularity='weekly')
+            r = R()
+            r.get_metric_history('test', granularity='weekly')
             [
                 ('m:test:w:52', '15'),
             ]
