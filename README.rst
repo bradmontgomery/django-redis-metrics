@@ -98,3 +98,8 @@ You can use it directly to set metrics or gagues and to retrieve data.
             {'day': '29', 'month': '29', 'week': '29', 'year': '29'}}
     ]
 
+
+Todo
+====
+
+Tests. OMG there are **NO tests**!!!?!:exclamation:?!11one1 :grimacing:
