@@ -1,0 +1,26 @@
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
+
+{% block content %}
+    <h1><code>{{ slug }}</code> history</h1>
+    <ul class="breadcrumb">
+    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+    <li><a href="{% url 'redis_metric_detail' slug %}">{{ slug }} detail</a></li>
+    <li class="active">{{ slug }} history</li>
+    </ul>
+
+    <table>
+        <caption>{{ granularity }} metrics</caption>
+        <thead>
+            <tr><th>Key</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {% for key, value in metric_history %}
+                <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ value|default_if_none:"-" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

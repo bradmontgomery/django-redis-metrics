@@ -7,6 +7,7 @@ simple.
 
 """
 from django.contrib.auth.decorators import user_passes_test
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from .models import R
@@ -41,4 +42,24 @@ class MetricDetailView(ProtectedTemplateView):
         data = super(MetricDetailView, self).get_context_data(**kwargs)
         data['slug'] = kwargs['slug']
         data['metrics'] = R().get_metric(kwargs['slug'])
+        return data
+
+
+class MetricHistoryView(ProtectedTemplateView):
+    template_name = "redis_metrics/metric_history.html"
+
+    def get_context_data(self, **kwargs):
+        """Includes the metrics slugs in the context."""
+        data = super(MetricHistoryView, self).get_context_data(**kwargs)
+        try:
+            data.update({
+                'slug': kwargs['slug'],
+                'granularity': kwargs['granularity'],
+                'metric_history': R().get_metric_history(
+                    slug=kwargs['slug'],
+                    granularity=kwargs['granularity']
+                )
+            })
+        except KeyError:
+            raise Http404
         return data
