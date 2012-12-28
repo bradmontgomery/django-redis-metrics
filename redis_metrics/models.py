@@ -123,12 +123,11 @@ class R(object):
             day_key, week_key, month_key, year_key)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
-        # incrby method, so let's brute-force it for now.
-        for i in range(num):
-            self.r.incr(day_key)
-            self.r.incr(week_key)
-            self.r.incr(month_key)
-            self.r.incr(year_key)
+        # incrby method; .incr accepts a second ``amound`` parameter.
+        self.r.incr(day_key, num)
+        self.r.incr(week_key, num)
+        self.r.incr(month_key, num)
+        self.r.incr(year_key, num)
 
     def get_metric(self, slug):
         """Get the current values for a metric.
