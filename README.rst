@@ -5,16 +5,16 @@ This app is inspired by Frank Wiles' ``django-app-metrics``. It allows you to
 define various named metrics (such as 'New User Signups', 'Downloads') and
 record when they happen.
 
-This app, however, is essentially stripped of all but the bare-bones features
-offered by the Redis backend in ``django-app-metrics``. Major differences are:
+However, this app is stripped of all but the bare-bones features offered by the
+Redis backend in ``django-app-metrics``. Major differences are:
 
 * *only* backed by Redis
 * does not require Celery
 * currently no grouping of Metrics
 * no timing
 
-*TODO* In addition, there are some built-in default views and templates for viewing
-metrics.
+In addition, there are some built-in default views and templates for viewing
+metrics and charts backed by google charts.
 
 
 Requirements
@@ -28,19 +28,23 @@ The only requirement for this app is `redis-py`_ and Django 1.4 or above.
 Installation
 ============
 
-*TODO*: eventually, ``pip install django-redis-metrics``.
+*TODO*: eventually, ``pip install django-redis-metrics``.  For now, add the
+``redis_metrics`` directory on your python path.
 
-To use the (nascent) built-in views, add ``redis_metrics`` to your ``INSTALLED_APPS``.
+To use the built-in views, add ``redis_metrics`` to your ``INSTALLED_APPS``,
+and include the following in your Root URLconf::
 
+    url(r'^metrics/', include('redis_metrics.urls')),
+
+Then, to view your metrics, visit the /metrics/ url, (i.e. run the development
+server and go to http://127.0.0.1:8000/metrics/)
 
 Settings
 ========
 
-``REDIS_METRICS_HOST`` - Hostname of redis server, defaults to 'localhost'
-
-``REDIS_METRICS_PORT`` - redis port, defaults to '6379'
-
-``REDIS_METRICS_DB`` - redis database number to use, defaults to 0
+* ``REDIS_METRICS_HOST`` - Hostname of redis server, defaults to 'localhost'
+* ``REDIS_METRICS_PORT`` - redis port, defaults to '6379'
+* ``REDIS_METRICS_DB`` - redis database number to use, defaults to 0
 
 
 Usage
