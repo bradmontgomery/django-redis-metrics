@@ -1,18 +1,24 @@
 <html>
 <head>
-    <title>django-redis-metrics</title>
-    <style type="text/css">
-        body {padding: 0; margin: 20px auto; width: 960px;}
-        table tbody tr td {border: 1px solid #ddd;}
-        ul.breadcrumb {
-            padding:5px; margin:0; margin-bottom:15px;
-            height: 20px; line-height: 20px; background-color: #ddd;
-        }
-        ul.breadcrumb > li {float:left; padding-right:5px;}
-        ul.breadcrumb > li:after {content:" >"}
-        ul.breadcrumb > li.active:after {content:""}
-    </style>
+<title>django-redis-metrics</title>
+<style type="text/css">
+body {padding: 0; margin: 20px auto; width: 960px;}
+table {border: 1px solid #ccc; width:80%; margin:0 auto;}
+caption {background-color: #eee; border:1px solid #ccc; border-bottom:0px;}
+table tbody tr td {border: 1px solid #ddd; padding: 3px 6px;}
+td.value {text-align: center;}
+tr:nth-child(even) {background-color: #eee;}
+ul.breadcrumb {
+  padding:5px; margin:0; margin-bottom:15px;
+  height: 20px; line-height: 20px; background-color: #ddd;
+}
+ul.breadcrumb > li {float:left; padding-right:5px;}
+ul.breadcrumb > li:after {content:" >"}
+ul.breadcrumb > li.active:after {content:""}
+</style>
+{% block extrahead %}{% endblock %}
 </head>
+
 <body>
 {% block content %}{% endblock %}
 </body>
