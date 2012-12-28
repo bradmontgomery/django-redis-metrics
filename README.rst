@@ -68,14 +68,14 @@ There are also ``gauge``'s.
 
     from redis_metrics import gauge
 
-    # Create a gague
+    # Create a gauge
     gauge('total-downloads', 0)
 
-    # Update the gague
+    # Update the gauge
     gauge('total-downloads', 9999)
 
 There's also an ``R`` class which is a lightweight wrapper around ``redis``.
-You can use it directly to set metrics or gagues and to retrieve data.
+You can use it directly to set metrics or gauges and to retrieve data.
 
 ::
 

@@ -33,16 +33,16 @@ class MetricsListView(ProtectedTemplateView):
         r = R()
         data['metric_slugs'] = r.metric_slugs()
 
-        # Include gagues in the default View. They're *technically* a list
+        # Include gauges in the default View. They're *technically* a list
         # of metrics, too!
-        gagues = {
-            'slugs': list(r.gague_slugs()),
+        gauges = {
+            'slugs': list(r.gauge_slugs()),
             'data': {}
         }
-        if gagues['slugs']:
-            for slug in gagues['slugs']:
-                gagues['data'][slug] = r.get_gague(slug)
-        data['gagues'] = gagues
+        if gauges['slugs']:
+            for slug in gauges['slugs']:
+                gauges['data'][slug] = r.get_gauge(slug)
+        data['gauges'] = gauges
         return data
 
 

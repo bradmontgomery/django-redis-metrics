@@ -2,7 +2,7 @@
 {% load url from future %}
 
 {% block extrahead %}
-{% if gagues.slugs|length %}
+{% if gauges.slugs|length %}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
   google.load("visualization", "1", {packages:["corechart"]});
@@ -10,8 +10,8 @@
   function drawChart() {
     var data = google.visualization.arrayToDataTable([
       ['Gague', 'Value'],
-      {% for gague, value in gagues.data.items %}
-      ['{{ gague }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+      {% for gauge, value in gauges.data.items %}
+      ['{{ gauge }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
       {% endfor %}
     ]);
 
@@ -21,7 +21,7 @@
       legend: {position: 'none'}
     };
 
-    var chart_div = document.getElementById('gagues_chart');
+    var chart_div = document.getElementById('gauges_chart');
     var chart = new google.visualization.BarChart(chart_div);
     chart.draw(data, options);
   }
@@ -31,8 +31,8 @@
 
 {% block content %}
     <h1>Gagues</h1>
-    {% if gagues.slugs|length %}
-        <div id="gagues_chart"></div>
+    {% if gauges.slugs|length %}
+        <div id="gauges_chart"></div>
 
         <table>
         <caption>Gagues</caption>
@@ -40,16 +40,16 @@
             <tr><th>Gague</th><th>Value</th></tr>
         </thead>
         <tbody>
-            {% for gague, value in gagues.data.items %}
+            {% for gauge, value in gauges.data.items %}
                 <tr>
-                    <td>{{ gague }}</td>
+                    <td>{{ gauge }}</td>
                     <td class="value">{{ value|default_if_none:"-" }}</td>
                 </tr>
             {% endfor %}
         </tbody>
         </table>
     {% else %}
-        <p>You don't have any gagues set up yet!</p>
+        <p>You don't have any gauges set up yet!</p>
     {% endif %}
 
     {% if metric_slugs|length %}
