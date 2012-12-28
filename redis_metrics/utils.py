@@ -16,6 +16,7 @@ def gague(slug, current_value):
 
 
 def _dates(num):
+    """Yields a generator of datetime.date objects for the past ``num`` days"""
     today = datetime.date.today()
     return (today - datetime.timedelta(days=d) for d in range(num))
 
@@ -23,16 +24,14 @@ def _dates(num):
 def generate_test_metrics(slug='test-metric', num=100):
     """Generate some dummy (but increasing) metrics for the given ``slug`` and
     the past ``num`` days."""
-    i = 1
+    i = 100
     for date in _dates(num):
         for key in _r._build_keys(slug, date=date):
             # The following is normally done in _r.metric, but we're adding
-            # "old" metrics here, so this is duplicate code.
+            # metrics for past days here, so this is duplicate code.
             _r.r.sadd(_r._metric_slugs_key, key)  # keep track of the keys
-            for x in range(i):
-                _r.r.incr(key)  # incr the key an increasing number of times
-        i += 1
-
+            _r.r.incr(key, i)  # incr the key an increasing number of times
+        i += 100
 
 def delete_test_metrics(slug='test-metric', num=100):
     """Deletes the metrics created by ``generate_test_metrics``."""
