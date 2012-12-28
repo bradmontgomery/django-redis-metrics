@@ -10,9 +10,9 @@ def metric(slug, num=1, **kwargs):
     _r.metric(slug, num)
 
 
-def gague(slug, current_value):
-    """Set a value for a Guage"""
-    _r.gague(slug, current_value)
+def gauge(slug, current_value):
+    """Set a value for a Gauge"""
+    _r.gauge(slug, current_value)
 
 
 def _dates(num):
