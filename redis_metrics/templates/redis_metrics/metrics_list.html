@@ -1,14 +1,69 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
 
-{% block content %}
-    <h1>Metric Slugs</h1>
+{% block extrahead %}
+{% if gagues.slugs|length %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Gague', 'Value'],
+      {% for gague, value in gagues.data.items %}
+      ['{{ gague }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]);
 
-    <ul>
-    {% for slug in metric_slugs %}
-        <li>
-            <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
-        </li>
-    {% endfor %}
-    </ul>
+    var options = {
+      title: 'Gagues',
+      {#vAxis: {title: '',  titleTextStyle: {color: 'red'}},#}
+      legend: {position: 'none'}
+    };
+
+    var chart_div = document.getElementById('gagues_chart');
+    var chart = new google.visualization.BarChart(chart_div);
+    chart.draw(data, options);
+  }
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+    <h1>Gagues</h1>
+    {% if gagues.slugs|length %}
+        <div id="gagues_chart"></div>
+
+        <table>
+        <caption>Gagues</caption>
+        <thead>
+            <tr><th>Gague</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {% for gague, value in gagues.data.items %}
+                <tr>
+                    <td>{{ gague }}</td>
+                    <td class="value">{{ value|default_if_none:"-" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p>You don't have any gagues set up yet!</p>
+    {% endif %}
+
+    {% if metric_slugs|length %}
+        <h1>Metrics</h1>
+        <p>Click a metric below to view more data.</p>
+        <ul>
+        {% for slug in metric_slugs %}
+            <li>
+                <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>You don't have any metrics set up yet!</p>
+    {% endif %}
+
 {% endblock %}
