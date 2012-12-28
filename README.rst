@@ -53,6 +53,7 @@ Usage
 Use the ``metric`` shortcut to start recording metrics.
 
 ::
+
     from redis_metrics import metric
 
     # Increment the metric by one
