@@ -62,17 +62,17 @@ Use the ``metric`` shortcut to start recording metrics.
     # Increment the metric by some other number
     metric('new-user-signup', 4)
 
-There are also ``gague``'s.
+There are also ``gauge``'s.
 
 ::
 
-    from redis_metrics import gague
+    from redis_metrics import gauge
 
     # Create a gague
-    gague('total-downloads', 0)
+    gauge('total-downloads', 0)
 
     # Update the gague
-    gague('total-downloads', 9999)
+    gauge('total-downloads', 9999)
 
 There's also an ``R`` class which is a lightweight wrapper around ``redis``.
 You can use it directly to set metrics or gagues and to retrieve data.
