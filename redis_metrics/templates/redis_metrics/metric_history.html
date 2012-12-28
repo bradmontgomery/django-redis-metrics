@@ -1,13 +1,41 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
 
+{% block extrahead %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Key', 'Metric Value'],
+      {% for key, value in metric_history %}
+      ['{{ key }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]);
+
+    var options = {
+      title: '{{ slug }} {{ granularity }} history',
+      legend: {position: 'none'}
+    };
+
+    var chart_div = document.getElementById('chart_div');
+    var chart = new google.visualization.LineChart(chart_div);
+    chart.draw(data, options);
+  }
+</script>
+{% endblock %}
+
+
 {% block content %}
     <h1><code>{{ slug }}</code> history</h1>
     <ul class="breadcrumb">
     <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
     <li><a href="{% url 'redis_metric_detail' slug %}">{{ slug }} detail</a></li>
-    <li class="active">{{ slug }} history</li>
+    <li class="active">{{ granularity }} history</li>
     </ul>
+
+    <div id="chart_div"></div>
 
     <table>
         <caption>{{ granularity }} metrics</caption>
@@ -18,7 +46,7 @@
             {% for key, value in metric_history %}
                 <tr>
                     <td>{{ key }}</td>
-                    <td>{{ value|default_if_none:"-" }}</td>
+                    <td class="value">{{ value|default_if_none:"-" }}</td>
                 </tr>
             {% endfor %}
         </tbody>

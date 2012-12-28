@@ -1,6 +1,33 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
 
+{% block extrahead %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Metric', 'Value'],
+      ['Day',    {{ metrics.day|default:0 }}],
+      ['Week',   {{ metrics.week|default:0 }}],
+      ['Month',  {{ metrics.month|default:0 }}],
+      ['Year',   {{ metrics.year|default:0 }}],
+    ]);
+
+    var options = {
+      title: '{{ slug }} metrics',
+      vAxis: {title: 'Time Period',  titleTextStyle: {color: 'red'}},
+      legend: {position: 'none'}
+    };
+
+    var chat_div = document.getElementById('chart_div');
+    var chart = new google.visualization.BarChart(chart_div);
+    chart.draw(data, options);
+  }
+</script>
+{% endblock %}
+
 {% block content %}
     <h1><code>{{ slug }}</code> metrics</h1>
     <ul class="breadcrumb">
@@ -8,15 +35,39 @@
     <li class="active">{{ slug }}</li>
     </ul>
 
+    <h2>Metric History</h2>
+    <p>Click below for more detailed history for this metric.</p>
+    <ul>
+    <li><a href="{% url 'redis_metric_history' slug 'daily' %}">Daily</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'weekly' %}">Weekly</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'monthly' %}">Monthly</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'yearly' %}">Yearly</a></li>
+    </ul>
+
+    <div id="chart_div"></div>
+
     <table>
+        <caption>{{ slug }} data</caption>
         <thead>
             <tr><th>Time Period</th><th>Value</th></tr>
         </thead>
         <tbody>
-            <tr><td>Day</td><td>{{ metrics.day }}</td></tr>
-            <tr><td>Week</td><td>{{ metrics.week }}</td></tr>
-            <tr><td>Month</td><td>{{ metrics.month }}</td></tr>
-            <tr><td>Year</td><td>{{ metrics.year }}</td></tr>
+            <tr>
+                <td>Day</td>
+                <td class="value">{{ metrics.day|default_if_none:"-" }}</td>
+            </tr>
+            <tr>
+                <td>Week</td>
+                <td class="value">{{ metrics.week|default_if_none:"-" }}</td>
+            </tr>
+            <tr>
+                <td>Month</td>
+                <td class="value">{{ metrics.month|default_if_none:"-" }}</td>
+            </tr>
+            <tr>
+                <td>Year</td>
+                <td class="value">{{ metrics.year|default_if_none:"-" }}</td>
+            </tr>
         </tbody>
     </table>
 {% endblock %}
