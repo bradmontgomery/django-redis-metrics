@@ -90,11 +90,11 @@ You can use it directly to set metrics or gagues and to retrieve data.
     set(['new-user-signup', 'user-logins'])
 
     # Get metrics for multiple slugs
-    >>> r.get_metrics(['repo-created', 'repo-updated'])
+    >>> r.get_metrics(['new-user-signup', 'user-logins'])
     [
-        {'repo-created':
+        {'new-user-signup':
             {'day': '7', 'month': '7', 'week': '7', 'year': '7'}},
-        {'repo-updated':
+        {'user-logins':
             {'day': '29', 'month': '29', 'week': '29', 'year': '29'}}
     ]
 
