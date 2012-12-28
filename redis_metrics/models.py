@@ -20,15 +20,15 @@ class R(object):
 
         * ``metric_slugs_key`` -- The key storing a set of all metrics slugs
           (default is "metric-slugs")
-        * ``gague_slugs_key`` -- The key storing a set of all slugs for gagues
-          (default is "gague-slugs")
+        * ``gauge_slugs_key`` -- The key storing a set of all slugs for gauges
+          (default is "gauge-slugs")
         * ``host`` -- Redis host (default settings.REDIS_METRICS_HOST)
         * ``port`` -- Redis port (default settings.REDIS_METRICS_PORT)
         * ``db``   -- Redis DB (default settings.REDIS_METRICS_DB)
 
         """
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
-        self._gague_slugs_key = kwargs.get('gague_slugs_key', 'gague-slugs')
+        self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
         if 'host' in kwargs:
             self.host = kwargs['host']
@@ -174,23 +174,23 @@ class R(object):
             keys.update(set(self._build_keys(slug, date, granularity)))
         return sorted(zip(keys, self.r.mget(keys)))
 
-    # Gagues. Gagues have a different prefix "g:" in order to differentiate
+    # Gauges. Gauges have a different prefix "g:" in order to differentiate
     # them from a metric of the same name.
-    def gague_slugs(self):
-        """Return a set of Gagues slugs (i.e. those used to create Redis keys)
+    def gauge_slugs(self):
+        """Return a set of Gauges slugs (i.e. those used to create Redis keys)
         for this app."""
-        keys = self.r.smembers(self._gague_slugs_key)
+        keys = self.r.smembers(self._gauge_slugs_key)
         return set(s.split(":")[1] for s in keys)
 
-    def _gague_key(self, slug):
+    def _gauge_key(self, slug):
         """Make sure our slugs have a consistent format."""
         return "g:{0}".format(slugify(slug))
 
-    def gague(self, slug, current_value):
-        k = self._gague_key(slug)
-        self.r.sadd(self._gague_slugs_key, k)  # keep track of all Gagues
+    def gauge(self, slug, current_value):
+        k = self._gauge_key(slug)
+        self.r.sadd(self._gauge_slugs_key, k)  # keep track of all Gauges
         self.r.set(k, current_value)
 
-    def get_gague(self, slug):
-        k = self._gague_key(slug)
+    def get_gauge(self, slug):
+        k = self._gauge_key(slug)
         return self.r.get(k)
