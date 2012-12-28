@@ -1,5 +1,6 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
+{% load redis_metrics_filters %}
 
 {% block extrahead %}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
@@ -10,7 +11,7 @@
     var data = google.visualization.arrayToDataTable([
       ['Key', 'Metric Value'],
       {% for key, value in metric_history %}
-      ['{{ key }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+      ['{{ key|strip_metric_prefix }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
       {% endfor %}
     ]);
 
@@ -45,7 +46,7 @@
         <tbody>
             {% for key, value in metric_history %}
                 <tr>
-                    <td>{{ key }}</td>
+                    <td>{{ key|strip_metric_prefix }}</td>
                     <td class="value">{{ value|default_if_none:"-" }}</td>
                 </tr>
             {% endfor %}
