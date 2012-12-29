@@ -6,10 +6,11 @@ Replace this with more appropriate tests for your application.
 """
 import datetime
 from mock import call, patch
-from mock import MagicMock
 
 from django.conf import settings
-from django.test import TestCase
+from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
+from django.test import TestCase, Client
 from .models import R
 
 
@@ -89,7 +90,7 @@ class TestR(TestCase):
 
     def test_metric_slugs(self):
         """Test that ``R.metric_slugs`` makes a call to Redis SMEMBERS."""
-        slugs = self.r.metric_slugs()
+        self.r.metric_slugs()
         self.redis.assert_has_calls([call.smembers(self.r._metric_slugs_key)])
 
     def test_metric(self):
@@ -200,3 +201,113 @@ class TestR(TestCase):
         Redis GET command is called with the correct key."""
         self.r.get_gauge('test-gauge')
         self.redis.assert_has_calls([call.get('g:test-gauge')])
+
+
+class TestViews(TestCase):
+    url = 'redis_metrics.urls'
+
+    def setUp(self):
+        self.user = User.objects.create_superuser(
+            username="redis_metrics_test_user",
+            email="redis_metrics_test_user@example.com",
+            password="secret"
+        )
+        assert self.client.login(username="redis_metrics_test_user",
+            password="secret")
+        self.unauthed_client = Client()  # Keep an unauthenticated client
+
+    def tearDown(self):
+        self.user.delete()
+
+    def assertUnauthedRequestRedirects(self, url):
+        resp = self.unauthed_client.get(url)
+        self.assertEqual(resp.status_code, 302)
+        return resp
+
+    def test_metrics_list(self):
+        """Test the ``MetricsListView``."""
+        url = reverse('redis_metrics_list')
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set appropriate return values for methods that'll get called
+            # in the MetricsListView.
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            r.metric_slugs.return_value = set(['test-metric'])
+            r.gauge_slugs.return_value = set(['test-gauge'])
+
+            # Do the Request and test for content
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('test-metric', resp.content)
+            self.assertIn('test-gauge', resp.content)
+
+            # Make sure our Mock R object called the right methods.
+            mock_r.assert_has_calls([
+                call().metric_slugs(),
+                call().gauge_slugs(),
+                call().get_gauge('test-gauge'),
+            ])
+
+    def test_metric_detail(self):
+        slug = u'test-metric'
+        url = reverse('redis_metric_detail', args=[slug])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set up a return value for ``R.get_metric(slug)``
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            m = {'day': '1', 'month': '1', 'week': '1', 'year': '1'}
+            r.get_metric.return_value = m
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.context_data['slug'], slug)
+            self.assertEqual(resp.context_data['metrics'], m)
+
+            # Make sure our Mocked R instance had its ``get_metric`` method
+            # called with the correct parameter
+            r.assert_has_calls([call.get_metric(slug)])
+
+    def test_metric_history(self):
+        slug = u'test-metric'
+        granularity = u'daily'
+        url = reverse('redis_metric_history', args=[slug, granularity])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set up a return value for ``R
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            mocked_history = [
+                ('m:{0}:2012-12-26'.format(slug), None),
+                ('m:{0}:2012-12-27'.format(slug), None),
+                ('m:{0}:2012-12-28'.format(slug), '1'),
+            ]
+            r.get_metric_history.return_value = mocked_history
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            context = resp.context_data
+            self.assertEqual(context['slug'], slug)
+            self.assertEqual(context['granularity'], granularity)
+            self.assertEqual(context['metric_history'], mocked_history)
+
+            # Make sure our Mocked R instance had its ``get_metric_history``
+            # method called with the correct parameters
+            r.assert_has_calls([
+                call.get_metric_history(slug=slug, granularity=granularity)
+            ])
+
+    def test_metrics_list_requires_admin(self):
+        """Verifies that ``MetricsListView`` requires authentication."""
+        self.assertUnauthedRequestRedirects(reverse('redis_metrics_list'))
+
+    def test_metric_detail_requires_admin(self):
+        """Verifies that ``MetricDetailView`` requires authentication."""
+        self.assertUnauthedRequestRedirects(
+            reverse('redis_metric_detail', args=['whatever'])
+        )
+
+    def test_metric_history_requires_admin(self):
+        """Verifies that ``MetricHistoryView`` requires authentication."""
+        self.assertUnauthedRequestRedirects(
+            reverse('redis_metric_history', args=['whatever', 'daily'])
+        )
