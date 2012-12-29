@@ -17,6 +17,13 @@ In addition, there are some built-in default views and templates for viewing
 metrics and charts backed by google charts.
 
 
+License
+=======
+
+This code is distributed under the terms of the MIT license. See the
+``LICENSE.txt`` file.
+
+
 Requirements
 ============
 
