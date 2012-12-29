@@ -28,8 +28,7 @@ The only requirement for this app is `redis-py`_ and Django 1.4 or above.
 Installation
 ============
 
-*TODO*: eventually, ``pip install django-redis-metrics``.  For now, add the
-``redis_metrics`` directory on your python path.
+For now, add the ``redis_metrics`` directory on your python path. (See *TODO*)
 
 To use the built-in views, add ``redis_metrics`` to your ``INSTALLED_APPS``,
 and include the following in your Root URLconf::
@@ -38,6 +37,7 @@ and include the following in your Root URLconf::
 
 Then, to view your metrics, visit the /metrics/ url, (i.e. run the development
 server and go to http://127.0.0.1:8000/metrics/)
+
 
 Settings
 ========
@@ -102,4 +102,6 @@ You can use it directly to set metrics or gauges and to retrieve data.
 Todo
 ====
 
-Tests. OMG there are **NO tests**!!!?!:exclamation:?!11one1 :grimacing:
+* Better Test Coverage.
+* Add a proper ``setup.py`` and host at PyPi so this can be installed with
+  ``pip install django-redis-metrics``.
