@@ -38,8 +38,8 @@ Installation
 This app is not yet *pip-install-able*. (See *TODO*). You can do one of the
 following to start using it, though:
 
-* `pip install` the development version:
-  `pip install -e git://github.com/bradmontgomery/django-redis-metrics.git#egg=redis_metrics-dev`
+* ``pip install`` the development version:
+  ``pip install -e git://github.com/bradmontgomery/django-redis-metrics.git#egg=redis_metrics-dev``
 * Clone this repo and add the ``redis_metrics`` directory on your python path
   (e.g. copy it into your Django project directory)
 
