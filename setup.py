@@ -20,15 +20,18 @@ setup(
     author_email='brad@bradmontgomery.net',
     url='https://github.com/bradmontgomery/django-redis-metrics',
     packages=find_packages(),
+    package_dir={'redis_metrics': 'redis_metrics'},
     package_data={
+        '': ['README.rst', 'LICENSE.txt'],
         'redis_metrics': [
-            'templates/redis_metrics/*',
+            'templates/*',
         ]
     },
-    install_requires=[
-        'django', 'redis',
-    ],
-    tests_require=['mock', ],
+    include_package_data=True,
+    install_requires=['django', 'redis'],
+    tests_require=['mock'],
+    license='LICENSE.txt',
+    zip_safe=False,
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Web Environment',
