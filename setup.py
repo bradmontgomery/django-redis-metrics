@@ -30,7 +30,7 @@ setup(
     include_package_data=True,
     install_requires=['django', 'redis'],
     tests_require=['mock'],
-    license='LICENSE.txt',
+    license='MIT',
     zip_safe=False,
     classifiers=[
         'Development Status :: 3 - Alpha',
