@@ -35,13 +35,10 @@ The only requirement for this app is `redis-py`_ and Django 1.4 or above.
 Installation
 ============
 
-This app is not yet *pip-install-able*. (See *TODO*). You can do one of the
-following to start using it, though:
+To install the current version, run ``pip install django-redis-metrics``.
 
-* ``pip install`` the development version:
-  ``pip install -e git://github.com/bradmontgomery/django-redis-metrics.git#egg=redis_metrics-dev``
-* Clone this repo and add the ``redis_metrics`` directory on your python path
-  (e.g. copy it into your Django project directory)
+You can also install the development version with
+``pip install -e git://github.com/bradmontgomery/django-redis-metrics.git#egg=redis_metrics-dev``
 
 To use the built-in views, add ``redis_metrics`` to your ``INSTALLED_APPS``,
 and include the following in your Root URLconf::
@@ -112,9 +109,9 @@ You can use it directly to set metrics or gauges and to retrieve data.
     ]
 
 
-Todo
-====
+Contributing
+============
 
-* Better Test Coverage.
-* Add a proper ``setup.py`` and host at PyPi so this can be installed with
-  ``pip install django-redis-metrics``.
+Feel free to submit bug reports or pull requests on `the github repo`_.
+
+.. _`the github repo`: https://github.com/bradmontgomery/django-redis-metrics

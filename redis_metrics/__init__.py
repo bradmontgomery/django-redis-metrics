@@ -1,4 +1,4 @@
-VERSION = (0, 1, 0)
+VERSION = (0, 1, 1)
 
 # Sigh. I want to be able to do this:
 #   >>> from redis_metrics import metric
