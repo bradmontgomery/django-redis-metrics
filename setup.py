@@ -24,8 +24,10 @@ setup(
     package_data={
         '': ['README.rst', 'LICENSE.txt'],
         'redis_metrics': [
-            'templates/*',
-        ]
+            'templates/redis_metrics/*.html',
+            'templates/redis_metrics/email/*.html',
+            'templates/redis_metrics/email/*.txt',
+        ],
     },
     include_package_data=True,
     install_requires=['django', 'redis'],
