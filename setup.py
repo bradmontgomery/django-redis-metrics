@@ -1,7 +1,7 @@
 from os import path
 from setuptools import setup, find_packages
 
-from redis_metrics import VERSION
+from redis_metrics import __version__
 
 
 desc = ('django-redis-metrics is a Django application for '
@@ -13,7 +13,7 @@ f.close()
 
 setup(
     name='django-redis-metrics',
-    version=".".join(map(str, VERSION)),
+    version=__version__,
     description=desc,
     long_description=readme,
     author='Brad Montgomery',
