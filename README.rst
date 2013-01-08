@@ -1,8 +1,3 @@
-*WARNING*: This app has a broken ``setup.py``. Installation will fail with
-``error: can't copy 'redis_metrics/templates/redis_metrics': doesn't exist or not a regular file``,
-because pip isn't installing the template directories correctly. If you know how
-to fix this, I'd appreciate your help. :(
-
 Django Redis Metrics
 ====================
 
