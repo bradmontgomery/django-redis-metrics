@@ -1,4 +1,5 @@
 import datetime
+from random import randint
 from .models import R
 
 
@@ -21,17 +22,25 @@ def _dates(num):
     return (today - datetime.timedelta(days=d) for d in range(num))
 
 
-def generate_test_metrics(slug='test-metric', num=100):
+def generate_test_metrics(slug='test-metric', num=100, randomize=False):
     """Generate some dummy (but increasing) metrics for the given ``slug`` and
-    the past ``num`` days."""
+    the past ``num`` days.
+
+    If ``randomize`` is True, the metrics will be random integers.
+
+    """
     i = 100
     for date in _dates(num):
         for key in _r._build_keys(slug, date=date):
             # The following is normally done in _r.metric, but we're adding
             # metrics for past days here, so this is duplicate code.
             _r.r.sadd(_r._metric_slugs_key, key)  # keep track of the keys
-            _r.r.incr(key, i)  # incr the key an increasing number of times
+            if randomize:
+                _r.r.incr(key, randint(i, i + 100))
+            else:
+                _r.r.incr(key, i)  # incr the key an increasing number of times
         i += 100
+
 
 def delete_test_metrics(slug='test-metric', num=100):
     """Deletes the metrics created by ``generate_test_metrics``."""
