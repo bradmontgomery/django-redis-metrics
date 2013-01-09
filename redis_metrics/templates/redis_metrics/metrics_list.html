@@ -5,26 +5,36 @@
 {% if gauges.slugs|length %}
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
-  google.load("visualization", "1", {packages:["corechart"]});
-  google.setOnLoadCallback(drawChart);
-  function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-      ['Gague', 'Value'],
-      {% for gauge, value in gauges.data.items %}
-      ['{{ gauge }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
-      {% endfor %}
-    ]);
+    google.load('visualization', '1', {packages:['gauge']});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Gauge', 'Value'],
+            {% for gauge, value in gauges.data.items %}
+            ['{{ gauge }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]);
 
-    var options = {
-      title: 'Gagues',
-      {#vAxis: {title: '',  titleTextStyle: {color: 'red'}},#}
-      legend: {position: 'none'}
-    };
+        {% comment %}
 
-    var chart_div = document.getElementById('gauges_chart');
-    var chart = new google.visualization.BarChart(chart_div);
-    chart.draw(data, options);
-  }
+        NOTE: Google Charts' Gagues have settings for "red" and "yellow"
+        indicators (e.g. as Warning levels). These values are highly
+        subjective, so you should tweak them according to your own gagues.
+
+        The following values are just an example.
+
+        {% endcomment %}
+        var options = {
+            width: 400, height: 120,
+            redFrom: 90, redTo: 100,        {# Error Levels #}
+            yellowFrom:75, yellowTo: 90,    {# Warning Levels #}
+            minorTicks: 5
+        };
+
+        var chart_div = document.getElementById('gauges_chart');
+        var chart = new google.visualization.Gauge(chart_div);
+        chart.draw(data, options);
+    }
 </script>
 {% endif %}
 {% endblock %}
