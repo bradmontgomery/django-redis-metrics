@@ -147,7 +147,10 @@ class R(object):
     def get_metrics(self, slug_list):
         """Get the metrics for multiple slugs.
 
-        Returns a list of dicts.
+        Returns a list of two-tuples containing the metric slug and a
+        dictionary like the one returned by ``get_metric``::
+
+            (some-metric, {'day': 0, 'week': 0, 'month': 0, 'year': 0})
 
         NOTE: This method calls ``get_metric`` for each slug in the
         ``slug_list``, which really isn't very efficient.
@@ -155,7 +158,7 @@ class R(object):
         """
         results = []
         for slug in slug_list:
-            results.append({slug: self.get_metric(slug)})
+            results.append((slug, self.get_metric(slug)))
         return results
 
     def get_metric_history(self, slug, since=None, granularity='daily'):
