@@ -340,3 +340,35 @@ class TestViews(TestCase):
             self.assertEqual(resp.status_code, 302)
             # make sure the metric slug shows up in the redirect URL
             self.assertIn('foo+bar', resp.get("Location", ''))
+
+    def test_aggregate_detail_view(self):
+        """Tests ``views.AggregateDetailView``."""
+
+        slug_set = set(['foo', 'bar', 'test-metric', 'yippitty-poo-bah'])
+        slugs = '+'.join(slug_set)
+        url = reverse('redis_metric_aggregate_detail', args=[slugs])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set up a return value for ``R.get_metric(slug)``
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            metric_list = []
+            for slug in slug_set:
+                metric_list.append((slug, {
+                        'day': '1',
+                        'month': '22',
+                        'week': '333',
+                        'year': '4444'
+                    })
+                )
+            r.get_metric.return_value = metric_list
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('slugs', resp.context_data)
+            self.assertIn('metrics', resp.context_data)
+            self.assertEqual(resp.context_data['slugs'], slug_set)
+
+            # Make sure our Mocked R instance had its ``get_metrics`` method
+            # called with the correct parameter
+            r.assert_has_calls([call.get_metrics(slug_set)])

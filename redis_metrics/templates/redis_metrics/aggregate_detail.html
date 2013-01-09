@@ -1,0 +1,73 @@
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
+
+{% comment %}
+
+Context for this Template:
+
+    * ``slugs`` -- a set of slugs for the metrics that we want to aggregate.
+    * ``metrics`` -- the metric data. It's a list of two-tuples that looks
+      something like this::
+
+        [('foo', {'day': '42', 'month': '90', 'week': '50', 'year': '9991'}),
+         ('bar', {'day': '2',  'month': '10', 'week': '5',  'year': '90'})]
+
+{% endcomment %}
+
+
+{% block extrahead %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Period',{% for s, d in metrics %}'{{ s }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Day',   {% for s, d in metrics %}{{   d.day }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Week',  {% for s, d in metrics %}{{  d.week }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Month', {% for s, d in metrics %}{{ d.month }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Year',  {% for s, d in metrics %}{{  d.year }}{% if not forloop.last %}, {% endif %}{% endfor %}]
+    ]);
+
+    var options = {
+      title: 'Aggregate metrics',
+      vAxis: {title: 'Time Period',  titleTextStyle: {color: 'red'}},
+    };
+
+    var chart_div = document.getElementById('chart_div');
+    var chart = new google.visualization.BarChart(chart_div);
+    chart.draw(data, options);
+  }
+</script>
+{% endblock %}
+
+
+{% block content %}
+    <h1>Aggregate Metrics</h1>
+    <ul class="breadcrumb">
+    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+    <li><a href="{% url 'redis_metric_aggregate' %}">Select Metrics</a></li>
+    <li class="active">Aggregate Metrics</li>
+    </ul>
+
+    <p>Metrics in this graph: <code>{{ slugs|join:", " }}</code></p>
+    <div id="chart_div"></div>
+
+    <table>
+        <caption>Metrics Data</caption>
+        <thead>
+            <tr><th>Metric</th><th>Time Period</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+        {% for slug, metric_dict in metrics %}
+            {% for period, value in metric_dict.items %}
+                <tr>
+                <td><code>{{ slug }}</code></td>
+                <td>{{ period|capfirst }}</td>
+                <td class="value">{{ value|default_if_none:"-" }}</td>
+                </tr>
+            {% endfor %}
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

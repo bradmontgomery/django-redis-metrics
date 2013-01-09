@@ -119,9 +119,12 @@ class AggregateFormView(ProtectedFormView):
 
 
 class AggregateDetailView(ProtectedTemplateView):
-    template_name = "redis_metrics/metric_detail.html"
+    template_name = "redis_metrics/aggregate_detail.html"
 
     def get_context_data(self, **kwargs):
         """Includes the metrics slugs in the context."""
         data = super(AggregateDetailView, self).get_context_data(**kwargs)
+        slug_set = set(kwargs['slugs'].split('+'))
+        data['slugs'] = slug_set
+        data['metrics'] = R().get_metrics(slug_set)
         return data
