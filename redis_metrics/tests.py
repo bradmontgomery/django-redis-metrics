@@ -311,3 +311,32 @@ class TestViews(TestCase):
         self.assertUnauthedRequestRedirects(
             reverse('redis_metric_history', args=['whatever', 'daily'])
         )
+
+    def test_aggregate_form_view(self):
+        """Verifies that GET requests to the ``AggregateFormView`` have the
+        correct context info (i.e. a form)."""
+        url = reverse('redis_metric_aggregate')
+        self.assertUnauthedRequestRedirects(url)
+        with patch('redis_metrics.views.R') as mock_r:
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('form', resp.context_data)
+
+    def test_aggregate_form_view_post(self):
+        """Verifies that POST requests to the ``AggregateFormView`` work as
+        expected."""
+        url = reverse('redis_metric_aggregate')
+        with patch('redis_metrics.views.R') as mock_r:
+            # Test with ONE metric selected
+            data = {'metrics': ['foo']}
+            resp = self.client.post(url, data)
+            self.assertEqual(resp.status_code, 302)
+            # make sure the metric slug shows up in the redirect URL
+            self.assertIn('foo', resp.get("Location", ''))
+
+            # Test with TWO metrics selected
+            data = {'metrics': ['foo', 'bar']}
+            resp = self.client.post(url, data)
+            self.assertEqual(resp.status_code, 302)
+            # make sure the metric slug shows up in the redirect URL
+            self.assertIn('foo+bar', resp.get("Location", ''))
