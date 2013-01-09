@@ -8,7 +8,6 @@ simple.
 """
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
-#from django.core.urlresolvers import reverse_lazy
 from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import FormView

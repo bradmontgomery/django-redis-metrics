@@ -1,7 +1,6 @@
 from django import forms
-from django.template.defaultfilters import slugify
-
 from .models import R
+
 
 class AggregateMetricForm(forms.Form):
     metrics = forms.MultipleChoiceField(choices=[])

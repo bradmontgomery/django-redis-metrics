@@ -317,7 +317,7 @@ class TestViews(TestCase):
         correct context info (i.e. a form)."""
         url = reverse('redis_metric_aggregate')
         self.assertUnauthedRequestRedirects(url)
-        with patch('redis_metrics.views.R') as mock_r:
+        with patch('redis_metrics.views.R'):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertIn('form', resp.context_data)
@@ -326,7 +326,7 @@ class TestViews(TestCase):
         """Verifies that POST requests to the ``AggregateFormView`` work as
         expected."""
         url = reverse('redis_metric_aggregate')
-        with patch('redis_metrics.views.R') as mock_r:
+        with patch('redis_metrics.views.R'):
             # Test with ONE metric selected
             data = {'metrics': ['foo']}
             resp = self.client.post(url, data)
