@@ -161,9 +161,10 @@ class R(object):
             results.append((slug, self.get_metric(slug)))
         return results
 
-    def get_metric_history(self, slug, since=None, granularity='daily'):
-        """Get history for a metric.
+    def get_metric_history(self, slugs, since=None, granularity='daily'):
+        """Get history for one or more metrics.
 
+        * ``slugs`` -- a slug OR a list of slugs
         * ``since`` -- the date from which we start pulling metrics
         * ``granularity`` -- daily, weekly, monthly, yearly
 
@@ -176,10 +177,24 @@ class R(object):
                 ('m:test:w:52', '15'),
             ]
 
+        To get history for multiple metrics, just provide a list of slugs::
+
+            metrics = ['test', 'other']
+            r.get_metric_history(metrics, granularity='weekly')
+            [
+                ('m:test:w:52', '15'),
+                ('m:other:w:52', '42'),
+            ]
+
         """
-        keys = set()  # redis keys
-        for date in self._date_range(since):
-            keys.update(set(self._build_keys(slug, date, granularity)))
+        if not type(slugs) == list:
+            slugs = [slugs]
+
+        # Build the set of Redis keys that we need to get.
+        keys = set()
+        for slug in slugs:
+            for date in self._date_range(since):
+                keys.update(set(self._build_keys(slug, date, granularity)))
         return sorted(zip(keys, self.r.mget(keys)))
 
     # Gauges. Gauges have a different prefix "g:" in order to differentiate

@@ -146,13 +146,16 @@ class TestR(TestCase):
         self.r.get_metrics(slugs)
         self.redis.assert_has_calls(calls)
 
-    def _metric_history_keys(self, slug, since=None, granularity='daily'):
+    def _metric_history_keys(self, slugs, since=None, granularity='daily'):
         """generates the same list of keys used in ``get_metric_history``.
         These can then be used to test for calls to redis. Note: This is
         duplicate code from ``get_metric_history`` :-/ """
+        if type(slugs) != list:
+            slugs = [slugs]
         keys = set()
-        for date in self.r._date_range(since):
-            keys.update(set(self.r._build_keys(slug, date, granularity)))
+        for slug in slugs:
+            for date in self.r._date_range(since):
+                keys.update(set(self.r._build_keys(slug, date, granularity)))
         return keys
 
     def _test_get_metric_history(self, slug, granularity):
@@ -176,6 +179,18 @@ class TestR(TestCase):
     def test_get_metric_history_yearly(self):
         """Tests ``R.get_metric_history`` with yearly granularity."""
         self._test_get_metric_history('test-slug', 'yearly')
+
+    def test_get_metric_multiple_history_daily(self):
+        self._test_get_metric_history(['foo', 'bar'], 'daily')
+
+    def test_get_metric_multiple_history_weekly(self):
+        self._test_get_metric_history(['foo', 'bar'], 'weekly')
+
+    def test_get_metric_multiple_history_monthly(self):
+        self._test_get_metric_history(['foo', 'bar'], 'monthly')
+
+    def test_get_metric_multiple_history_yearly(self):
+        self._test_get_metric_history(['foo', 'bar'], 'yearly')
 
     def test_gauge_slugs(self):
         """Tests that ``R.gauge_slugs`` calls the SMEMBERS command."""
@@ -293,7 +308,7 @@ class TestViews(TestCase):
             # Make sure our Mocked R instance had its ``get_metric_history``
             # method called with the correct parameters
             r.assert_has_calls([
-                call.get_metric_history(slug=slug, granularity=granularity)
+                call.get_metric_history(slugs=slug, granularity=granularity)
             ])
 
     def test_metrics_list_requires_admin(self):
