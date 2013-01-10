@@ -1,0 +1,74 @@
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
+{% load redis_metrics_filters %}
+
+{% block extrahead %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+        {% comment %}
+        ---------------------------------
+
+        Google Charts' LineChart wants data in the following format, so
+        ``metric_history`` is generated w/ ``R.get_metric_history_as_columns``
+
+            ['Period', 'foo', 'bar'],
+            ['2012-01', 222,   333],
+            ['2012-02', 999,   444],
+
+        -----------------------------------
+        {% endcomment %}
+
+        {# Header Row #}
+        [{% for header in metric_history.0  %}'{{header}}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+        {# Data Rows -- first column is a string, the rest are integers #}
+        {% for row in metric_history|slice:"1:" %}
+        [{% for col in row %}{% if forloop.first %}'{{col}}'{% else %}{{ col|default_if_none:0}}{% endif %}{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]);
+    var options = {title: '{{ granularity }} history'};
+    var chart_div = document.getElementById('chart_div');
+    var chart = new google.visualization.LineChart(chart_div);
+    chart.draw(data, options);
+}
+</script>
+{% endblock %}
+
+
+{% block content %}
+    <h1>Aggregate History</h1>
+    <ul class="breadcrumb">
+    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+    <li><a href="{% url 'redis_metric_aggregate' %}">Select Metrics</a></li>
+    <li><a href="{% url 'redis_metric_aggregate_detail' slugs %}">Detail</a></li>
+    <li class="active">{{ granularity }} history</li>
+    </ul>
+
+    <div id="chart_div"></div>
+
+    <table>
+        <caption>{{ granularity }} metrics</caption>
+        <thead>
+            <tr>
+                <th>Period</th>
+                {% for slug in slugs %}
+                <th><code>{{ slug }}</code></th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for row in metric_history %}
+            <tr>
+            {% for column in row %}
+                <td>
+                {{ column|default_if_none:"-" }}
+                </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

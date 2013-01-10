@@ -83,7 +83,7 @@ class MetricHistoryView(ProtectedTemplateView):
                 'slug': kwargs['slug'],
                 'granularity': kwargs['granularity'],
                 'metric_history': R().get_metric_history(
-                    slug=kwargs['slug'],
+                    slugs=kwargs['slug'],
                     granularity=kwargs['granularity']
                 )
             })
@@ -126,4 +126,26 @@ class AggregateDetailView(ProtectedTemplateView):
         slug_set = set(kwargs['slugs'].split('+'))
         data['slugs'] = slug_set
         data['metrics'] = R().get_metrics(slug_set)
+        return data
+
+
+class AggregateHistoryView(ProtectedTemplateView):
+    template_name = "redis_metrics/aggregate_history.html"
+
+    def get_context_data(self, **kwargs):
+        """Includes the metrics slugs in the context."""
+        data = super(AggregateHistoryView, self).get_context_data(**kwargs)
+        slug_set = set(kwargs['slugs'].split('+'))
+        granularity = kwargs.get('granularity', 'daily')
+        try:
+            data.update({
+                'slugs': slug_set,
+                'granularity': granularity,
+                'metric_history': R().get_metric_history_as_columns(
+                    slugs=list(slug_set),
+                    granularity=granularity
+                )
+            })
+        except KeyError:
+            raise Http404
         return data
