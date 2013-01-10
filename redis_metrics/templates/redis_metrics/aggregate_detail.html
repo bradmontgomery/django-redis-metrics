@@ -23,10 +23,10 @@ Context for this Template:
   function drawChart() {
     var data = google.visualization.arrayToDataTable([
       ['Period',{% for s, d in metrics %}'{{ s }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Day',   {% for s, d in metrics %}{{   d.day }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Week',  {% for s, d in metrics %}{{  d.week }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Month', {% for s, d in metrics %}{{ d.month }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Year',  {% for s, d in metrics %}{{  d.year }}{% if not forloop.last %}, {% endif %}{% endfor %}]
+      ['Day',   {% for s, d in metrics %}{{   d.day|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Week',  {% for s, d in metrics %}{{  d.week|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Month', {% for s, d in metrics %}{{ d.month|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Year',  {% for s, d in metrics %}{{  d.year|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}]
     ]);
 
     var options = {
