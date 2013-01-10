@@ -1,4 +1,4 @@
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 
 # Sigh. I want to be able to do this:
 #   >>> from redis_metrics import metric
