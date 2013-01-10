@@ -19,3 +19,20 @@ def strip_metric_prefix(value):
 
     """
     return ':'.join(value.split(":")[2:])
+
+
+@register.filter(name='metric_slug')
+@stringfilter
+def metric_slug(value):
+    """Given a redis key value for a metric, returns only the slug.
+    Applying this filter to the keys for each metric will have the following
+    results:
+
+
+    * Converts ``m:foo:<yyyy-mm-dd>`` to ``foo``
+    * Converts ``m:foo:w:<num>`` to ``foo``
+    * Converts ``m:foo:m:<yyyy-mm>`` to ``foo``
+    * Converts ``m:foo:y:<yyyy>`` to ``foo``
+
+    """
+    return value.split(":")[1]
