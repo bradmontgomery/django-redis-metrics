@@ -211,7 +211,7 @@ class TestR(TestCase):
         # Verify that the method gets called correctly
         with patch('redis_metrics.models.R') as mock_r:
             r = mock_r.return_value  # Get an instance of our Mocked R class
-            h = r.get_metric_history_as_columns(slugs, granularity=granularity)
+            r.get_metric_history_as_columns(slugs, granularity=granularity)
             mock_r.assert_has_calls([
                 call().get_metric_history_as_columns(slugs,
                                                      granularity=granularity)
@@ -424,3 +424,65 @@ class TestViews(TestCase):
             # Make sure our Mocked R instance had its ``get_metrics`` method
             # called with the correct parameter
             r.assert_has_calls([call.get_metrics(slug_set)])
+
+    def _metrichistory(self, slugs, granularity):
+        """Create an appropriate return value for ``R.get_metric_history``
+        based on the given slugs and granularity."""
+        history = []
+        value = 0
+        for slug in slugs:
+            if granularity == "daily":
+                key_pattern = "m:{0}:2013-01-10"
+            elif granularity == "weekly":
+                key_pattern = "m:{0}:w:01"
+            elif granularity == "monthly":
+                key_pattern = "m:{0}:m:2013-01"
+            elif granularity == "yearly":
+                key_pattern = "m:{0}:y:2013"
+
+            history.append((key_pattern.format(slug), value))
+            value += 1
+        return history
+
+    def _test_aggregate_history_view(self, slugs, granularity):
+        """Tests ``views.AggregateHistoryView`` with the given slugs and
+        granularity (i.e. 'daily', 'weekly', 'monthly', 'yearly')."""
+        slug_set = set(slugs)
+        url = reverse('redis_metric_aggregate_history',
+                      args=['+'.join(slugs), granularity])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set up a return value for ``get_metric_history_as_columns``
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            r.get_metric_history.return_value = self._metrichistory(
+                slugs, granularity)
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('slugs', resp.context_data)
+            self.assertIn('granularity', resp.context_data)
+            self.assertIn('metric_history', resp.context_data)
+            self.assertEqual(resp.context_data['slugs'], slug_set)
+            self.assertEqual(resp.context_data['granularity'], granularity)
+
+            # Make sure our Mocked R instance had its
+            # ``get_metric_history_as_columns`` method called with the correct
+            # parameters
+            c = call.get_metric_history_as_columns(
+                slugs=slugs,
+                granularity=granularity
+            )
+            r.assert_has_calls([c])
+
+    def test_aggregate_history_view_daily(self):
+        self._test_aggregate_history_view(['foo', 'bar'], 'daily')
+
+    def test_aggregate_history_view_weekly(self):
+        self._test_aggregate_history_view(['foo', 'bar'], 'weekly')
+
+    def test_aggregate_history_view_monthly(self):
+        self._test_aggregate_history_view(['foo', 'bar'], 'monthly')
+
+    def test_aggregate_history_view_yearly(self):
+        self._test_aggregate_history_view(['foo', 'bar'], 'yearly')
