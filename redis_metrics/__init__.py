@@ -6,5 +6,8 @@ __version__ = "0.1.3"
 # the ``redis`` dependency hasn't yet been installed.
 try:
     from .utils import gauge, metric
+    # placate pyflakes
+    assert gauge
+    assert metric
 except ImportError:
     pass
