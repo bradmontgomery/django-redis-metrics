@@ -1,5 +1,4 @@
-import datetime
-from random import randint
+import datetime, random
 from .models import R
 
 
@@ -36,7 +35,8 @@ def generate_test_metrics(slug='test-metric', num=100, randomize=False):
             # metrics for past days here, so this is duplicate code.
             _r.r.sadd(_r._metric_slugs_key, key)  # keep track of the keys
             if randomize:
-                _r.r.incr(key, randint(i, i + 100))
+                random.seed()
+                _r.r.incr(key, random.randint(0, i + 100))
             else:
                 _r.r.incr(key, i)  # incr the key an increasing number of times
         i += 100
