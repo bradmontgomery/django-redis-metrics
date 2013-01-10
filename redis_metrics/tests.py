@@ -158,10 +158,10 @@ class TestR(TestCase):
                 keys.update(set(self.r._build_keys(slug, date, granularity)))
         return keys
 
-    def _test_get_metric_history(self, slug, granularity):
+    def _test_get_metric_history(self, slugs, granularity):
         """actual test code for ``R.get_metric_history``."""
-        keys = self._metric_history_keys(slug, granularity=granularity)
-        self.r.get_metric_history(slug, granularity=granularity)
+        keys = self._metric_history_keys(slugs, granularity=granularity)
+        self.r.get_metric_history(slugs, granularity=granularity)
         self.redis.assert_has_calls([call.mget(keys)])
 
     def test_get_metric_history_daily(self):
@@ -191,6 +191,43 @@ class TestR(TestCase):
 
     def test_get_metric_multiple_history_yearly(self):
         self._test_get_metric_history(['foo', 'bar'], 'yearly')
+
+    def _test_get_metric_history_as_columns(self, slugs, granularity):
+        """Test that R.get_metric_history_as_columns makes calls to the
+        following functions:
+
+        * ``R.r.mget``
+        * ``R.get_metric_history``
+        * ``templatetags.metric_slug``
+        * ``templatetags.strip_metric_prefix``
+
+        """
+        keys = self._metric_history_keys(slugs, granularity=granularity)
+        self.r.get_metric_history_as_columns(slugs, granularity=granularity)
+
+        # Verifies the correct call to redis
+        self.redis.assert_has_calls([call.mget(keys)])
+
+        # Verify that the method gets called correctly
+        with patch('redis_metrics.models.R') as mock_r:
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            h = r.get_metric_history_as_columns(slugs, granularity=granularity)
+            mock_r.assert_has_calls([
+                call().get_metric_history_as_columns(slugs,
+                                                     granularity=granularity)
+            ])
+
+    def test_get_metric_history_as_columns_daily(self):
+        self._test_get_metric_history_as_columns(['foo', 'bar'], 'daily')
+
+    def test_get_metric_history_as_columns_weekly(self):
+        self._test_get_metric_history_as_columns(['foo', 'bar'], 'weekly')
+
+    def test_get_metric_history_as_columns_monthly(self):
+        self._test_get_metric_history_as_columns(['foo', 'bar'], 'monthly')
+
+    def test_get_metric_history_as_columns_yearly(self):
+        self._test_get_metric_history_as_columns(['foo', 'bar'], 'yearly')
 
     def test_gauge_slugs(self):
         """Tests that ``R.gauge_slugs`` calls the SMEMBERS command."""
