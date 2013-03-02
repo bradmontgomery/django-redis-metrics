@@ -37,7 +37,7 @@ def generate_test_metrics(slug='test-metric', num=100, randomize=False):
     _r = get_r()
     i = 100
     for date in _dates(num):
-        for key in r._build_keys(slug, date=date):
+        for key in _r._build_keys(slug, date=date):
             # The following is normally done in _r.metric, but we're adding
             # metrics for past days here, so this is duplicate code.
             _r.r.sadd(_r._metric_slugs_key, key)  # keep track of the keys
