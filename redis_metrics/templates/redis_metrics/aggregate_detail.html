@@ -50,7 +50,16 @@ Context for this Template:
     <li class="active">Aggregate Metrics</li>
     </ul>
 
-    <p>Metrics in this graph: <code>{{ slugs|join:", " }}</code></p>
+    <p>Metrics in this graph: <code>{{ slugs|join:", " }}</code>. You may
+    also view aggregate history:</p>
+
+    <ul>
+    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'daily' %}">Daily</a></li>
+    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'weekly' %}">Weekly</a></li>
+    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'monthly' %}">Monthly</a></li>
+    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'yearly' %}">Yearly</a></li>
+    </ul>
+
     <div id="chart_div"></div>
 
     <table>

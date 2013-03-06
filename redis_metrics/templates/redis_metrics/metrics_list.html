@@ -64,6 +64,8 @@
 
     <h1>Metrics</h1>
     {% if metric_slugs|length %}
+        <p>Want to see multiple metrics at once?
+           Check out the <a href="{% url 'redis_metric_aggregate' %}">Aggregates</a></p>
         <p>Click a metric below to view more data.</p>
         <ul>
         {% for slug in metric_slugs %}

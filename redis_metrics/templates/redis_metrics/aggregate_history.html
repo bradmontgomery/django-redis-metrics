@@ -43,7 +43,7 @@
     <ul class="breadcrumb">
     <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
     <li><a href="{% url 'redis_metric_aggregate' %}">Select Metrics</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_detail' slugs %}">Detail</a></li>
+    <li><a href="{% url 'redis_metric_aggregate_detail' slugs|join:"+" %}">Detail</a></li>
     <li class="active">{{ granularity }} history</li>
     </ul>
 
