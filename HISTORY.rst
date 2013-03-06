@@ -1,6 +1,15 @@
 History
 -------
 
+0.3.0 (2013-03-05)
+++++++++++++++++++
+
+- Support for Django 1.5's configurable User Model (only used in tests)
+- Lazily instantiate R in ``utils`` so installing this actually works.
+- Fixed the ``redis_metrics_send_mail`` command (Issue #2)
+- Improvements to default templates
+
+
 0.2.0 (2013-01-10)
 ++++++++++++++++++
 
