@@ -16,11 +16,12 @@ class Command(NoArgsCommand):
         """Send Report E-mails."""
 
         r = R()
-        slugs = r.slugs()
+        slugs = r.metric_slugs()
 
         template = "redis_metrics/email/report.{fmt}"
         data = {
-            'date': date.today(),
+            'today': date.today(),
+            'slugs': slugs,
             'metrics': r.get_metrics(slugs)
         }
         message = render_to_string(template.format(fmt='txt'), data)

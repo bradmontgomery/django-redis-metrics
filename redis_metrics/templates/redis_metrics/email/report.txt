@@ -1,13 +1,24 @@
 Here are your Redis metrics for {{ today }}!
 
-{% for report in metrics %}
-{% for slug, data in report.items %}
+{% comment %}
+Format of `metrics` is:
 
+    [
+        ('slug-1',
+            {'day': '4', 'month': '4', 'week': '352321', 'year': '2129'}
+        ),
+
+        ('slug-2',
+            {'day': None, 'month': None, 'week': '303669', 'year': '3594'}
+        ),
+    ]
+{% endcomment %}
+
+{% for slug, data in metrics %}
 === {{ slug|upper }} ===
 Day:   {{ data.day }}
 Week:  {{ data.week }}
 Month: {{ data.month }}
 Year:  {{ data.year }}
 
-{% endfor %}
 {% endfor %}

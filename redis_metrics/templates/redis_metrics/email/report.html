@@ -1,5 +1,8 @@
 <!DOCTYPE html>
-<head><title>Redis Metrics</title>
+<html>
+<head>
+    <title>Redis Metrics</title>
+</head>
 <body>
 <h1>Here are your Redis metrics!</h1>
 
@@ -15,9 +18,7 @@
     </tr>
 </thead>
 <tbody>
-{# [{'foo': {'day': '1', 'month': '1', 'week': '1', 'year': '1'} #}
-{% for report in metrics %}
-    {% for slug, data in report.items %}
+{% for slug, data in metrics %}
     <tr>
     <td>{{ slug }}</td>
     <td>{{ data.day }}</td>
@@ -25,7 +26,6 @@
     <td>{{ data.month }}</td>
     <td>{{ data.year }}</td>
     </tr>
-    {% endfor %}
 {% endfor %}
 <tbody>
 </table>
