@@ -7,13 +7,20 @@ Replace this with more appropriate tests for your application.
 import datetime
 from mock import call, patch
 
+try:
+    # Django 1.5
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+except ImportError:
+    # Fallback for Django 1.4 (or lower)
+    from django.contrib.auth.models import User
+
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
+
 from .models import R
 
-User = get_user_model()
 
 
 class TestR(TestCase):
