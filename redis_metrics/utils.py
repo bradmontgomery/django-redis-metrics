@@ -3,17 +3,22 @@ import random
 from .models import R
 
 
-_r = R()
+_redis_model = None
 
+def get_r():
+    global _redis_model
+    if not _redis_model:
+        _redis_model = R()
+    return _redis_model
 
 def metric(slug, num=1, **kwargs):
     """Create/Increment a metric."""
-    _r.metric(slug, num)
+    get_r().metric(slug, num)
 
 
 def gauge(slug, current_value):
     """Set a value for a Gauge"""
-    _r.gauge(slug, current_value)
+    get_r().gauge(slug, current_value)
 
 
 def _dates(num):
@@ -29,6 +34,7 @@ def generate_test_metrics(slug='test-metric', num=100, randomize=False):
     If ``randomize`` is True, the metrics will be random integers.
 
     """
+    _r = get_r()
     i = 100
     for date in _dates(num):
         for key in _r._build_keys(slug, date=date):
@@ -45,6 +51,7 @@ def generate_test_metrics(slug='test-metric', num=100, randomize=False):
 
 def delete_test_metrics(slug='test-metric', num=100):
     """Deletes the metrics created by ``generate_test_metrics``."""
+    _r = get_r()
     for date in _dates(num):
         keys = _r._build_keys(slug, date=date)
         _r.r.srem(_r._metric_slugs_key, *keys)  # remove metric slugs
