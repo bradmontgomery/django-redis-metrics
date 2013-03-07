@@ -66,7 +66,7 @@ class TestR(TestCase):
         slug = 'test-slug'
         expected_results = [
             "m:{0}:{1}".format(slug, d.strftime("%Y-%m-%d")),
-            "m:{0}:w:{1}".format(slug, d.strftime("%U")),
+            "m:{0}:w:{1}".format(slug, d.strftime("%Y-%U")),
             "m:{0}:m:{1}".format(slug, d.strftime("%Y-%m")),
             "m:{0}:y:{1}".format(slug, d.strftime("%Y")),
         ]
@@ -83,7 +83,7 @@ class TestR(TestCase):
         """Tests ``R._build_keys``. with a *weekly* granularity."""
         d = datetime.date(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
-        self.assertEqual(keys, ['m:test-slug:w:14'])
+        self.assertEqual(keys, ['m:test-slug:w:2012-14'])
 
     def test__build_keys_monthly(self):
         """Tests ``R._build_keys``. with a *monthly* granularity."""
@@ -443,7 +443,7 @@ class TestViews(TestCase):
             if granularity == "daily":
                 key_pattern = "m:{0}:2013-01-10"
             elif granularity == "weekly":
-                key_pattern = "m:{0}:w:01"
+                key_pattern = "m:{0}:w:2013-01"
             elif granularity == "monthly":
                 key_pattern = "m:{0}:m:2013-01"
             elif granularity == "yearly":

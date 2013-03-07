@@ -89,7 +89,7 @@ class R(object):
         patterns.insert(0, "daily",
             "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
         patterns.insert(1, "weekly",
-            "m:{0}:w:{1}".format(slug, date.strftime("%U")))
+            "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U")))
         patterns.insert(2, "monthly",
             "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
         patterns.insert(3, "yearly",
@@ -113,7 +113,7 @@ class R(object):
         Keys for each metric (slug) take the form:
 
             m:<slug>:<yyyy-mm-dd>   # Day
-            m:<slug>:w:<num>        # Week
+            m:<slug>:w:<yyyy-num>   # Week (year - week number)
             m:<slug>:m:<yyyy-mm>    # Month
             m:<slug>:y:<yyyy>       # Year
 
@@ -176,7 +176,7 @@ class R(object):
             r = R()
             r.get_metric_history('test', granularity='weekly')
             [
-                ('m:test:w:52', '15'),
+                ('m:test:w:2012-52', '15'),
             ]
 
         To get history for multiple metrics, just provide a list of slugs::
@@ -184,8 +184,8 @@ class R(object):
             metrics = ['test', 'other']
             r.get_metric_history(metrics, granularity='weekly')
             [
-                ('m:test:w:52', '15'),
-                ('m:other:w:52', '42'),
+                ('m:test:w:2012-52', '15'),
+                ('m:other:w:2012-52', '42'),
             ]
 
         """
