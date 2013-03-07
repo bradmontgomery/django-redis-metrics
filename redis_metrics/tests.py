@@ -22,7 +22,6 @@ from django.test import TestCase, Client
 from .models import R
 
 
-
 class TestR(TestCase):
     """Tests for the ``R`` class."""
 
@@ -388,19 +387,25 @@ class TestViews(TestCase):
         expected."""
         url = reverse('redis_metric_aggregate')
         with patch('redis_metrics.views.R'):
-            # Test with ONE metric selected
-            data = {'metrics': ['foo']}
-            resp = self.client.post(url, data)
-            self.assertEqual(resp.status_code, 302)
-            # make sure the metric slug shows up in the redirect URL
-            self.assertIn('foo', resp.get("Location", ''))
+            with patch('redis_metrics.forms.R') as mock_r:
+                # Set up a return value for ``R.metric_slugs``, which is used
+                # in the ``AggregateMetricForm``
+                r = mock_r.return_value  # An instance of our Mocked R class
+                r.metric_slugs.return_value = set(['test', 'foo', 'bar'])
 
-            # Test with TWO metrics selected
-            data = {'metrics': ['foo', 'bar']}
-            resp = self.client.post(url, data)
-            self.assertEqual(resp.status_code, 302)
-            # make sure the metric slug shows up in the redirect URL
-            self.assertIn('foo+bar', resp.get("Location", ''))
+                # Test with ONE metric selected
+                data = {'metrics': ['foo']}
+                resp = self.client.post(url, data)
+                self.assertEqual(resp.status_code, 302)
+                # make sure the metric slug shows up in the redirect URL
+                self.assertIn('foo', resp.get("Location", ''))
+
+                # Test with TWO metrics selected
+                data = {'metrics': ['foo', 'bar']}
+                resp = self.client.post(url, data)
+                self.assertEqual(resp.status_code, 302)
+                # make sure the metric slug shows up in the redirect URL
+                self.assertIn('foo+bar', resp.get("Location", ''))
 
     def test_aggregate_detail_view(self):
         """Tests ``views.AggregateDetailView``."""
