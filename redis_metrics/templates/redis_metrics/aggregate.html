@@ -1,6 +1,7 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
 
+
 {% block content %}
     <h1>Aggregate</h1>
     <ul class="breadcrumb">
@@ -15,4 +16,11 @@
         <p><input type="submit" value="View Metrics"/></p>
         </form>
     {% endif %}
+
+    {# make sure the default mulit-select widget is large enough to be usable #}
+    <script type="text/javascript">
+    s = document.getElementById("id_metrics");
+    height = s.children.length * 18; // default font-size is approx 15px-20px
+    s.style.height = height + "px";
+    </script>
 {% endblock %}
