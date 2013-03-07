@@ -1,6 +1,16 @@
 History
 -------
 
+0.4.0 (2013-03-07)
+++++++++++++++++++
+
+- *Backwards Incompatible Change*: Changed the underlying Redis key for weekly
+  metrics. See `Issue #7 <https://github.com/bradmontgomery/django-redis-metrics/issues/7>`_
+  for a description of this bug.
+- Added a management command--``reset_weekly_metrics``--that allows you to change
+  the keys for weekly metrics
+- Minor changes to the default templates
+
 0.3.0 (2013-03-05)
 ++++++++++++++++++
 
