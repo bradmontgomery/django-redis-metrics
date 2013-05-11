@@ -59,7 +59,7 @@ class R(object):
         * ``since`` -- a ``datetime.date`` object or None.
 
         """
-        now = datetime.date.today()
+        now = datetime.datetime.today()
         if since is None:
             since_days = 365  # assume 1 year :-/
         else:
