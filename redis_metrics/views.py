@@ -6,6 +6,8 @@ the views here are extended from ``TemplateView`` in order to keep things
 simple.
 
 """
+from datetime import datetime
+
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
 from django.http import Http404
@@ -79,11 +81,17 @@ class MetricHistoryView(ProtectedTemplateView):
         """Includes the metrics slugs in the context."""
         data = super(MetricHistoryView, self).get_context_data(**kwargs)
         try:
+            # Accept GET query params for ``since``
+            since = self.request.GET.get('since', None)
+            if since and len(since) == 10:  # yyyy-mm-dd
+                since = datetime.strptime(since, "%Y-%m-%d")
+
             data.update({
                 'slug': kwargs['slug'],
                 'granularity': kwargs['granularity'],
                 'metric_history': R().get_metric_history(
                     slugs=kwargs['slug'],
+                    since=since,
                     granularity=kwargs['granularity']
                 )
             })
@@ -138,11 +146,17 @@ class AggregateHistoryView(ProtectedTemplateView):
         slug_set = set(kwargs['slugs'].split('+'))
         granularity = kwargs.get('granularity', 'daily')
         try:
+            # Accept GET query params for ``since``
+            since = self.request.GET.get('since', None)
+            if since and len(since) == 10:  # yyyy-mm-dd
+                since = datetime.strptime(since, "%Y-%m-%d")
+
             data.update({
                 'slugs': slug_set,
                 'granularity': granularity,
                 'metric_history': R().get_metric_history_as_columns(
                     slugs=list(slug_set),
+                    since=since,
                     granularity=granularity
                 )
             })
