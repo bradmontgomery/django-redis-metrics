@@ -47,7 +47,12 @@ class TestUtils(TestCase):
             ])
 
     def test_gauge(self):
-        assert False
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.gauge("test-slug", 9000)
+            mock_get_r.assert_has_calls([
+                call(),
+                call().gauge("test-slug", 9000),
+            ])
 
     def test__dates(self):
         assert False
