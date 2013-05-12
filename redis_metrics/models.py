@@ -4,6 +4,7 @@ lightweight wrapper around Redis.
 
 """
 import datetime
+import json
 import redis
 
 from django.conf import settings
@@ -67,6 +68,35 @@ class R(object):
             since_days = delta.days + 1
         return (now - datetime.timedelta(days=d) for d in range(since_days))
 
+    def _category_key(self, category):
+        return u"c:{0}".format(category)
+
+    def _category_slugs(self, category):
+        """Returns a list of the metric slugs for the given category"""
+        key = self._category_key(category)
+        slugs = self.r.get(key)
+        return [] if slugs is None else json.loads(slugs)
+
+    def _categorize(self, slug, category):
+        """Add the ``slug`` to the ``category``. We store category data as
+        JSON strings, with a key of the form::
+
+            c:<category name>
+
+        The data is a JSON-serialized list of metric slugs::
+
+            '["slug-a", "slug-b", ...]'
+
+        """
+        # Store existing slugs in a set, so we don't have duplicates
+        metric_slugs = set(self._category_slugs(category))
+        metric_slugs.add(slug)
+
+        # sets are not JSON-serializable, so convert to a list before storing
+        json_data = json.dumps(list(metric_slugs))
+        key = self._category_key(category)
+        self.r.set(key, json_data)
+
     def _build_keys(self, slug, date=None, granularity='all'):
         """Builds redis keys used to store metrics.
 
@@ -105,7 +135,7 @@ class R(object):
         keys = self.r.smembers(self._metric_slugs_key)
         return set(s.split(":")[1] for s in keys)
 
-    def metric(self, slug, num=1):
+    def metric(self, slug, num=1, category=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
         if it does. All metrics are prefixed with 'm', and automatically
         aggregate for Day, Week, Month, and Year.
@@ -130,6 +160,9 @@ class R(object):
         self.r.incr(week_key, num)
         self.r.incr(month_key, num)
         self.r.incr(year_key, num)
+
+        if category:
+            self._categorize(slug, category)
 
     def get_metric(self, slug):
         """Get the current values for a metric.
@@ -162,6 +195,11 @@ class R(object):
         for slug in slug_list:
             results.append((slug, self.get_metric(slug)))
         return results
+
+    def get_category_metrics(self, category):
+        """Get metrics belonging to the given category"""
+        slug_list = self._category_slugs(category)
+        return self.get_metrics(slug_list)
 
     def get_metric_history(self, slugs, since=None, granularity='daily'):
         """Get history for one or more metrics.

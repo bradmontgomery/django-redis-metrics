@@ -5,7 +5,7 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 import datetime
-from mock import call, patch
+from mock import call, patch, Mock
 
 try:
     # Django 1.5
@@ -58,6 +58,70 @@ class TestR(TestCase):
 
         self.assertIn(t, dates)  # Should include our specified date
         self.assertGreater(len(dates), 1)  # There should be some dates
+
+    def test__category_key(self):
+        """Creates a redis key for a given category string."""
+        self.assertEqual(
+            self.r._category_key("Sample Category"),
+            u"c:Sample Category"
+        )
+
+    def test__category_slugs(self):
+        """Verify that this returns an empty list or a list of slugs."""
+        # When there are no results from redis
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            mock_redis.return_value.get.return_value = None
+            r = R()
+            result = r._category_slugs("Sample Category")
+            self.assertEqual(result, [])
+
+        # When there are no results from redis
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            mock_redis.return_value.get.return_value = '["slug-a", "slug-b"]'
+            r = R()
+            result = r._category_slugs("Sample Category")
+            self.assertEqual(result, ['slug-a', 'slug-b'])
+
+    @patch.object(R, '_category_slugs')
+    def test__categorize(self, mock_category_slugs):
+        """Categorizing a slug should add the correct key/values to Redis"""
+
+        # Sample category and metric slug
+        cat = "Sample Category"
+        cat_key = "c:Sample Category"
+        slug = "sample-slug"
+
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            redis_instance = mock_redis.return_value
+            r = R()
+
+            # When there are no existing slugs for a category
+            mock_category_slugs.return_value = []
+            r._categorize(slug, cat)
+            mock_category_slugs.assert_called_once_with(cat)
+            json_slug = '["{0}"]'.format(slug)
+            redis_instance.set.assert_called_once_with(cat_key, json_slug)
+
+            redis_instance.reset_mock()
+            mock_category_slugs.reset_mock()
+
+            # When there's an existing slug for a category
+            mock_category_slugs.return_value = ["existing-slug"]
+            r._categorize(slug, cat)
+            mock_category_slugs.assert_called_once_with(cat)
+            json_slug = '["{0}", "existing-slug"]'.format(slug)
+            redis_instance.set.assert_called_once_with(cat_key, json_slug)
+
+            redis_instance.reset_mock()
+            mock_category_slugs.reset_mock()
+
+            # When we're setting a duplicate metric (should be no duplicates
+            # in the list that's set in Redis
+            mock_category_slugs.return_value = [slug]
+            r._categorize(slug, cat)
+            mock_category_slugs.assert_called_once_with(cat)
+            json_slug = '["{0}"]'.format(slug)
+            redis_instance.set.assert_called_once_with(cat_key, json_slug)
 
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""
@@ -122,6 +186,31 @@ class TestR(TestCase):
             call.incr(year, n),
         ])
 
+    @patch.object(R, '_categorize')
+    def test_metric_with_category(self, mock_categorize):
+        """The ``metric`` method should call ``_categorize`` if passed a
+        ``category`` argument."""
+        category = "Some Category"
+        slug = 'categorized-metric'
+        n = 1
+
+        # get the keys used for the metric, so we can check for calls
+        day, week, month, year = self.r._build_keys(slug)
+        self.r.metric(slug, num=n, category=category)
+
+        # Verify that setting a metric adds the appropriate slugs to the keys
+        # set and then incrememts each key
+        self.redis.assert_has_calls([
+            call.sadd(self.r._metric_slugs_key, day, week, month, year),
+            call.incr(day, n),
+            call.incr(week, n),
+            call.incr(month, n),
+            call.incr(year, n),
+        ])
+
+        # Make sure this gets categorized.
+        mock_categorize.assert_called_once_with(slug, category)
+
     def test_get_metric(self):
         """Tests getting a single metric; ``R.get_metric``."""
         slug = 'test-metric'
@@ -153,6 +242,17 @@ class TestR(TestCase):
         # Test our method
         self.r.get_metrics(slugs)
         self.redis.assert_has_calls(calls)
+
+    def test_get_category_metrics(self):
+        """returns metrics for a given category"""
+        r = R()
+        # Mock methods called by `get_category_metrics`
+        r._category_slugs = Mock(return_value=['some-slug'])
+        r.get_metrics = Mock(return_value="RESULT")
+        results = r.get_category_metrics("Sample Category")
+        self.assertEqual(results, 'RESULT')
+        r._category_slugs.assert_called_once_with("Sample Category")
+        r.get_metrics.assert_called_once_with(['some-slug'])
 
     def _metric_history_keys(self, slugs, since=None, granularity='daily'):
         """generates the same list of keys used in ``get_metric_history``.
