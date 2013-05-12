@@ -108,7 +108,11 @@ class TestViews(TestCase):
             # Make sure our Mocked R instance had its ``get_metric_history``
             # method called with the correct parameters
             r.assert_has_calls([
-                call.get_metric_history(slugs=slug, granularity=granularity)
+                call.get_metric_history(
+                    since=None,
+                    slugs=slug,
+                    granularity=granularity
+                )
             ])
 
     def test_metrics_list_requires_admin(self):
