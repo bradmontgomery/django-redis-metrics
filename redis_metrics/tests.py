@@ -4,7 +4,7 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-from datetime import datetime
+from datetime import date, datetime
 from mock import call, patch, Mock
 
 try:
@@ -126,7 +126,7 @@ class TestR(TestCase):
 
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""
-        d = datetime.date.today()
+        d = date.today()
         slug = 'test-slug'
         expected_results = [
             "m:{0}:{1}".format(slug, d.strftime("%Y-%m-%d")),
@@ -139,25 +139,25 @@ class TestR(TestCase):
 
     def test__build_keys_daily(self):
         """Tests ``R._build_keys``. with a *daily* granularity."""
-        d = datetime.date(2012, 4, 1)  # April Fools!
+        d = date(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='daily')
         self.assertEqual(keys, ['m:test-slug:2012-04-01'])
 
     def test__build_keys_weekly(self):
         """Tests ``R._build_keys``. with a *weekly* granularity."""
-        d = datetime.date(2012, 4, 1)  # April Fools!
+        d = date(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
         self.assertEqual(keys, ['m:test-slug:w:2012-14'])
 
     def test__build_keys_monthly(self):
         """Tests ``R._build_keys``. with a *monthly* granularity."""
-        d = datetime.date(2012, 4, 1)  # April Fools!
+        d = date(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='monthly')
         self.assertEqual(keys, ['m:test-slug:m:2012-04'])
 
     def test__build_keys_yearly(self):
         """Tests ``R._build_keys``. with a *yearly* granularity."""
-        d = datetime.date(2012, 4, 1)  # April Fools!
+        d = date(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='yearly')
         self.assertEqual(keys, ['m:test-slug:y:2012'])
 
