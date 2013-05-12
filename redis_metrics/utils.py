@@ -5,11 +5,13 @@ from .models import R
 
 _redis_model = None
 
+
 def get_r():
     global _redis_model
     if not _redis_model:
         _redis_model = R()
     return _redis_model
+
 
 def metric(slug, num=1, **kwargs):
     """Create/Increment a metric."""

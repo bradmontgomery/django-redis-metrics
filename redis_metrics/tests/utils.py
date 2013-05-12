@@ -1,4 +1,4 @@
-from mock import patch
+from mock import call, patch
 from django.conf import settings
 from django.test import TestCase
 
@@ -39,7 +39,12 @@ class TestUtils(TestCase):
                 host="localhost", port=6379, db=0)
 
     def test_metric(self):
-        assert False
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.metric("test-slug")
+            mock_get_r.assert_has_calls([
+                call(),
+                call().metric("test-slug", 1),
+            ])
 
     def test_gauge(self):
         assert False
