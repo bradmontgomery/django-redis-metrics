@@ -35,6 +35,25 @@ class TestR(TestCase):
         settings.REDIS_METRICS_DB = self.old_db
         super(TestR, self).tearDown()
 
+    def test__init__(self):
+        """Test creation of an R object with parameters."""
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            kwargs = {
+                'metric_slugs_key': 'MSK',
+                'gauge_slugs_key': 'GSK',
+                'host': 'HOST',
+                'port': 'PORT',
+                'db': 'DB'
+            }
+            inst = R(**kwargs)
+            self.assertEqual(inst.host, "HOST")
+            self.assertEqual(inst.port, "PORT")
+            self.assertEqual(inst.db, "DB")
+            self.assertEqual(inst._metric_slugs_key, "MSK")
+            self.assertEqual(inst._gauge_slugs_key, "GSK")
+            mock_redis.assert_called_once_with(
+                host='HOST', port='PORT', db='DB')
+
     def test__date_range(self):
         """Tests ``R._date_range``."""
 
@@ -291,6 +310,30 @@ class TestR(TestCase):
 
     def test_get_metric_multiple_history_yearly(self):
         self._test_get_metric_history(['foo', 'bar'], 'yearly')
+
+    @patch.object(R, 'get_metric_history')
+    def test_get_metric_history_as_columns(self, mock_metric_hist):
+        # set up some sample (yearly) metrics
+        mock_metric_hist.return_value = [
+            ("m:bar:y:2012", '1'),
+            ('m:bar:y:2013', '2'),
+            ('m:foo:y:2012', '3'),
+            ('m:foo:y:2013', '4'),
+        ]
+        expected_results = [
+            ('Period',  'foo',  'bar'),
+            ('y:2012',  '3',    '1'),
+            ('y:2013',  '4',    '2'),
+        ]
+        with patch('redis_metrics.models.redis.StrictRedis'):
+            r = R()
+            kwargs = {
+                'slugs': ['foo', 'bar'],
+                'since': None,
+                'granularity': 'yearly',
+            }
+            results = r.get_metric_history_as_columns(**kwargs)
+            self.assertEqual(results, expected_results)
 
     def _test_get_metric_history_as_columns(self, slugs, granularity):
         """Test that R.get_metric_history_as_columns makes calls to the
