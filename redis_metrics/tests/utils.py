@@ -1,5 +1,5 @@
 from datetime import date, timedelta
-from mock import call, patch
+from mock import call, patch, Mock
 
 from django.conf import settings
 from django.test import TestCase
@@ -64,7 +64,33 @@ class TestUtils(TestCase):
         self.assertEqual(list(utils._dates(5)), list(expected))
 
     def test_generate_test_metrics(self):
-        assert False
+        config = {
+            '_build_keys.return_value': ['key'],
+            '_metric_slugs_key': 'MSK',
+        }
+        mock_r = Mock(**config)
+        config = {'return_value': mock_r}
+        with patch("redis_metrics.utils.get_r", **config) as mock_get_r:
+            # When called with random = True
+            with patch("redis_metrics.utils.random") as mock_random:
+                mock_random.randint.return_value = 9999
+                utils.generate_test_metrics(
+                    slug="test_slug", num=1, randomize=True)
+                mock_get_r.assert_called_once_with()
+                mock_r.r.sadd.assert_called_once_with('MSK', 'key')
+                mock_random.seed.assert_called_once_with()
+                mock_random.randint.assert_called_once_with(0, 100 + 100)
+                mock_r.r.incr.assert_called_once_with('key', 9999)
+
+            mock_get_r.reset_mock()
+            mock_r.reset_mock()
+
+            # When called with random = False
+            utils.generate_test_metrics(
+                slug="test_slug", num=1, randomize=False)
+            mock_get_r.assert_called_once_with()
+            mock_r.r.sadd.assert_called_once_with('MSK', 'key')
+            mock_r.r.incr.assert_called_once_with('key', 100)
 
     def test_delete_test_metrics(self):
         d = list(utils._dates(1))[0]  # Date used inside function
