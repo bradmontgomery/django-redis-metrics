@@ -217,7 +217,7 @@ class TestViews(TestCase):
             value += 1
         return history
 
-    def _test_aggregate_history_view(self, slugs, granularity):
+    def _test_aggregate_history_view(self, slugs, granularity, since=None):
         """Tests ``views.AggregateHistoryView`` with the given slugs and
         granularity (i.e. 'daily', 'weekly', 'monthly', 'yearly')."""
         slug_set = set(slugs)
@@ -244,7 +244,8 @@ class TestViews(TestCase):
             # parameters
             c = call.get_metric_history_as_columns(
                 slugs=slugs,
-                granularity=granularity
+                granularity=granularity,
+                since=since
             )
             r.assert_has_calls([c])
 
