@@ -53,11 +53,11 @@ class R(object):
         self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
 
     def _date_range(self, since=None):
-        """Returns a generator that yields ``datetime.date`` objects from the
-        ``since`` date until *now*. If ``since`` is omitted, returns dates for
-        one year.
+        """Returns a generator that yields ``datetime.datetime`` objects from
+        the ``since`` date until *now*. If ``since`` is omitted, returns dates
+        for one year.
 
-        * ``since`` -- a ``datetime.date`` object or None.
+        * ``since`` -- a ``datetime.datetime`` object or None.
 
         """
         now = datetime.datetime.today()

@@ -4,7 +4,7 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-import datetime
+from datetime import datetime
 from mock import call, patch, Mock
 
 try:
@@ -53,10 +53,11 @@ class TestR(TestCase):
         self.assertEqual(len(dates), 365)
 
         # Provide a ``since`` parameter.
-        t = datetime.date(2012, 12, 25)  # Merry Christmas!
-        dates = [d for d in self.r._date_range(since=t)]
+        t = datetime(2012, 12, 25)  # Merry Christmas!
+        # NOTE: just check for dates, ignoring hours, mins, seconds, etc.
+        dates = [d.date() for d in self.r._date_range(since=t)]
 
-        self.assertIn(t, dates)  # Should include our specified date
+        self.assertIn(t.date(), dates)  # Should include our specified date
         self.assertGreater(len(dates), 1)  # There should be some dates
 
     def test__category_key(self):
