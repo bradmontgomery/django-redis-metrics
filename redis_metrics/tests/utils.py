@@ -1,4 +1,6 @@
+from datetime import date, timedelta
 from mock import call, patch
+
 from django.conf import settings
 from django.test import TestCase
 
@@ -55,7 +57,11 @@ class TestUtils(TestCase):
             ])
 
     def test__dates(self):
-        assert False
+        # The following line is the expected result of _dates for 5 days
+        expected = (date.today() - timedelta(days=d) for d in range(5))
+        result = utils._dates(5)
+        self.assertEqual(type(expected), type(result))
+        self.assertEqual(list(utils._dates(5)), list(expected))
 
     def test_generate_test_metrics(self):
         assert False
