@@ -2,6 +2,7 @@ from mock import patch
 from django.conf import settings
 from django.test import TestCase
 
+from ..models import R
 from .. import utils
 
 
@@ -28,7 +29,14 @@ class TestUtils(TestCase):
         # TODO: unpatch StrictRedis
 
     def test_get_r(self):
-        assert False
+        # Global `_redis_model` is None by default
+        self.assertEqual(utils._redis_model, None)
+        with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
+            r = utils.get_r()
+            self.assertIsInstance(r, R)
+            self.assertEqual(r, utils._redis_model)
+            mock_redis.assert_called_once_with(
+                host="localhost", port=6379, db=0)
 
     def test_metric(self):
         assert False
