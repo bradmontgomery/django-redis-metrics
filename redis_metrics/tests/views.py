@@ -4,15 +4,16 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
+from datetime import datetime
 from mock import call, patch
 
-try:
+try:  # pragma: no cover
     # Django 1.5
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-except ImportError:
+    from django.contrib.auth import get_user_model  # pragma: no cover
+    User = get_user_model()  # pragma: no cover
+except ImportError:  # pragma: no cover
     # Fallback for Django 1.4 (or lower)
-    from django.contrib.auth.models import User
+    from django.contrib.auth.models import User  # pragma: no cover
 
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
@@ -114,6 +115,58 @@ class TestViews(TestCase):
                     granularity=granularity
                 )
             ])
+
+    def test_metric_history_since(self):
+        """Tests the ``MetricHistoryView`` when there's a ``since`` variable"""
+        slug = u'test-metric'
+        granularity = u'daily'
+        url = reverse('redis_metric_history', args=[slug, granularity])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set up a return value for ``R
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            mocked_history = [
+                ('m:{0}:2012-12-26'.format(slug), None),
+                ('m:{0}:2012-12-27'.format(slug), None),
+                ('m:{0}:2012-12-28'.format(slug), '1'),
+            ]
+            r.get_metric_history.return_value = mocked_history
+
+            # Do the Request & test results
+            resp = self.client.get(url, {'since': '2012-12-25'})
+            self.assertEqual(resp.status_code, 200)
+            context = resp.context_data
+            self.assertEqual(context['slug'], slug)
+            self.assertEqual(context['granularity'], granularity)
+            self.assertEqual(context['metric_history'], mocked_history)
+
+            # Make sure our Mocked R instance had its ``get_metric_history``
+            # method called with the correct parameters
+            r.assert_has_calls([
+                call.get_metric_history(
+                    since=datetime(2012, 12, 25, 0, 0),
+                    slugs=slug,
+                    granularity=granularity
+                )
+            ])
+
+    def test_metric_history_raises_keyerror(self):
+        """Tests the ``MetricHistoryView`` when there's a ``since`` variable"""
+        slug = u'test-metric'
+        granularity = u'daily'
+        url = reverse('redis_metric_history', args=[slug, granularity])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # there are a couple ways we could get a KeyError (e.g., invalid
+            # kwargs passed into ``get_context_data``, but it's convenient to
+            # test that ``get_metric_history`` raises this, since we're already
+            # mocking it.
+            r = mock_r.return_value
+            r.get_metric_history.side_effect = KeyError
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 404)
 
     def test_metrics_list_requires_admin(self):
         """Verifies that ``MetricsListView`` requires authentication."""
@@ -260,3 +313,51 @@ class TestViews(TestCase):
 
     def test_aggregate_history_view_yearly(self):
         self._test_aggregate_history_view(['foo', 'bar'], 'yearly')
+
+    def test_aggregate_history_view_since(self):
+        """Tests ``views.AggregateHistoryView`` with a ``since`` parameter."""
+        slugs = ['foo', 'bar']
+        granularity = 'yearly'
+        url = reverse('redis_metric_aggregate_history',
+                      args=['+'.join(slugs), granularity])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set up a return value for ``get_metric_history_as_columns``
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            r.get_metric_history.return_value = self._metrichistory(
+                slugs, granularity)
+
+            # Do the Request & test results
+            resp = self.client.get(url, {'since': "2012-12-25"})
+            self.assertEqual(resp.status_code, 200)
+
+            # Make sure our Mocked R instance had its
+            # ``get_metric_history_as_columns`` method called with the correct
+            # parameters
+            c = call.get_metric_history_as_columns(
+                slugs=slugs,
+                granularity=granularity,
+                since=datetime(2012, 12, 25)
+            )
+            r.assert_has_calls([c])
+
+    def test_aggregate_history_view_raises_keyerror(self):
+        """Tests ``views.AggregateHistoryView`` raises a 404 if
+        there's a KeyError."""
+
+        slugs = ['foo', 'bar']
+        granularity = 'yearly'
+        url = reverse('redis_metric_aggregate_history',
+                      args=['+'.join(slugs), granularity])
+
+        with patch('redis_metrics.views.R') as mock_r:
+            # there are a couple ways we could get a KeyError (e.g., invalid
+            # kwargs passed into ``get_context_data``, but it's convenient to
+            # test that ``get_metric_history`` raises this, since we're already
+            # mocking it.
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            r.get_metric_history_as_columns.side_effect = KeyError
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 404)

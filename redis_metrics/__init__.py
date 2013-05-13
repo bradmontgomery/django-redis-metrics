@@ -5,5 +5,5 @@ try:
     # placate pyflakes
     assert gauge
     assert metric
-except ImportError:
-    pass
+except ImportError:  # pragma: no cover
+    pass  # pragma: no cover
