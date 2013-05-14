@@ -16,7 +16,7 @@ from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 
 from .models import R
-from .forms import AggregateMetricForm
+from .forms import AggregateMetricForm, MetricCategoryForm
 
 
 class ProtectedTemplateView(TemplateView):
@@ -163,3 +163,19 @@ class AggregateHistoryView(ProtectedTemplateView):
         except KeyError:
             raise Http404
         return data
+
+
+class CategoryFormView(ProtectedFormView):
+    """Allows the user to (re)categorize existing metrics."""
+    template_name = "redis_metrics/categorize.html"
+    form_class = MetricCategoryForm
+
+    def get_success_url(self):
+        """Show the list of metrics."""
+        return reverse('redis_metrics_list')
+
+    def form_valid(self, form):
+        """Get the category name/metric slugs from the form, and update the
+        category so contains the given metrics."""
+        form.categorize_metrics()
+        return super(CategoryFormView, self).form_valid(form)

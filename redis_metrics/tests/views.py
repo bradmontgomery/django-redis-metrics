@@ -361,3 +361,41 @@ class TestViews(TestCase):
             # Do the Request & test results
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 404)
+
+    def test_category_form_view(self):
+        """Verifies that GET requests to the ``CategoryFormView`` have the
+        correct context info (i.e. a form)."""
+        url = reverse('redis_metrics_categorize')
+        self.assertUnauthedRequestRedirects(url)
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('form', resp.context_data)
+        self.assertIn("id_category_name", resp.content)
+        self.assertIn("id_metrics", resp.content)
+
+    def test_category_form_view_post(self):
+        """Verifies that POST requests to the ``CategoryFormView`` work as
+        expected."""
+        url = reverse('redis_metrics_categorize')
+
+        # NOTE: you can't mock the form in the views, because calls to the
+        # form get dispatched somewhere else. That's why this is mocking the
+        # R object in the form, instead of the form, itself.
+        k = {
+            'return_value.metric_slugs.return_value': ['foo', 'bar', 'baz'],
+            'return_value._category_slugs.return_value': ['foo', 'bar'],
+        }
+        with patch('redis_metrics.forms.R', **k) as mock_R:
+            data = {'category_name': 'Foo', 'metrics': ['foo', 'bar']}
+            resp = self.client.post(url, data)
+            self.assertEqual(resp.status_code, 302)
+            # This is what should happen in the form when POSTing
+            mock_R.assert_has_calls([
+                # happens in __init__
+                call(),
+                call().metric_slugs(),
+
+                # happens in categorize_metrics
+                call()._categorize('foo', 'Foo'),
+                call()._categorize('bar', 'Foo'),
+            ])

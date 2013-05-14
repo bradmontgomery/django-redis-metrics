@@ -1,10 +1,14 @@
 from django.conf.urls.defaults import patterns, url
-from .views import (AggregateHistoryView, AggregateDetailView,
-                    AggregateFormView, MetricDetailView,
-                    MetricHistoryView, MetricsListView)
+from .views import (
+    AggregateHistoryView, AggregateDetailView, AggregateFormView,
+    CategoryFormView, MetricDetailView, MetricHistoryView, MetricsListView,
+)
 
 
 urlpatterns = patterns('',
+    url(r'^categorize/$',
+        CategoryFormView.as_view(),
+        name='redis_metrics_categorize'),
     url(r'^aggregate/(?P<slugs>.*)/(?P<granularity>.*)/$',
         AggregateHistoryView.as_view(),
         name='redis_metric_aggregate_history'),

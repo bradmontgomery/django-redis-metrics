@@ -1,0 +1,21 @@
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
+
+
+{% block content %}
+    <h1>Aggregate</h1>
+    <ul class="breadcrumb">
+    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+    <li class="active">Categorize Metrics</li>
+    </ul>
+
+    {% if form %}
+        <form action="{% url 'redis_metrics_categorize' %}" method="post">
+        {% csrf_token %}
+        <p>Select the metrics that should belong to this category:</p>
+        {{ form.as_p }}
+        <p><input type="submit" value="Categorize Metrics"/></p>
+        </form>
+    {% endif %}
+
+{% endblock %}

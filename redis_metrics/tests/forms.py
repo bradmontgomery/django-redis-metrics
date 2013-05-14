@@ -84,3 +84,26 @@ class TestMetricCategoryForm(TestCase):
             form = MetricCategoryForm(data)
             self.assertTrue(form.is_valid())
             self.assertEqual(form.cleaned_data, data)
+
+    def test_categorize_metrics(self):
+        """Test the ``categorize_metrics`` method; This method should be called
+        after POSTing."""
+        k = {
+            'return_value.metric_slugs.return_value': ['foo', 'bar', 'baz'],
+            'return_value._category_slugs.return_value': ['foo', 'bar'],
+        }
+        with patch('redis_metrics.forms.R', **k) as mock_R:
+            data = {'category_name': 'Foo', 'metrics': ['foo', 'bar']}
+            form = MetricCategoryForm(data)
+            self.assertTrue(form.is_valid())
+            form.categorize_metrics()
+            # This is what should happen in the form when POSTing
+            mock_R.assert_has_calls([
+                # happens in __init__
+                call(),
+                call().metric_slugs(),
+
+                # happens in categorize_metrics
+                call()._categorize('foo', 'Foo'),
+                call()._categorize('bar', 'Foo'),
+            ])
