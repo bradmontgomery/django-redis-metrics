@@ -33,14 +33,54 @@ class TestAggregateMetricForm(TestCase):
 
 class TestMetricCategoryForm(TestCase):
 
-    def setUp(self):
-        self.form = MetricCategoryForm()
-
     def test_form(self):
-        assert False
-        # Test that the form has choices from R.metric_slugs, and that
-        # providing a ``category`` argument sets initial values
+        """Test that the form has choices from R.metric_slugs, and that
+        providing a ``category`` argument sets initial values."""
 
-    def test_clean(self):
-        assert False
-        # Verify we get expected results from cleaned_data
+        # Set up a mock result for R.metric_slugs & R._category_slugs
+        config = {
+            'return_value.metric_slugs.return_value': ['test-slug'],
+            'return_value._category_slugs.return_value': ['test-slug']
+        }
+        with patch('redis_metrics.forms.R', **config) as mock_R:
+            # No Category
+            form = MetricCategoryForm()
+            mock_R.assert_has_calls([
+                call(),
+                call().metric_slugs(),
+            ])
+            self.assertEqual(
+                form.fields['metrics'].choices,
+                [('test-slug', 'test-slug')]
+            )
+            self.assertEqual(form.fields['metrics'].initial, None)
+            self.assertEqual(form.fields['category_name'].initial, None)
+            self.assertFalse(mock_R._category_slugs.called)
+            mock_R.reset_mock()
+
+            # With a Category
+            form = MetricCategoryForm(category="Sample Category")
+            self.assertEqual(form.fields['metrics'].initial, ['test-slug'])
+            self.assertEqual(
+                form.fields['category_name'].initial,
+                "Sample Category"
+            )
+            r = mock_R.return_value
+            r._category_slugs.assert_called_once_with("Sample Category")
+
+    def test_cleaned_data(self):
+        """Verify we get expected results from cleaned_data."""
+
+        # Set up a mock result for R.metric_slugs & R._category_slugs
+        config = {
+            'return_value.metric_slugs.return_value': ['test-slug'],
+            'return_value._category_slugs.return_value': ['test-slug']
+        }
+        with patch('redis_metrics.forms.R', **config):
+            data = {
+                'category_name': 'Sample Data',
+                'metrics': ['test-slug'],
+            }
+            form = MetricCategoryForm(data)
+            self.assertTrue(form.is_valid())
+            self.assertEqual(form.cleaned_data, data)
