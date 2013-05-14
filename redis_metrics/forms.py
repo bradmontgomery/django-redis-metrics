@@ -32,4 +32,5 @@ class MetricCategoryForm(forms.Form):
 
         # If a "category" is provided, set inital values (pre-selected)
         if category:
+            self.fields['category_name'].initial = category
             self.fields['metrics'].initial = r._category_slugs(category)
