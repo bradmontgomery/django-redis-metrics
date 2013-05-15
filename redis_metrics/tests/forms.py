@@ -59,7 +59,8 @@ class TestMetricCategoryForm(TestCase):
             mock_R.reset_mock()
 
             # With a Category
-            form = MetricCategoryForm(category="Sample Category")
+            initial = {'category_name': "Sample Category"}
+            form = MetricCategoryForm(initial=initial)
             self.assertEqual(form.fields['metrics'].initial, ['test-slug'])
             self.assertEqual(
                 form.fields['category_name'].initial,

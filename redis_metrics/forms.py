@@ -20,18 +20,24 @@ class MetricCategoryForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        self.r = R()  # Keep a connection to our Redis wrapper
-        category = kwargs.get('category', None)
-        if category:
-            del kwargs['category']
+        """See if this form is created with an initial Category. If so, we call
+        out to ``R._category_slugs`` to find the pre-selected metrics. Any
+        initial data should look like this:
 
+            {'category_name': 'Whatever'}
+
+
+        """
         super(MetricCategoryForm, self).__init__(*args, **kwargs)
+        self.r = R()  # Keep a connection to our Redis wrapper
         # The list of available choices should include all metrics
         choices = [(slug, slug) for slug in self.r.metric_slugs()]
         self.fields['metrics'].choices = choices
 
         # If a "category" is provided, set inital values (pre-selected)
-        if category:
+        initial = kwargs.get('initial', None)
+        if initial and 'category_name' in initial:
+            category = initial['category_name']
             self.fields['category_name'].initial = category
             self.fields['metrics'].initial = self.r._category_slugs(category)
 
