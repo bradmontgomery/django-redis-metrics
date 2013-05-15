@@ -24,21 +24,26 @@ class TestR(TestCase):
         settings.REDIS_METRICS_PORT = 6379
         settings.REDIS_METRICS_DB = 0
 
-        # The redis client instance on R is a MagicMock object
-        with patch('redis_metrics.models.redis'):
-            self.r = R()
-            self.redis = self.r.r  # keep a sanely named reference to Redis
+        # Patch the connection to redis, but keep a reference to the
+        # created StrictRedis instance, so we can make assertions about how
+        # it's called.
+        self.redis_patcher = patch('redis_metrics.models.redis.StrictRedis')
+        mock_StrictRedis = self.redis_patcher.start()
+        self.redis = mock_StrictRedis.return_value
+        self.r = R()
 
     def tearDown(self):
         settings.REDIS_METRICS_HOST = self.old_host
         settings.REDIS_METRICS_PORT = self.old_port
         settings.REDIS_METRICS_DB = self.old_db
+        self.redis = self.redis_patcher.stop()
         super(TestR, self).tearDown()
 
     def test__init__(self):
         """Test creation of an R object with parameters."""
         with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
             kwargs = {
+                'categories_key': 'CAT',
                 'metric_slugs_key': 'MSK',
                 'gauge_slugs_key': 'GSK',
                 'host': 'HOST',
@@ -49,6 +54,7 @@ class TestR(TestCase):
             self.assertEqual(inst.host, "HOST")
             self.assertEqual(inst.port, "PORT")
             self.assertEqual(inst.db, "DB")
+            self.assertEqual(inst._categories_key, "CAT")
             self.assertEqual(inst._metric_slugs_key, "MSK")
             self.assertEqual(inst._gauge_slugs_key, "GSK")
             mock_redis.assert_called_once_with(
@@ -95,7 +101,8 @@ class TestR(TestCase):
 
     @patch.object(R, '_category_slugs')
     def test__categorize(self, mock_category_slugs):
-        """Categorizing a slug should add the correct key/values to Redis"""
+        """Categorizing a slug should add the correct key/values to Redis,
+        and it should store the Category in a redis set."""
 
         # Sample category and metric slug
         cat = "Sample Category"
@@ -112,6 +119,8 @@ class TestR(TestCase):
             mock_category_slugs.assert_called_once_with(cat)
             json_slug = '["{0}"]'.format(slug)
             redis_instance.set.assert_called_once_with(cat_key, json_slug)
+            # Verify that Category was added to the set
+            redis_instance.sadd.assert_called_once_with("categories", cat)
 
             redis_instance.reset_mock()
             mock_category_slugs.reset_mock()
@@ -122,6 +131,8 @@ class TestR(TestCase):
             mock_category_slugs.assert_called_once_with(cat)
             json_slug = '["{0}", "existing-slug"]'.format(slug)
             redis_instance.set.assert_called_once_with(cat_key, json_slug)
+            # Verify that Category was added to the set
+            redis_instance.sadd.assert_called_once_with("categories", cat)
 
             redis_instance.reset_mock()
             mock_category_slugs.reset_mock()
@@ -133,6 +144,8 @@ class TestR(TestCase):
             mock_category_slugs.assert_called_once_with(cat)
             json_slug = '["{0}"]'.format(slug)
             redis_instance.set.assert_called_once_with(cat_key, json_slug)
+            # Verify that Category was added to the set
+            redis_instance.sadd.assert_called_once_with("categories", cat)
 
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""
@@ -175,6 +188,20 @@ class TestR(TestCase):
         """Test that ``R.metric_slugs`` makes a call to Redis SMEMBERS."""
         self.r.metric_slugs()
         self.redis.assert_has_calls([call.smembers(self.r._metric_slugs_key)])
+
+    @patch.object(R, '_category_slugs')
+    def test_metric_slugs_by_category(self, mock_category_slugs):
+        """Test that we get metric slugs organized by category."""
+        # set up a mock return value for the category's redis set
+        self.redis.smembers.return_value = ['Sample Category']
+        # set up return value for mock call to _category_slugs
+        mock_category_slugs.return_value = ['foo', 'bar']
+
+        result = self.r.metric_slugs_by_category()
+        expected_result = {'Sample Category': ['foo', 'bar']}
+        self.assertEqual(result, expected_result)
+        self.redis.smembers.assert_called_once_with("categories")
+        mock_category_slugs.assert_called_once_with("Sample Category")
 
     def test_metric(self):
         """Test setting metrics using ``R.metric``."""

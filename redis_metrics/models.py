@@ -22,6 +22,8 @@ class R(object):
 
         Valid keyword arguments:
 
+        * ``categories_key`` -- The key storing a set of all metric Categories
+          (default is "categories")
         * ``metric_slugs_key`` -- The key storing a set of all metrics slugs
           (default is "metric-slugs")
         * ``gauge_slugs_key`` -- The key storing a set of all slugs for gauges
@@ -31,6 +33,7 @@ class R(object):
         * ``db``   -- Redis DB (default settings.REDIS_METRICS_DB)
 
         """
+        self._categories_key = kwargs.get('categories_key', 'categories')
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
@@ -97,6 +100,9 @@ class R(object):
         key = self._category_key(category)
         self.r.set(key, json_data)
 
+        # Store all category names in a Redis set, for easy retrieval
+        self.r.sadd(self._categories_key, category)
+
     def _build_keys(self, slug, date=None, granularity='all'):
         """Builds redis keys used to store metrics.
 
@@ -134,6 +140,19 @@ class R(object):
         for this app."""
         keys = self.r.smembers(self._metric_slugs_key)
         return set(s.split(":")[1] for s in keys)
+
+    def metric_slugs_by_category(self):
+        """Return a dictionary of category->metrics data:
+
+            {<category_name>: [<slug1>, <slug2>, ...]}
+
+        """
+        result = {}
+        categories = self.r.smembers(self._categories_key)
+        for category in categories:
+            result[category] = self._category_slugs(category)
+        # TODO: What about metrics that aren't in a category?
+        return result
 
     def metric(self, slug, num=1, category=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
