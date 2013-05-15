@@ -302,6 +302,16 @@ class TestR(TestCase):
         r._category_slugs.assert_called_once_with("Sample Category")
         r.get_metrics.assert_called_once_with(['some-slug'])
 
+    def test_reset_category(self):
+        with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
+            r = R()
+            r.reset_category("Stuff", ['foo', 'bar'])
+            mock_redis.assert_has_calls([
+                call(host='localhost', db=0, port=6379),
+                call().set('c:Stuff', '["foo", "bar"]'),
+                call().sadd('categories', 'Stuff'),
+            ])
+
     def _metric_history_keys(self, slugs, since=None, granularity='daily'):
         """generates the same list of keys used in ``get_metric_history``.
         These can then be used to test for calls to redis. Note: This is
