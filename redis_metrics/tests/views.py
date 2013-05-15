@@ -47,18 +47,22 @@ class TestViews(TestCase):
             # Set appropriate return values for methods that'll get called
             # in the MetricsListView.
             r = mock_r.return_value  # Get an instance of our Mocked R class
-            r.metric_slugs.return_value = set(['test-metric'])
+            r.metric_slugs_by_category.return_value = {
+                "Sample Category": ['test-metric-a', 'test-metric-b'],
+            }
             r.gauge_slugs.return_value = set(['test-gauge'])
 
             # Do the Request and test for content
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('test-metric', resp.content)
+            self.assertIn('Sample Category', resp.content)
+            self.assertIn('test-metric-a', resp.content)
+            self.assertIn('test-metric-b', resp.content)
             self.assertIn('test-gauge', resp.content)
 
             # Make sure our Mock R object called the right methods.
             mock_r.assert_has_calls([
-                call().metric_slugs(),
+                call().metric_slugs_by_category(),
                 call().gauge_slugs(),
                 call().get_gauge('test-gauge'),
             ])

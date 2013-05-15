@@ -63,17 +63,20 @@
     {% endif %}
 
     <h1>Metrics</h1>
-    {% if metric_slugs|length %}
+    {% if metrics %}
         <p>Want to see multiple metrics at once?
            Check out the <a href="{% url 'redis_metric_aggregate' %}">Aggregates</a></p>
         <p>Click a metric below to view more data.</p>
-        <ul>
-        {% for slug in metric_slugs %}
-            <li>
+        {% for category, slugs in metrics.items %}
+            <h2>{{ category }}</h2>
+            <ul>
+            {% for slug in slugs %}
+                <li>
                 <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
-            </li>
+                </li>
+            {% endfor %}
+            </ul>
         {% endfor %}
-        </ul>
     {% else %}
         <p>You don't have any metrics set up yet!</p>
     {% endif %}

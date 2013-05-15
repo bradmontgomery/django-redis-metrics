@@ -48,7 +48,9 @@ class MetricsListView(ProtectedTemplateView):
         """Includes the metrics slugs in the context."""
         data = super(MetricsListView, self).get_context_data(**kwargs)
         r = R()
-        data['metric_slugs'] = r.metric_slugs()
+        # Metrics organized by category, like so:
+        # { <category_name>: [ <slug1>, <slug2>, ... ]}
+        data['metrics'] = r.metric_slugs_by_category()
 
         # Include gauges in the default View. They're *technically* a list
         # of metrics, too!
