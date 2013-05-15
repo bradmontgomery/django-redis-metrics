@@ -6,6 +6,9 @@ from .views import (
 
 
 urlpatterns = patterns('',
+    url(r'^categorize/(?P<category_name>.*)/$',
+        CategoryFormView.as_view(),
+        name='redis_metrics_categorize'),
     url(r'^categorize/$',
         CategoryFormView.as_view(),
         name='redis_metrics_categorize'),

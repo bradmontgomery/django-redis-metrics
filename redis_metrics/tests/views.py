@@ -377,6 +377,53 @@ class TestViews(TestCase):
         self.assertIn("id_category_name", resp.content)
         self.assertIn("id_metrics", resp.content)
 
+    def test_category_form_view_with_initial(self):
+        """Verifies that GET requests to the ``CategoryFormView`` have the
+        correct context info/initial data when called with a specified
+        Category."""
+        url = reverse('redis_metrics_categorize', args=['Stuff'])
+        self.assertUnauthedRequestRedirects(url)
+
+        # NOTE: you can't mock the form in the views, because calls to the
+        # form get dispatched somewhere else. That's why this is mocking the
+        # R object in the form, instead of the form, itself.
+        k = {
+            'return_value.metric_slugs.return_value': ['foo', 'bar', 'baz'],
+            'return_value._category_slugs.return_value': ['foo', 'bar'],
+        }
+        with patch('redis_metrics.forms.R', **k) as mock_R:
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('form', resp.context_data)
+            self.assertIn("id_category_name", resp.content)
+            self.assertIn("id_metrics", resp.content)
+
+            # foo and bar should be pre-selected, but baz should not, since
+            # it's not in the "Stuff" category
+            checked_foo = (
+                '<input checked="checked" id="id_metrics_0" name="metrics"'
+                ' type="checkbox" value="foo" />'
+            )
+            checked_bar = (
+                '<input checked="checked" id="id_metrics_1" name="metrics"'
+                ' type="checkbox" value="bar" />'
+            )
+            unchecked_baz = (
+                '<input id="id_metrics_2" name="metrics" type="checkbox"'
+                ' value="baz" />'
+            )
+            self.assertIn(checked_foo, resp.content)
+            self.assertIn(checked_bar, resp.content)
+            self.assertIn(unchecked_baz, resp.content)
+
+            # This is what should happen in the form
+            mock_R.assert_has_calls([
+                # happens in __init__
+                call(),
+                call().metric_slugs(),
+                call()._category_slugs('Stuff')
+            ])
+
     def test_category_form_view_post(self):
         """Verifies that POST requests to the ``CategoryFormView`` work as
         expected."""

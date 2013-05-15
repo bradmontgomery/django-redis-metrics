@@ -172,6 +172,15 @@ class CategoryFormView(ProtectedFormView):
     template_name = "redis_metrics/categorize.html"
     form_class = MetricCategoryForm
 
+    def get(self, *args, **kwargs):
+        """See if this view was called with a specified category."""
+        self.initial = {"category_name":  kwargs.get('category_name', None)}
+        return super(CategoryFormView, self).get(*args, **kwargs)
+
+    def get_initial(self):
+        """Initialize the form with the given category."""
+        return self.initial
+
     def get_success_url(self):
         """Show the list of metrics."""
         return reverse('redis_metrics_list')

@@ -68,7 +68,10 @@
            Check out the <a href="{% url 'redis_metric_aggregate' %}">Aggregates</a></p>
         <p>Click a metric below to view more data.</p>
         {% for category, slugs in metrics.items %}
-            <h2>{{ category }}</h2>
+            <h2>
+                <a href="{% url 'redis_metrics_categorize' category %}"
+                   title="Edit {{ category}}">{{ category }}</a>
+            </h2>
             <ul>
             {% for slug in slugs %}
                 <li>
