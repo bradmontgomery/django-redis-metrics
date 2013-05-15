@@ -197,11 +197,21 @@ class TestR(TestCase):
         # set up return value for mock call to _category_slugs
         mock_category_slugs.return_value = ['foo', 'bar']
 
+        # Since this method all calls out to ``R.metric_slugs``, let's patch
+        # that so it returns a list of all slugs, one of which will not be
+        # categorized
+        self.r.metric_slugs = Mock(return_value=['foo', 'bar', 'baz'])
+
+        # Now, test the thing.
         result = self.r.metric_slugs_by_category()
-        expected_result = {'Sample Category': ['foo', 'bar']}
+        expected_result = {
+            'Sample Category': ['foo', 'bar'],
+            'Uncategorized': ['baz']
+        }
         self.assertEqual(result, expected_result)
         self.redis.smembers.assert_called_once_with("categories")
         mock_category_slugs.assert_called_once_with("Sample Category")
+        self.r.metric_slugs.assert_called_once_with()
 
     def test_metric(self):
         """Test setting metrics using ``R.metric``."""

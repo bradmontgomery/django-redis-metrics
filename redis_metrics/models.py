@@ -151,7 +151,16 @@ class R(object):
         categories = self.r.smembers(self._categories_key)
         for category in categories:
             result[category] = self._category_slugs(category)
-        # TODO: What about metrics that aren't in a category?
+
+        # We also need to see the uncategorized metric slugs, so need some way
+        # to check which slugs are not already stored.
+        categorized_metrics = set([  # Flatten the list of metrics
+            slug for sublist in result.values() for slug in sublist
+        ])
+        f = lambda slug: slug not in categorized_metrics
+        uncategorized = filter(f, self.metric_slugs())
+        if len(uncategorized) > 0:
+            result['Uncategorized'] = uncategorized
         return result
 
     def metric(self, slug, num=1, category=None):
