@@ -400,21 +400,10 @@ class TestViews(TestCase):
 
             # foo and bar should be pre-selected, but baz should not, since
             # it's not in the "Stuff" category
-            checked_foo = (
-                '<input checked="checked" id="id_metrics_0" name="metrics"'
-                ' type="checkbox" value="foo" />'
-            )
-            checked_bar = (
-                '<input checked="checked" id="id_metrics_1" name="metrics"'
-                ' type="checkbox" value="bar" />'
-            )
-            unchecked_baz = (
-                '<input id="id_metrics_2" name="metrics" type="checkbox"'
-                ' value="baz" />'
-            )
-            self.assertIn(checked_foo, resp.content)
-            self.assertIn(checked_bar, resp.content)
-            self.assertIn(unchecked_baz, resp.content)
+            initial_metrics = resp.context['form'].fields['metrics'].initial
+            self.assertIn('foo', initial_metrics)
+            self.assertIn('bar', initial_metrics)
+            self.assertNotIn('baz', initial_metrics)
 
             # This is what should happen in the form
             mock_R.assert_has_calls([
