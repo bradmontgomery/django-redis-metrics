@@ -16,7 +16,9 @@ class MetricCategoryForm(forms.Form):
     category_name = forms.CharField()
     metrics = forms.MultipleChoiceField(
         choices=[],
-        widget=forms.widgets.CheckboxSelectMultiple()
+        widget=forms.widgets.CheckboxSelectMultiple(),
+        required=False  # Don't require this, unchecking all metrics will
+                        # remove a Category from Redis.
     )
 
     def __init__(self, *args, **kwargs):

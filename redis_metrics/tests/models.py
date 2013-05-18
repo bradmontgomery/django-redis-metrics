@@ -302,6 +302,25 @@ class TestR(TestCase):
         r._category_slugs.assert_called_once_with("Sample Category")
         r.get_metrics.assert_called_once_with(['some-slug'])
 
+    def test_delete_category(self):
+        with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
+            r = R()
+            r.delete_category("Foo")
+            mock_redis.assert_has_calls([
+                call(host='localhost', db=0, port=6379),
+                call().delete('c:Foo'),
+                call().srem("categories", "Foo")
+            ])
+
+    @patch.object(R, "delete_category")
+    def test_reset_category_with_no_metrics(self, mock_delete_category):
+        """Calling ``reset_category`` with an empty list of metrics should
+        just delete the category."""
+        with patch("redis_metrics.models.redis.StrictRedis"):
+            r = R()
+            r.reset_category("Stuff", [])
+            mock_delete_category.assert_called_once_with("Stuff")
+
     def test_reset_category(self):
         with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
             r = R()

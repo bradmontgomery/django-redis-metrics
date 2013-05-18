@@ -45,6 +45,8 @@ class TestMetricCategoryForm(TestCase):
         with patch('redis_metrics.forms.R', **config) as mock_R:
             # No Category
             form = MetricCategoryForm()
+            self.assertFalse(form.fields['metrics'].required)
+
             mock_R.assert_has_calls([
                 call(),
                 call().metric_slugs(),
@@ -61,6 +63,8 @@ class TestMetricCategoryForm(TestCase):
             # With a Category
             initial = {'category_name': "Sample Category"}
             form = MetricCategoryForm(initial=initial)
+            self.assertFalse(form.fields['metrics'].required)
+
             self.assertEqual(form.fields['metrics'].initial, ['test-slug'])
             self.assertEqual(
                 form.fields['category_name'].initial,

@@ -229,6 +229,16 @@ class R(object):
         slug_list = self._category_slugs(category)
         return self.get_metrics(slug_list)
 
+    def delete_category(self, category):
+        """Removes the category from Redis. This doesn't touch the metrics;
+        they simply become uncategorized."""
+        # Remove mapping of metrics-to-category
+        category_key = self._category_key(category)
+        self.r.delete(category_key)
+
+        # Remove category from Set
+        self.r.srem(self._categories_key, category)
+
     def reset_category(self, category, metric_slugs):
         """Resets (or creates) a category containing a list of metrics.
 
@@ -237,12 +247,16 @@ class R(object):
             category.
 
         """
-        # Convert metrics to json (removing any duplicates)
-        json_data = json.dumps(list(metric_slugs))
-        self.r.set(self._category_key(category), json_data)
+        if len(metric_slugs) == 0:
+            # If there are no metrics, just remove the category
+            self.delete_category(category)
+        else:
+            # Convert metrics to json (removing any duplicates)
+            json_data = json.dumps(list(metric_slugs))
+            self.r.set(self._category_key(category), json_data)
 
-        # Store all category names in a Redis set, for easy retrieval
-        self.r.sadd(self._categories_key, category)
+            # Store all category names in a Redis set, for easy retrieval
+            self.r.sadd(self._categories_key, category)
 
     def get_metric_history(self, slugs, since=None, granularity='daily'):
         """Get history for one or more metrics.
