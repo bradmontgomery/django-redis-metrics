@@ -447,6 +447,5 @@ class TestViews(TestCase):
                 call().metric_slugs(),
 
                 # happens in categorize_metrics
-                call()._categorize('foo', 'Foo'),
-                call()._categorize('bar', 'Foo'),
+                call().reset_category('Foo', ['foo', 'bar']),
             ])
