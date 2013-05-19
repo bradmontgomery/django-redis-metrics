@@ -13,9 +13,9 @@ def get_r():
     return _redis_model
 
 
-def metric(slug, num=1, **kwargs):
+def metric(slug, num=1, category=None):
     """Create/Increment a metric."""
-    get_r().metric(slug, num)
+    get_r().metric(slug, num=num, category=category)
 
 
 def gauge(slug, current_value):
