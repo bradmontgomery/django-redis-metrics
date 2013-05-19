@@ -14,7 +14,6 @@ try:  # pragma: no cover
 except ImportError:  # pragma: no cover
     # Fallback for Django 1.4 (or lower)
     from django.contrib.auth.models import User  # pragma: no cover
-
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 
@@ -23,6 +22,13 @@ class TestViews(TestCase):
     url = 'redis_metrics.urls'
 
     def setUp(self):
+        # Patch the connection to redis, but keep a reference to the
+        # created StrictRedis instance, so we can make assertions about how
+        # it's called.
+        self.redis_patcher = patch('redis_metrics.models.redis.StrictRedis')
+        mock_StrictRedis = self.redis_patcher.start()
+        self.redis = mock_StrictRedis.return_value
+
         self.user = User.objects.create_superuser(
             username="redis_metrics_test_user",
             email="redis_metrics_test_user@example.com",
@@ -33,6 +39,7 @@ class TestViews(TestCase):
         self.unauthed_client = Client()  # Keep an unauthenticated client
 
     def tearDown(self):
+        self.redis_patcher.stop()
         self.user.delete()
 
     def assertUnauthedRequestRedirects(self, url):
@@ -371,11 +378,20 @@ class TestViews(TestCase):
         correct context info (i.e. a form)."""
         url = reverse('redis_metrics_categorize')
         self.assertUnauthedRequestRedirects(url)
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn('form', resp.context_data)
-        self.assertIn("id_category_name", resp.content)
-        self.assertIn("id_metrics", resp.content)
+
+        # NOTE: you can't mock the form in the views, because calls to the
+        # form get dispatched somewhere else. That's why this is mocking the
+        # R object in the form, instead of the form, itself.
+        k = {
+            'return_value.metric_slugs.return_value': ['foo', 'bar', 'baz'],
+            'return_value._category_slugs.return_value': [],
+        }
+        with patch('redis_metrics.forms.R', **k) as mock_R:
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('form', resp.context_data)
+            self.assertIn("id_category_name", resp.content)
+            self.assertIn("id_metrics", resp.content)
 
     def test_category_form_view_with_initial(self):
         """Verifies that GET requests to the ``CategoryFormView`` have the
