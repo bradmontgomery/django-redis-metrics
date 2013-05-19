@@ -1,6 +1,13 @@
 Django Redis Metrics
 ====================
 
+.. image:: https://secure.travis-ci.org/bradmontgomery/django-redis-metrics.png
+    :alt: Build Status
+    :target: http://travis-ci.org/bradmontgomery/django-redis-metrics
+
+.. image:: https://pypip.in/d/django-redis-metrics/badge.png
+        :target: https://crate.io/packages/django-redis-metrics/
+
 This app is inspired by Frank Wiles ``django-app-metrics``. It allows you to
 define various named metrics (such as 'New User Signups', 'Downloads') and
 record when they happen.

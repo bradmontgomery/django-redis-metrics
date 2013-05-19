@@ -1,6 +1,12 @@
 History
 -------
 
+0.5.1 (2013-05-18)
+++++++++++++++++++
+
+- added category parameter to the ``metric`` function :-/
+- hooked up Travis-CI
+
 0.5.0 (2013-05-18)
 ++++++++++++++++++
 
