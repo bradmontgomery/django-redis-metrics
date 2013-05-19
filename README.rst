@@ -1,7 +1,7 @@
 Django Redis Metrics
 ====================
 
-This app is inspired by Frank Wiles' ``django-app-metrics``. It allows you to
+This app is inspired by Frank Wiles ``django-app-metrics``. It allows you to
 define various named metrics (such as 'New User Signups', 'Downloads') and
 record when they happen.
 
@@ -10,11 +10,10 @@ Redis backend in ``django-app-metrics``. Major differences are:
 
 * *only* backed by Redis
 * does not require Celery
-* currently no grouping of Metrics
 * no timing
 
-In addition, there are some built-in default views and templates for viewing
-metrics and charts backed by google charts.
+Additionally, there are some built-in views and templates that include charts
+(backed by the Google Charts API) for metrics.
 
 
 License
@@ -71,6 +70,16 @@ Use the ``metric`` shortcut to start recording metrics.
 
     # Increment the metric by some other number
     metric('new-user-signup', 4)
+
+
+Metrics can also be categorized. To record a metric and add it to a category,
+specify a ``category`` keyword parameter
+
+::
+
+    # Increment the metric, and add it to a category
+    metric('new-user-signup', category="User Metrics")
+
 
 There are also ``gauge``'s.
 
