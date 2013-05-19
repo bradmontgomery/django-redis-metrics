@@ -12,6 +12,10 @@ DATABASES = {
 SITE_ID = 1
 DEBUG = True
 SECRET_KEY = "secret"
+ROOT_URLCONF = 'redis_metrics.tests.urls'
+TEMPLATE_DIRS = (
+    os.path.join(BASE_PATH, 'templates'),
+)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
