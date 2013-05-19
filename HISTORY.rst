@@ -1,6 +1,16 @@
 History
 -------
 
+0.5.0 (2013-05-18)
+++++++++++++++++++
+
+- Added Categorization for metrics
+- Added a management command to generate random metrics (for testing)
+- ``MetricHistoryView`` and ``AggregateHistoryView`` accept a ``since``
+  querystring parameter to specify the date from which reports are generated.
+- 100% Test coverage
+
+
 0.4.0 (2013-03-07)
 ++++++++++++++++++
 
@@ -10,6 +20,7 @@ History
 - Added a management command--``reset_weekly_metrics``--that allows you to change
   the keys for weekly metrics
 - Minor changes to the default templates
+
 
 0.3.0 (2013-03-05)
 ++++++++++++++++++
@@ -28,6 +39,7 @@ History
 - Metric history reported in a columnar format. See
   ``R.get_metric_history_as_columns``.
 - New Template tag: ``metric_slug``
+
 
 0.1.x (2012-12-24)
 ++++++++++++++++++
