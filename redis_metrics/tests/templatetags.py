@@ -4,6 +4,9 @@
 from django.test import TestCase
 from mock import patch
 from redis_metrics.templatetags.gauges import gauge
+from redis_metrics.templatetags.redis_metrics_filters import (
+    strip_metric_prefix, metric_slug
+)
 
 
 class TestTemplateTags(TestCase):
@@ -34,3 +37,41 @@ class TestTemplateTags(TestCase):
             self.assertEqual(result, expected_result)
             mock_r.assert_called_once_with()
             inst.get_gauge.assert_called_once_with("test-slug")
+
+
+class TestTemplateFilters(TestCase):
+    """Verify that the custom filters return expected results."""
+
+    def test_strip_metric_prefix(self):
+        # Daily -- from: ``m:<slug>:<yyyy-mm-dd>`` to ``<yyyy-mm-dd>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:2000-01-30"), "2000-01-30"
+        )
+
+        # Weekly -- from ``m:<slug>:w:<yyyy-num>`` to ``w:<yyyy-num>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:w:2000-52"), "w:2000-52"
+        )
+
+        # Monthly -- from ``m:<slug>:m:<yyyy-mm>`` to ``m:<yyyy-mm>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:m:2000-01"), "m:2000-01"
+        )
+
+        # Yearly -- from ``m:<slug>:y:<yyyy>`` to ``y:<yyyy>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:y:2000"), "y:2000"
+        )
+
+    def test_metric_slug(self):
+        # Converts ``m:foo:<yyyy-mm-dd>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:2000-01-31"), "foo")
+
+        # Converts ``m:foo:w:<yyyy-num>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:w:2000-52"), "foo")
+
+        # Converts ``m:foo:m:<yyyy-mm>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:m:2000-01"), "foo")
+
+        # Converts ``m:foo:y:<yyyy>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:y:2000"), "foo")
