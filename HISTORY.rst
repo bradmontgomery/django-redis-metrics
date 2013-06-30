@@ -1,6 +1,11 @@
 History
 -------
 
+0.6.0 (in progess)
+++++++++++++++++++
+
+- Added methods & management commands to delete metrics & gauges
+
 0.5.1 (2013-05-18)
 ++++++++++++++++++
 
