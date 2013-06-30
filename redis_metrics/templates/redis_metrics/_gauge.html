@@ -1,0 +1,34 @@
+{% comment %}
+
+This is the template for the ``gauge`` inclusion tag. It expects the
+following context:
+
+    * slug
+    * current_value
+    * max_value  (used to mark the max value on the gauge chart)
+    * size (the size--width, height--of the chart, in pixels)
+    * yellow (used to indicate warning levels)
+    * red (used to indicate error levels)
+
+{% endcomment %}
+
+<div id="gauge-{{ slug }}" class="gauge"></div>
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load('visualization', '1', {packages:['gauge']});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+        ['Gauge', 'Value'],
+        ['{{ gauge }}', {{ current_value|default:0 }}]
+    ]);
+    var options = {
+        width: {{ size }}, height: {{ size }}, max: {{ max_value }},
+        yellowFrom: {{ yellow }}, yellowTo: {{ red }},  {# Warning Levels #}
+        redFrom: {{ red }}, redTo: {{ max_value }},     {# Error Levels #}
+    };
+    var chart_div = document.getElementById('gauge-{{slug}}');
+    var chart = new google.visualization.Gauge(chart_div);
+    chart.draw(data, options);
+}
+</script>
