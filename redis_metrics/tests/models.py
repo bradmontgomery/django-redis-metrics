@@ -477,3 +477,11 @@ class TestR(TestCase):
         Redis GET command is called with the correct key."""
         self.r.get_gauge('test-gauge')
         self.redis.assert_has_calls([call.get('g:test-gauge')])
+
+    def test_delete_gauge(self):
+        """Tests deltion of a gauge."""
+        self.r.delete_gauge("test-gauge")
+        self.redis.assert_has_calls([
+            call.delete('g:test-gauge'),
+            call.srem(self.r._gauge_slugs_key, "g:test-gauge"),
+        ])

@@ -379,3 +379,9 @@ class R(object):
     def get_gauge(self, slug):
         k = self._gauge_key(slug)
         return self.r.get(k)
+
+    def delete_gauge(self, slug):
+        """Removes all gauges with the given ``slug``."""
+        key = self._gauge_key(slug)
+        self.r.delete(key)  # Remove the Gauge
+        self.r.srem(self._gauge_slugs_key, key)  # Remove from the set of keys
