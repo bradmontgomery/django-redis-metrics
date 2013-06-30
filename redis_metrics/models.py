@@ -163,6 +163,24 @@ class R(object):
             result['Uncategorized'] = uncategorized
         return result
 
+    def delete_metric(self, slug):
+        """Removes all keys for the given ``slug``."""
+
+        # To remove all keys for a slug, I need to retrieve them all from
+        # the set of metric keys, then filter the matching prefixes.
+        # This is quite possibly the most inefficient way to do this :-/
+        prefix = "m:{0}:".format(slug)
+        keys = [
+            k for k in self.r.smembers(self._metric_slugs_key)
+            if k.startswith(prefix)
+        ]
+
+        # Remove the metric data
+        self.r.delete(*keys)
+
+        # Finally, remove keys from the set
+        self.r.srem(self._metric_slugs_key, *keys)
+
     def metric(self, slug, num=1, category=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
         if it does. All metrics are prefixed with 'm', and automatically

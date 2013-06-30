@@ -213,6 +213,21 @@ class TestR(TestCase):
         mock_category_slugs.assert_called_once_with("Sample Category")
         self.r.metric_slugs.assert_called_once_with()
 
+    def test_delete_metric(self):
+        """Verify that ``R.delete_metric`` deletes all keys and removes keys
+        from the set of metric slugs."""
+
+        # Make sure SMEMBERS returns some data
+        self.redis.smembers.return_value = ["m:slug:0", "m:slug:1"]
+        self.r.delete_metric('slug')  # call delete_metric
+
+        # Verify that the metric data is removed as are the keys from the set
+        self.redis.assert_has_calls([
+            call.smembers(self.r._metric_slugs_key),
+            call.delete("m:slug:0", "m:slug:1"),
+            call.srem(self.r._metric_slugs_key, "m:slug:0", "m:slug:1"),
+        ])
+
     def test_metric(self):
         """Test setting metrics using ``R.metric``."""
 
