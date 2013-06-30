@@ -16,13 +16,23 @@ class Command(NoArgsCommand):
         """Send Report E-mails."""
 
         r = R()
-        slugs = r.metric_slugs()
+        metrics = r.metric_slugs_by_category()
+        for category_name, slug_list in metrics.items():
+            metrics[category_name] = r.get_metrics(set(slug_list))
+
+        # metrics is now:
+        # --------------
+        # { Category : [
+        #     ('foo', {'day': '3', 'month': '3', 'week': '3', 'year': '3'}),
+        #     ('bar', {'day': '1', 'month': '1', 'week': '1', 'year': '1'})]
+        #   ],
+        #   ...
+        # }
 
         template = "redis_metrics/email/report.{fmt}"
         data = {
             'today': date.today(),
-            'slugs': slugs,
-            'metrics': r.get_metrics(slugs)
+            'metrics': metrics,
         }
         message = render_to_string(template.format(fmt='txt'), data)
         message_html = render_to_string(template.format(fmt='html'), data)
