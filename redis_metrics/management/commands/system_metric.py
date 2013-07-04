@@ -81,11 +81,12 @@ class Command(BaseCommand):
 
     def _cpu(self):
         """Record CPU usage."""
-        metric(int(psutil.cpu_percent()), category=self.category)
+        metric("cpu", int(psutil.cpu_percent()), category=self.category)
 
     def _mem(self):
         """Record Memory usage."""
         metric(
+            "memory",
             int(psutil.virtual_memory().percent),
             category=self.category
         )
