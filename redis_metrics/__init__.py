@@ -1,9 +1,6 @@
 __version__ = "0.5.1"
 
 try:
-    from .utils import gauge, metric
-    # placate pyflakes
-    assert gauge
-    assert metric
+    from .utils import gauge, metric  # NOQA
 except ImportError:  # pragma: no cover
     pass  # pragma: no cover
