@@ -3,7 +3,7 @@
 
 from django.test import TestCase
 from mock import patch
-from redis_metrics.templatetags.gauges import gauge
+from redis_metrics.templatetags.redis_metric_tags import gauge, metric_list
 from redis_metrics.templatetags.redis_metrics_filters import (
     strip_metric_prefix, metric_slug
 )
@@ -21,7 +21,7 @@ class TestTemplateTags(TestCase):
         self.r_patcher.stop()
 
     def test_gauge(self):
-        with patch("redis_metrics.templatetags.gauges.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
             inst = mock_r.return_value
             inst.get_gauge.return_value = 100
 
@@ -37,6 +37,19 @@ class TestTemplateTags(TestCase):
             self.assertEqual(result, expected_result)
             mock_r.assert_called_once_with()
             inst.get_gauge.assert_called_once_with("test-slug")
+
+    def test_metric_list(self):
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            inst = mock_r.return_value
+            inst.metric_slugs_by_category.return_value = "RESULT"
+
+            result = metric_list()
+            expected_result = {
+                'metrics': "RESULT",
+            }
+            self.assertEqual(result, expected_result)
+            mock_r.assert_called_once_with()
+            inst.metric_slugs_by_category.assert_called_once_with()
 
 
 class TestTemplateFilters(TestCase):
