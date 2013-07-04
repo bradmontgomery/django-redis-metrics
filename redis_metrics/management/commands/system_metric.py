@@ -32,7 +32,7 @@ class Command(BaseCommand):
 
     To record CPU usage (percent used), run:
 
-        manage.py system_metric cp
+        manage.py system_metric cpu
 
     To record Memory usage (virtual memory, percent used), run:
 
@@ -65,7 +65,7 @@ class Command(BaseCommand):
 
         if len(args) == 1 and args[0] in ['cpu', 'mem']:
             self.metric_name = args[0]
-        if len(args) == 2 and args[0] in ['cpu', 'mem']:
+        elif len(args) == 2 and args[0] in ['cpu', 'mem']:
             self.metric_name = args[0]
             self.category = args[1].strip()
         elif len(args) == 2 and args[0] in ['disk', 'net']:
@@ -96,9 +96,9 @@ class Command(BaseCommand):
         elif self.metric_name == "disk":
             mountpoints = [
                 p.mountpoint for p in psutil.disk_partitions()
-                if p.devicde.endswith(self.device)
+                if p.device.endswith(self.device)
             ]
-            if len(self.mountpoints) != 1:
+            if len(mountpoints) != 1:
                 raise CommandError("Unknown device: {0}".format(self.device))
             metric_name = "disk-{0}".format(self.device)
             metric(
