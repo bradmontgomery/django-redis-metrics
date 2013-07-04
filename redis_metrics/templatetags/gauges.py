@@ -15,3 +15,10 @@ def gauge(slug, maximum=9000, size=125):
         'yellow': maximum - (maximum / 2),
         'red': maximum - (maximum / 4),
     }
+
+
+@register.inclusion_tag("redis_metrics/_metric_list.html")
+def metric_list():
+    return {
+        'metrics': R().metric_slugs_by_category(),
+    }

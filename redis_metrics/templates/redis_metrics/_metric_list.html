@@ -1,0 +1,17 @@
+{% if metrics %}
+{% for category, slugs in metrics.items %}
+    <h2>
+        <a href="{% url 'redis_metrics_categorize' category %}"
+           title="Edit {{ category}}">{{ category }}</a>
+    </h2>
+    <ul>
+    {% for slug in slugs %}
+        <li>
+            <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
+        </li>
+    {% endfor %}
+    </ul>
+{% endfor %}
+{% else %}
+    <p>There are No Metrics</p>
+{% endif %}
