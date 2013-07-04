@@ -79,6 +79,50 @@ class Command(BaseCommand):
             raise CommandError("Invalid Arugments. Plase run "
                 "`manage.py help system_metric`")
 
+    def _cpu(self):
+        """Record CPU usage."""
+        metric(int(psutil.cpu_percent()), category=self.category)
+
+    def _mem(self):
+        """Record Memory usage."""
+        metric(
+            int(psutil.virtual_memory().percent),
+            category=self.category
+        )
+
+    def _disk(self):
+        """Record Disk usage."""
+        mountpoints = [
+            p.mountpoint for p in psutil.disk_partitions()
+            if p.device.endswith(self.device)
+        ]
+        if len(mountpoints) != 1:
+            raise CommandError("Unknown device: {0}".format(self.device))
+
+        metric(
+            "disk-{0}".format(self.device),
+            int(psutil.disk_usage(mountpoints[0]).percent),
+            category=self.category
+        )
+
+    def _net(self):
+        """Record Network usage."""
+        data = psutil.network_io_counters(pernic=True)
+        if self.device not in data:
+            raise CommandError("Unknown device: {0}".format(self.device))
+        # Network bytes sent
+        metric(
+            "net-{0}-sent".format(self.device),
+            data[self.device].bytes_sent,
+            category=self.category
+        )
+        # Network bytes received
+        metric(
+            "net-{0}-recv".format(self.device),
+            data[self.device].bytes_recv,
+            category=self.category
+        )
+
     def handle(self, *args, **options):
         # Make sure we've got psutil
         if psutil is None:
@@ -87,42 +131,13 @@ class Command(BaseCommand):
         self.process_args(*args)
 
         if self.metric_name == "cpu":
-            metric(int(psutil.cpu_percent()), category=self.category)
+            self._cpu()
         elif self.metric_name == "mem":
-            metric(
-                int(psutil.virtual_memory().percent),
-                category=self.category
-            )
+            self._mem()
         elif self.metric_name == "disk":
-            mountpoints = [
-                p.mountpoint for p in psutil.disk_partitions()
-                if p.device.endswith(self.device)
-            ]
-            if len(mountpoints) != 1:
-                raise CommandError("Unknown device: {0}".format(self.device))
-            metric_name = "disk-{0}".format(self.device)
-            metric(
-                metric_name,
-                int(psutil.disk_usage(mountpoints[0]).percent),
-                category=self.category
-            )
+            self._disk()
         elif self.metric_name == "net":
-            data = psutil.network_io_counters(pernic=True)
-            if self.device not in data:
-                raise CommandError("Unknown device: {0}".format(self.device))
-            metric_name_sent = "net-{0}-sent".format(self.device)
-            metric(
-                metric_name_sent,
-                data[self.device].bytes_sent,
-                category=self.category
-            )
-
-            metric_name_recv = "net-{0}-recv".format(self.device)
-            metric(
-                metric_name_recv,
-                data[self.device].bytes_recv,
-                category=self.category
-            )
+            self._net()
         else:
             m = "{0} is an invalid metric_name".format(self.metric_name)
             raise CommandError(m)
