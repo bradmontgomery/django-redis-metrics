@@ -7,6 +7,7 @@ History
 - Added methods & management commands to delete metrics & gauges
 - Updated email templates for the ``redis_metrics_send_mail`` command.
 - Added a ``system_metric`` managment command
+- Added ability to expire a metric
 
 0.5.1 (2013-05-18)
 ++++++++++++++++++

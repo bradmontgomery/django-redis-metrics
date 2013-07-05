@@ -87,6 +87,12 @@ specify a ``category`` keyword parameter
     # Increment the metric, and add it to a category
     metric('new-user-signup', category="User Metrics")
 
+Metrics can also expire after a specified number of seconds
+
+::
+
+    # The 'foo' metric will expire in 5 minutes
+    metric('foo', expire=300)
 
 There are also ``gauge``'s.
 

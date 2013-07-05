@@ -45,15 +45,23 @@ class TestUtils(TestCase):
             utils.metric("test-slug")
             mock_get_r.assert_has_calls([
                 call(),
-                call().metric("test-slug", num=1, category=None),
+                call().metric("test-slug", num=1, category=None, expire=None),
             ])
 
     def test_metric_with_category(self):
         with patch("redis_metrics.utils.get_r") as mock_get_r:
-            utils.metric("test-slug", category="Woooo")
+            utils.metric("test-slug", category="Woo")
             mock_get_r.assert_has_calls([
                 call(),
-                call().metric("test-slug", num=1, category="Woooo"),
+                call().metric("test-slug", num=1, category="Woo", expire=None),
+            ])
+
+    def test_metric_with_expiration(self):
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.metric("test-slug", expire=300)
+            mock_get_r.assert_has_calls([
+                call(),
+                call().metric("test-slug", num=1, category=None, expire=300),
             ])
 
     def test_gauge(self):

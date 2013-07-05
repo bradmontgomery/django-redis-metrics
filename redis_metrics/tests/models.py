@@ -249,6 +249,9 @@ class TestR(TestCase):
             call.incr(year, n),
         ])
 
+        # Expiration should not have gotten called
+        self.assertFalse(self.redis.expire.called)
+
     @patch.object(R, '_categorize')
     def test_metric_with_category(self, mock_categorize):
         """The ``metric`` method should call ``_categorize`` if passed a
@@ -273,6 +276,42 @@ class TestR(TestCase):
 
         # Make sure this gets categorized.
         mock_categorize.assert_called_once_with(slug, category)
+
+        # Expiration should not have gotten called
+        self.assertFalse(self.redis.expire.called)
+
+    @patch.object(R, '_categorize')
+    def test_metric_with_expiration(self, mock_categorize):
+        """The ``metric`` method should call the redis ``expire`` method if
+        passed an ``expire`` argument."""
+
+        slug = 'categorized-metric'
+        n = 1
+
+        # get the keys used for the metric, so we can check for calls
+        day, week, month, year = self.r._build_keys(slug)
+        self.r.metric(slug, num=n, expire=3600)
+
+        # Verify that setting a metric adds the appropriate slugs to the keys
+        # set and then incrememts each key
+        self.redis.assert_has_calls([
+            call.sadd(self.r._metric_slugs_key, day, week, month, year),
+            call.incr(day, n),
+            call.incr(week, n),
+            call.incr(month, n),
+            call.incr(year, n),
+        ])
+
+        # Make sure nothing was categorized.
+        self.assertFalse(mock_categorize.called)
+
+        # Expiration should have gotten called
+        self.redis.expire.assert_has_calls([
+            call.expire(day, 3600),
+            call.expire(week, 3600),
+            call.expire(month, 3600),
+            call.expire(year, 3600),
+        ])
 
     def test_get_metric(self):
         """Tests getting a single metric; ``R.get_metric``."""

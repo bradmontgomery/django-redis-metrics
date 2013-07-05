@@ -13,9 +13,9 @@ def get_r():
     return _redis_model
 
 
-def metric(slug, num=1, category=None):
+def metric(slug, num=1, category=None, expire=None):
     """Create/Increment a metric."""
-    get_r().metric(slug, num=num, category=category)
+    get_r().metric(slug, num=num, category=category, expire=expire)
 
 
 def gauge(slug, current_value):

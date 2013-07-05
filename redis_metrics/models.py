@@ -181,12 +181,21 @@ class R(object):
         # Finally, remove keys from the set
         self.r.srem(self._metric_slugs_key, *keys)
 
-    def metric(self, slug, num=1, category=None):
+    def metric(self, slug, num=1, category=None, expire=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
         if it does. All metrics are prefixed with 'm', and automatically
         aggregate for Day, Week, Month, and Year.
 
-        Keys for each metric (slug) take the form:
+        Parameters:
+
+        * ``slug`` -- a unique value to identify the metric; used in
+          construction of redis keys (see below).
+        * ``num`` -- Set or Increment the metric by this number; default is 1.
+        * ``category`` -- (optional) Assign the metric to a Category (a string)
+        * ``expire`` -- (optional) Specify the number of seconds in which the
+          metric will expire.
+
+        Redis keys for each metric (slug) take the form:
 
             m:<slug>:<yyyy-mm-dd>   # Day
             m:<slug>:w:<yyyy-num>   # Week (year - week number)
@@ -209,6 +218,13 @@ class R(object):
 
         if category:
             self._categorize(slug, category)
+
+        # Expire the Metric in ``expire`` seconds
+        if expire:
+            self.r.expire(day_key, expire)
+            self.r.expire(week_key, expire)
+            self.r.expire(month_key, expire)
+            self.r.expire(year_key, expire)
 
     def get_metric(self, slug):
         """Get the current values for a metric.
