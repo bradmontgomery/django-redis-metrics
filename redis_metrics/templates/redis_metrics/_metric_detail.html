@@ -1,0 +1,25 @@
+<div id="metric-detail-chart-{{ slug }}"></div>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+    ['Metric', 'Value'],
+    ['Day',    {{ metrics.day|default:0 }}],
+    ['Week',   {{ metrics.week|default:0 }}],
+    ['Month',  {{ metrics.month|default:0 }}],
+    ['Year',   {{ metrics.year|default:0 }}],
+  ]);
+
+  var options = {
+    title: '{{ slug }} metrics',
+    vAxis: {title: 'Time Period',  titleTextStyle: {color: 'red'}},
+    legend: {position: 'none'}
+  };
+
+  var chart_div = document.getElementById('metric-detail-chart-{{ slug }}');
+  var chart = new google.visualization.BarChart(chart_div);
+  chart.draw(data, options);
+}
+</script>

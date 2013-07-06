@@ -22,3 +22,11 @@ def metric_list():
     return {
         'metrics': R().metric_slugs_by_category(),
     }
+
+
+@register.inclusion_tag("redis_metrics/_metric_detail.html")
+def metric_detail(slug):
+    return {
+        'slug': slug,
+        'metrics': R().get_metric(slug),
+    }
