@@ -85,6 +85,21 @@ class TestTemplateTags(TestCase):
                 since=None
             )
 
+    def test_aggregate_detail(self):
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            slugs = ['a1', 'a2']
+            inst = mock_r.return_value
+            inst.get_metrics.return_value = 'RESULTS'
+
+            result = taglib.aggregate_detail(slugs)
+            expected_result = {
+                'slugs': slugs,
+                'metrics': 'RESULTS',
+            }
+            self.assertEqual(result, expected_result)
+            mock_r.assert_called_once_with()
+            inst.get_metrics.assert_called_once_with(slugs)
+
 
 class TestTemplateFilters(TestCase):
     """Verify that the custom filters return expected results."""

@@ -1,0 +1,34 @@
+{% comment %}
+
+Context for this Template:
+
+    * ``slugs`` -- a set of slugs for the metrics that we want to aggregate.
+    * ``metrics`` -- the metric data. It's a list of two-tuples that looks
+      something like this::
+
+        [('foo', {'day': '42', 'month': '90', 'week': '50', 'year': '9991'}),
+         ('bar', {'day': '2',  'month': '10', 'week': '5',  'year': '90'})]
+
+{% endcomment %}
+<div id="metric-aggregate-{{slugs|join:"-"}}"></div>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      ['Period',{% for s, d in metrics %}'{{ s }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Day',   {% for s, d in metrics %}{{   d.day|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Week',  {% for s, d in metrics %}{{  d.week|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Month', {% for s, d in metrics %}{{ d.month|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+      ['Year',  {% for s, d in metrics %}{{  d.year|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}]
+    ]);
+    var options = {
+      title: 'Aggregate metrics',
+      vAxis: {title: 'Time Period',  titleTextStyle: {color: 'red'}},
+    };
+    var chart_div = document.getElementById('metric-aggregate-{{slugs|join:"-"}}');
+    var chart = new google.visualization.BarChart(chart_div);
+    chart.draw(data, options);
+  }
+</script>

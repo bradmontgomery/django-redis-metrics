@@ -59,3 +59,16 @@ def metric_history(slug, granularity="daily", since=None):
         'granularity': granularity,
         'metric_history': metric_history,
     }
+
+
+@register.inclusion_tag("redis_metrics/_aggregate_detail.html")
+def aggregate_detail(slug_list):
+    """Template Tag to display multiple metrics.
+
+    * ``slug_list`` -- A list of slugs to display
+
+    """
+    return {
+        'slugs': slug_list,
+        'metrics': R().get_metrics(slug_list)
+    }
