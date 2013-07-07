@@ -1,0 +1,22 @@
+{% load redis_metrics_filters %}
+<div id="metric-history-{{ slug }}"></div>
+<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<script type="text/javascript">
+google.load("visualization", "1", {packages:["corechart"]});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+  var data = google.visualization.arrayToDataTable([
+    ['Key', 'Metric Value'],
+    {% for key, value in metric_history %}
+    ['{{ key|strip_metric_prefix }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]);
+  var options = {
+    title: '{{ slug }} {{ granularity }} history',
+    legend: {position: 'none'}
+  };
+  var chart_div = document.getElementById('metric-history-{{ slug }}');
+  var chart = new google.visualization.LineChart(chart_div);
+  chart.draw(data, options);
+}
+</script>

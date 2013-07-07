@@ -65,6 +65,26 @@ class TestTemplateTags(TestCase):
             mock_r.assert_called_once_with()
             inst.get_metric.assert_called_once_with('test')
 
+    def test_metric_history(self):
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            history = [("m:test:2000-01-01", 42)]
+            inst = mock_r.return_value
+            inst.get_metric_history.return_value = history
+
+            result = taglib.metric_history('test')
+            expected_result = {
+                'slug': 'test',
+                'granularity': "daily",
+                'metric_history': history,
+            }
+            self.assertEqual(result, expected_result)
+            mock_r.assert_called_once_with()
+            inst.get_metric_history.assert_called_once_with(
+                slugs='test',
+                granularity='daily',
+                since=None
+            )
+
 
 class TestTemplateFilters(TestCase):
     """Verify that the custom filters return expected results."""
