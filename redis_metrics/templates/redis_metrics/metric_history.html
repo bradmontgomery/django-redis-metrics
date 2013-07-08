@@ -1,5 +1,6 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
+{% load redis_metric_tags %}
 {% load redis_metrics_filters %}
 
 {% block extrahead %}
@@ -35,6 +36,16 @@
     <li><a href="{% url 'redis_metric_detail' slug %}">{{ slug }} detail</a></li>
     <li class="active">{{ granularity }} history</li>
     </ul>
+
+    <ul class="subnav history">
+    <li><a href="{% url 'redis_metric_history' slug 'daily' %}">Daily</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'weekly' %}">Weekly</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'monthly' %}">Monthly</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'yearly' %}">Yearly</a></li>
+    </ul>
+
+    {# Menu to control the date from which we display metrics #}
+    {% metrics_since slug 5 "history" granularity %}
 
     <div id="chart_div"></div>
 
