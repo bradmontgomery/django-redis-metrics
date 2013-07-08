@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from datetime import datetime, timedelta
+
 from django.test import TestCase
 from mock import patch
 from redis_metrics.templatetags import redis_metric_tags as taglib
@@ -11,6 +13,7 @@ from redis_metrics.templatetags.redis_metrics_filters import (
 
 class TestTemplateTags(TestCase):
     """Verify that template tags return the expected results."""
+    maxDiff = None
 
     def setUp(self):
         """Patch the ``R`` class."""
@@ -19,6 +22,81 @@ class TestTemplateTags(TestCase):
 
     def tearDown(self):
         self.r_patcher.stop()
+
+    def test_metrics_since_history(self):
+        """Tests the ``metrics_since`` template tag when displaying metric
+        history."""
+
+        slug = "test-slug"
+        years = 5
+        link_type = "history"
+        t = datetime.today()
+
+        result = taglib.metrics_since(slug, years, link_type)
+        self.assertIn('link_type', result.keys())
+        self.assertIn('slug_values', result.keys())
+        self.assertEqual(result['link_type'], link_type)
+
+        # Verify contents of `slug_values`
+        self.assertEqual(len(result['slug_values']), years)
+        self.assertEqual(
+            [s for s, d, y, g in result['slug_values']],
+            [slug for y in range(years)]
+        )
+        expected_dates = [
+            (t - timedelta(days=365 * y)).strftime("%Y-%m-%d")
+            for y in range(1, years + 1)
+        ]
+        self.assertEqual(
+            [d.strftime("%Y-%m-%d") for s, d, y, g in result['slug_values']],
+            expected_dates
+        )
+        self.assertEqual(
+            [y for s, d, y, g in result['slug_values']],
+            range(1, years + 1)
+        )
+        self.assertEqual(
+            [g for s, d, y, g in result['slug_values']],
+            ['daily' for y in range(years)]
+        )
+
+    def test_metrics_since_aggregate(self):
+        """Tests the ``metrics_since`` template tag when displaying metric
+        aggregate history."""
+
+        slugs = ['test-a', 'test-b']
+        years = 5
+        link_type = "aggregate"
+        granularity = "weekly"
+        t = datetime.today()
+
+        result = taglib.metrics_since(slugs, years, link_type, granularity)
+        self.assertIn('link_type', result.keys())
+        self.assertIn('slug_values', result.keys())
+        self.assertEqual(result['link_type'], link_type)
+
+        # Verify contents of `slug_values`
+        self.assertEqual(len(result['slug_values']), years)
+        self.assertEqual(
+            [s for s, d, y, g in result['slug_values']],
+            ["+".join(slugs) for y in range(years)]
+        )
+        expected_dates = [
+            (t - timedelta(days=365 * y)).strftime("%Y-%m-%d")
+            for y in range(1, years + 1)
+        ]
+        self.assertEqual(
+            [d.strftime("%Y-%m-%d") for s, d, y, g in result['slug_values']],
+            expected_dates
+        )
+        self.assertEqual(
+            [y for s, d, y, g in result['slug_values']],
+            range(1, years + 1)
+        )
+        self.assertEqual(
+            [g for s, d, y, g in result['slug_values']],
+            [granularity for y in range(years)]
+        )
 
     def test_gauge(self):
         with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:

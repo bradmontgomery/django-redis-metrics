@@ -1,0 +1,21 @@
+{% load url from future %}
+{% if slug_values %}
+<ul class="subnav since">
+
+{# Metric History #}
+{% if link_type == "history" %}
+    {% for slug, since, num_years, granularity in slug_values %}
+    <li><a href="{% url 'redis_metric_history' slug granularity %}?since={{ since|date:"Y-m-d" }}">
+    {{ num_years }} Years</a></li>
+    {% endfor %}
+
+{# Aggregate History #}
+{% elif link_type == "aggregate_history" %}
+    {% for slug, since, num_years, granularity in slug_values %}
+    <li><a href="{% url 'redis_metric_aggregate_history' slug granularity %}?since={{ since|date:"Y-m-d" }}">
+    {{ num_years }} Years</a></li>
+    {% endfor %}
+{% endif %}
+
+</ul>
+{% endif %}
