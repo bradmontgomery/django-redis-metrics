@@ -4,7 +4,7 @@ History
 0.6.0 (in progess)
 ++++++++++++++++++
 - Added template tags: ``metric_list``, ``metric_detail``, ``metric_history``,
-  ``aggregate_detail``, ``aggregate_history``.
+  ``aggregate_detail``, ``aggregate_history``, and ``metrics_since``.
 - Added a ``gauge`` template tag.
 - Added methods & management commands to delete metrics & gauges
 - Updated email templates for the ``redis_metrics_send_mail`` command.
