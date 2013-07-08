@@ -1,0 +1,101 @@
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
+{% load redis_metric_tags %}
+
+{% block extrahead %}
+{% comment %}
+{% if gauges.slugs|length %}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+    google.load('visualization', '1', {packages:['gauge']});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Gauge', 'Value'],
+            {% for gauge, value in gauges.data.items %}
+            ['{{ gauge }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]);
+        var options = {
+            width: 400, height: 120,
+            redFrom: 90, redTo: 100,        {# Error Levels #}
+            yellowFrom:75, yellowTo: 90,    {# Warning Levels #}
+            minorTicks: 5
+        };
+
+        var chart_div = document.getElementById('gauges_chart');
+        var chart = new google.visualization.Gauge(chart_div);
+        chart.draw(data, options);
+    }
+</script>
+{% endif %}
+{% endcomment %}
+{% endblock %}
+
+{% block content %}
+
+    <pre> TODO:
+     - convert this from a `metrics list` view to a `default` view
+     - include instructions to override the default template and include
+       any `gauge` tags
+     - write a metric template tag that graphs a give metric
+    </pre>
+
+    {# EXAMPLE: metric_history tag #}
+    {#{% metric_history 'kites' 'daily' '2013-06-01' %}#}
+
+    {# EXAMPLE: metric_detail tag #}
+    {#{% metric_detail 'memory' %}#}
+
+    {# EXAMPLE gauge tag #}
+    {#{% gauge 'test' %} #}
+
+    {% comment %}
+    <h1>Gagues</h1>
+    {% if gauges.slugs|length %}
+        <div id="gauges_chart"></div>
+
+        <table>
+        <caption>Gagues</caption>
+        <thead>
+            <tr><th>Gague</th><th>Value</th></tr>
+        </thead>
+        <tbody>
+            {% for gauge, value in gauges.data.items %}
+                <tr>
+                    <td>{{ gauge }}</td>
+                    <td class="value">{{ value|default_if_none:"-" }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    {% else %}
+        <p>You don't have any gauges set up yet!</p>
+    {% endif %}
+    {% endcomment %}
+
+    {% comment %}
+    <h1>Metrics</h1>
+    {% if metrics %}
+        <p>Want to see multiple metrics at once?
+           Check out the <a href="{% url 'redis_metric_aggregate' %}">Aggregates</a></p>
+        <p>Click a metric below to view more data.</p>
+        {% for category, slugs in metrics.items %}
+            <h2>
+                <a href="{% url 'redis_metrics_categorize' category %}"
+                   title="Edit {{ category}}">{{ category }}</a>
+            </h2>
+            <ul>
+            {% for slug in slugs %}
+                <li>
+                <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% endfor %}
+    {% else %}
+        <p>You don't have any metrics set up yet!</p>
+    {% endif %}
+    {% endcomment %}
+
+{% endblock %}

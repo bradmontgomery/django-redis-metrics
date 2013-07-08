@@ -47,6 +47,27 @@ class TestViews(TestCase):
         self.assertEqual(resp.status_code, 302)
         return resp
 
+    def test_gauges_view(self):
+        """Test the ``GaugesView``."""
+        url = reverse('redis_metrics_gauges')
+        with patch('redis_metrics.views.R') as mock_r:
+            # Set appropriate return values for methods that'll get called
+            # in the MetricsListView.
+            r = mock_r.return_value  # Get an instance of our Mocked R class
+            r.gauge_slugs.return_value = set(['gauge-a', 'gauge-b'])
+
+            # Do the Request and test for content
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('Gauges', resp.content)
+            self.assertEqual(
+                resp.context['gauges'],
+                set(['gauge-a', 'gauge-b'])
+            )
+
+            # Make sure our Mock R object called the right methods.
+            mock_r.assert_has_calls([call().gauge_slugs()])
+
     def test_metrics_list(self):
         """Test the ``MetricsListView``."""
         url = reverse('redis_metrics_list')
@@ -386,7 +407,7 @@ class TestViews(TestCase):
             'return_value.metric_slugs.return_value': ['foo', 'bar', 'baz'],
             'return_value._category_slugs.return_value': [],
         }
-        with patch('redis_metrics.forms.R', **k) as mock_R:
+        with patch('redis_metrics.forms.R', **k):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertIn('form', resp.context_data)

@@ -1,7 +1,8 @@
 from django.conf.urls.defaults import patterns, url
 from .views import (
     AggregateHistoryView, AggregateDetailView, AggregateFormView,
-    CategoryFormView, MetricDetailView, MetricHistoryView, MetricsListView,
+    CategoryFormView, GaugesView, MetricDetailView, MetricHistoryView,
+    MetricsListView,
 )
 
 
@@ -21,13 +22,16 @@ urlpatterns = patterns('',
     url(r'^aggregate/$',
         AggregateFormView.as_view(),
         name='redis_metric_aggregate'),
+    url(r'^list/$',
+        MetricsListView.as_view(),
+        name='redis_metrics_list'),
+    url(r'^gauges/$',
+        GaugesView.as_view(),
+        name='redis_metrics_gauges'),
     url(r'^(?P<slug>.*)/(?P<granularity>.*)/$',
         MetricHistoryView.as_view(),
         name='redis_metric_history'),
     url(r'^(?P<slug>.*)/$',
         MetricDetailView.as_view(),
         name='redis_metric_detail'),
-    url(r'^$',
-        MetricsListView.as_view(),
-        name='redis_metrics_list'),
 )

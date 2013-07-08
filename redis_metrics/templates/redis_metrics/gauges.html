@@ -1,0 +1,13 @@
+{% extends "redis_metrics/base.html" %}
+{% load url from future %}
+{% load redis_metric_tags %}
+
+
+{% block content %}
+    <h1>Gauges</h1>
+    {% for slug in gauges %}
+        {% gauge slug %}
+    {% empty %}
+        <p>You don't have any gauges set up yet!</p>
+    {% endfor %}
+{% endblock %}
