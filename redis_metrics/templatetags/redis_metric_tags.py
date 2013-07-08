@@ -72,3 +72,31 @@ def aggregate_detail(slug_list):
         'slugs': slug_list,
         'metrics': R().get_metrics(slug_list)
     }
+
+
+@register.inclusion_tag("redis_metrics/_aggregate_history.html")
+def aggregate_history(slugs, granularity="daily", since=None):
+    """Template Tag to display history for multiple metrics.
+
+    * ``slug_list`` -- A list of slugs to display
+    * ``granularity`` -- the granularity: daily, weekly, monthly, yearly
+    * ``since`` -- a date string of the form "YYYY-mm-dd";
+
+    """
+    slugs = list(slugs)
+    try:
+        since_date = datetime.strptime(since, "%Y-%m-%d")
+    except (TypeError, ValueError):
+        since_date = None
+
+    metric_history = R().get_metric_history_as_columns(
+        slugs=slugs,
+        since=since_date,
+        granularity=granularity
+    )
+
+    return {
+        'slugs': slugs,
+        'granularity': granularity,
+        'metric_history': metric_history,
+    }
