@@ -15,3 +15,9 @@
 {% else %}
     <p>There are No Metrics</p>
 {% endif %}
+
+<h2>Admin</h2>
+<ul>
+<li><a href="{% url 'redis_metrics_categorize' %}">Create Category</a></li>
+<li><a href="{% url 'redis_metric_aggregate' %}">View Metric Aggregates</a></li>
+</ul>
