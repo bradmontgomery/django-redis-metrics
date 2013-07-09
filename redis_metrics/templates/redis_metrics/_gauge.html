@@ -12,15 +12,16 @@ following context:
 
 {% endcomment %}
 
-<div id="gauge-{{ slug }}" class="gauge"></div>
+<div id="gauge-{{ slug }}" class="gauge"
+    style="width: {{ size }}px; height: {{ size }}px; padding:0; margin: 10px; float: left;"></div>
 <script type="text/javascript" src="//www.google.com/jsapi"></script>
 <script type="text/javascript">
 google.load('visualization', '1', {packages:['gauge']});
 google.setOnLoadCallback(drawChart);
 function drawChart() {
     var data = google.visualization.arrayToDataTable([
-        ['Gauge', 'Value'],
-        ['{{ gauge }}', {{ current_value|default:0 }}]
+        ['Label', 'Value'],
+        ['{{ slug }}', {{ current_value|default:0 }}]
     ]);
     var options = {
         width: {{ size }}, height: {{ size }}, max: {{ max_value }},
