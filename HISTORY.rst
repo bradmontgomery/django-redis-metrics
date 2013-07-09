@@ -3,6 +3,8 @@ History
 
 0.6.0 (in progess)
 ++++++++++++++++++
+- Default templates are now less hideous.
+- Separated list of gauges and metrics into separate views.
 - Added template tags: ``metric_list``, ``metric_detail``, ``metric_history``,
   ``aggregate_detail``, ``aggregate_history``, and ``metrics_since``.
 - Added a ``gauge`` template tag.
