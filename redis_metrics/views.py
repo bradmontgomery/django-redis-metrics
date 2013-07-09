@@ -41,6 +41,10 @@ class ProtectedFormView(FormView):
         return super(ProtectedFormView, self).dispatch(*args, **kwargs)
 
 
+class DefaultView(ProtectedTemplateView):
+    template_name = "redis_metrics/default.html"
+
+
 class GaugesView(ProtectedTemplateView):
     template_name = "redis_metrics/gauges.html"
 

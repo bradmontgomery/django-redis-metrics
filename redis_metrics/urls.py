@@ -1,8 +1,8 @@
 from django.conf.urls.defaults import patterns, url
 from .views import (
     AggregateHistoryView, AggregateDetailView, AggregateFormView,
-    CategoryFormView, GaugesView, MetricDetailView, MetricHistoryView,
-    MetricsListView,
+    CategoryFormView, DefaultView, GaugesView, MetricDetailView,
+    MetricHistoryView, MetricsListView,
 )
 
 
@@ -34,4 +34,7 @@ urlpatterns = patterns('',
     url(r'^(?P<slug>.*)/$',
         MetricDetailView.as_view(),
         name='redis_metric_detail'),
+    url(r'^$',
+        DefaultView.as_view(),
+        name='redis_metrics_default'),
 )

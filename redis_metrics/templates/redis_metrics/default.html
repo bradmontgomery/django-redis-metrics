@@ -1,101 +1,84 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
-{% load redis_metric_tags %}
-
-{% block extrahead %}
-{% comment %}
-{% if gauges.slugs|length %}
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-    google.load('visualization', '1', {packages:['gauge']});
-    google.setOnLoadCallback(drawChart);
-    function drawChart() {
-        var data = google.visualization.arrayToDataTable([
-            ['Gauge', 'Value'],
-            {% for gauge, value in gauges.data.items %}
-            ['{{ gauge }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ]);
-        var options = {
-            width: 400, height: 120,
-            redFrom: 90, redTo: 100,        {# Error Levels #}
-            yellowFrom:75, yellowTo: 90,    {# Warning Levels #}
-            minorTicks: 5
-        };
-
-        var chart_div = document.getElementById('gauges_chart');
-        var chart = new google.visualization.Gauge(chart_div);
-        chart.draw(data, options);
-    }
-</script>
-{% endif %}
-{% endcomment %}
-{% endblock %}
 
 {% block content %}
 
-    <pre> TODO:
-     - convert this from a `metrics list` view to a `default` view
-     - include instructions to override the default template and include
-       any `gauge` tags
-     - write a metric template tag that graphs a give metric
-    </pre>
+    <h1>Thank You!</h1>
+    <p>Hi. Thanks for using
+    <a href="https://github.com/bradmontgomery/django-redis-metrics">
+    django-redis-metrics</a>. Read on below for tips on getting started.</p>
 
-    {# EXAMPLE: metric_history tag #}
-    {#{% metric_history 'kites' 'daily' '2013-06-01' %}#}
+    <p>If you discover any bugs, please submit an <a href="https://github.com/bradmontgomery/django-redis-metrics/issues">Issue</a>.</p>
 
-    {# EXAMPLE: metric_detail tag #}
-    {#{% metric_detail 'memory' %}#}
 
-    {# EXAMPLE gauge tag #}
-    {#{% gauge 'test' %} #}
+    <h2>Getting Started</h2>
+    <p>Congratulations on installing <code>redis_metrics</code>! Now, you can
+    start counting things with this handy bit of code:</p>
 
-    {% comment %}
-    <h1>Gagues</h1>
-    {% if gauges.slugs|length %}
-        <div id="gauges_chart"></div>
+    <pre><code>
+    from redis_metrics import metric
 
-        <table>
-        <caption>Gagues</caption>
-        <thead>
-            <tr><th>Gague</th><th>Value</th></tr>
-        </thead>
-        <tbody>
-            {% for gauge, value in gauges.data.items %}
-                <tr>
-                    <td>{{ gauge }}</td>
-                    <td class="value">{{ value|default_if_none:"-" }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-        </table>
-    {% else %}
-        <p>You don't have any gauges set up yet!</p>
-    {% endif %}
-    {% endcomment %}
+    #...
 
-    {% comment %}
-    <h1>Metrics</h1>
-    {% if metrics %}
-        <p>Want to see multiple metrics at once?
-           Check out the <a href="{% url 'redis_metric_aggregate' %}">Aggregates</a></p>
-        <p>Click a metric below to view more data.</p>
-        {% for category, slugs in metrics.items %}
-            <h2>
-                <a href="{% url 'redis_metrics_categorize' category %}"
-                   title="Edit {{ category}}">{{ category }}</a>
-            </h2>
-            <ul>
-            {% for slug in slugs %}
-                <li>
-                <a href="{% url 'redis_metric_detail' slug %}">{{ slug }}</a>
-                </li>
-            {% endfor %}
-            </ul>
-        {% endfor %}
-    {% else %}
-        <p>You don't have any metrics set up yet!</p>
-    {% endif %}
-    {% endcomment %}
+    def your_function():
+        ...
+
+        metric('your-function')
+    </code></pre>
+
+    <p>Import the <code>metric</code> function in your code, and you can start
+    recording arbitrary metrics. Any time the <code>metric</code> function is
+    executed, your <em>your-function</em> metric will be incremented.</p>
+
+    <p>You can also record gauges in a similar manner. Gauges are a numeric
+    <em>snapshot</em> of some value.</p>
+    <pre><code>
+    from redis_metrics import gauge
+
+    #...
+
+    def your_function():
+        ...
+        # You calculate some value that's important to you
+        num = calculate_some_value()
+
+        # Then store it in a Gauge
+        gauge('some-value', num)
+    </code></pre>
+
+    <h2>Viewing Metrics</h2>
+    <p>There are a couple of ways to view your metrics. Out of the box, you
+    can view a list of metrics (<em>You should see these to your left</em>)
+    as well as a list of all gauges using the links below:</p>
+    <ul>
+        <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+        <li><a href="{% url 'redis_metrics_gauges' %}">Gauges List</a></li>
+    </ul>
+
+    <p>There are also a number of template tags that allow you co customize
+    where (and how) you view metrics or gauges.</p>
+
+    <h3>Metric Detail</h3>
+    <p>Assuming you've defined a <code>logins</code> metric, you can see the
+    details of the data using the <code>metric_detail</code> template tag:</p>
+    <pre><code>
+    {% templatetag openblock %}metric_detail 'logins' {% templatetag closeblock %}
+    </code></pre>
+
+    <h3>Metric History</h3>
+    <p>Assuming that you've defined a <code>new-users</code> metric, you can
+    use the <code>metric_history</code> template tag to view the its daily
+    (or weekly, monthly, yearly) values:</p>
+    <pre><code>
+    {% templatetag openblock %}load redis_metric_tags {% templatetag closeblock %}
+    {% templatetag openblock %}metric_history 'new-users' 'daily' {% templatetag closeblock %}
+    </code></pre>
+
+    <h3>Gauges</h3>
+    <p>Finally, you can view the status of any gauge with the <code>gauge</code>
+    template tag:</p>
+    <pre><code>
+    {% templatetag openblock %} gauge 'pageviews' {% templatetag closeblock %}
+    </code></pre>
 
 {% endblock %}

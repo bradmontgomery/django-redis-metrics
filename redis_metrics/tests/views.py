@@ -47,6 +47,12 @@ class TestViews(TestCase):
         self.assertEqual(resp.status_code, 302)
         return resp
 
+    def test_default_view(self):
+        url = reverse('redis_metrics_default')
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "redis_metrics/default.html")
+
     def test_gauges_view(self):
         """Test the ``GaugesView``."""
         url = reverse('redis_metrics_gauges')
