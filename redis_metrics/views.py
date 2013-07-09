@@ -61,21 +61,10 @@ class MetricsListView(ProtectedTemplateView):
     def get_context_data(self, **kwargs):
         """Includes the metrics slugs in the context."""
         data = super(MetricsListView, self).get_context_data(**kwargs)
-        r = R()
+
         # Metrics organized by category, like so:
         # { <category_name>: [ <slug1>, <slug2>, ... ]}
-        data['metrics'] = r.metric_slugs_by_category()
-
-        # Include gauges in the default View. They're *technically* a list
-        # of metrics, too!
-        gauges = {
-            'slugs': list(r.gauge_slugs()),
-            'data': {}
-        }
-        if gauges['slugs']:
-            for slug in gauges['slugs']:
-                gauges['data'][slug] = r.get_gauge(slug)
-        data['gauges'] = gauges
+        data.update({'metrics': R().metric_slugs_by_category()})
         return data
 
 

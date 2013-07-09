@@ -92,13 +92,10 @@ class TestViews(TestCase):
             self.assertIn('Sample Category', resp.context['metrics'].keys())
             self.assertIn('test-metric-a', resp.context['metrics'].values()[0])
             self.assertIn('test-metric-b', resp.context['metrics'].values()[0])
-            self.assertIn('test-gauge', resp.context['gauges']['data'].keys())
 
             # Make sure our Mock R object called the right methods.
             mock_r.assert_has_calls([
                 call().metric_slugs_by_category(),
-                call().gauge_slugs(),
-                call().get_gauge('test-gauge'),
             ])
 
     def test_metric_detail(self):
