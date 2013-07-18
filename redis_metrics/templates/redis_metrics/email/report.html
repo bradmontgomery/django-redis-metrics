@@ -1,3 +1,4 @@
+{% load redis_metrics_filters %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,35 +9,45 @@ table, td {border:1px solid #ccc;}
 </style>
 </head>
 <body>
-
 {% if metrics %}
+
+    {# Generate the HTML for the charts #}
     <h1>Metrics for {{ today }}</h1>
+
     {% for category, metric_data in metrics.items %}
-        <table style="border: 1px solid #ccc; margin: 1em 0;">
-        <caption style="font-weight: bold; text-align: left; font-size: 1.5em;">
-            {{ category }}</caption>
-        <thead>
-            <tr>
-            <th>Metric</th>
-            <th>Day</th>
-            <th>Week</th>
-            <th>Month</th>
-            <th>Year</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for slug, data in metric_data %}
-            <tr>
-            <td style="border-right: 1px solid #ccc;">{{ slug }}</td>
-            <td style="border-right: 1px solid #ccc;">{{ data.day }}</td>
-            <td style="border-right: 1px solid #ccc;">{{ data.week }}</td>
-            <td style="border-right: 1px solid #ccc;">{{ data.month }}</td>
-            <td>{{ data.year }}</td>
-            </tr>
-        {% endfor %}
-        <tbody>
-        </table>
+    {% for metric_name, value_list in metric_data %}
+        <h2>{{ category }}</h2>
+        <div id="chart-{{ metric_name }}"></div>
     {% endfor %}
+    {% endfor %}
+
+{# Stick the required JS at the bottom of the page #}
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load("visualization", "1", {packages:["corechart"]});
+  google.setOnLoadCallback(drawChart);
+  function drawChart() {
+    {% for category, metric_data in metrics.items %}
+    {% for metric_name, value_list in metric_data %}
+    var data = google.visualization.arrayToDataTable([
+      ['Key', 'Metric Value'],
+      {% for key, value in value_list %}
+      ['{{ key|strip_metric_prefix }}', {{ value|default:0 }}]{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]);
+
+    var options = {
+      title: '{{ category }}: {{ metric_name }}',
+      legend: {position: 'none'}
+    };
+
+    var chart_div = document.getElementById('chart-{{ metric_name }}');
+    var chart = new google.visualization.LineChart(chart_div);
+    chart.draw(data, options);
+    {% endfor %} {# end metric_name, value_list #}
+    {% endfor %} {# end category, metric_data #}
+  }
+</script>
 {% else %}
     <p>You don't have any metrics set up yet!</p>
 {% endif %}

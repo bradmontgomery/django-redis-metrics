@@ -16,15 +16,20 @@ class Command(NoArgsCommand):
         """Send Report E-mails."""
 
         r = R()
-        metrics = r.metric_slugs_by_category()
-        for category_name, slug_list in metrics.items():
-            metrics[category_name] = r.get_metrics(set(slug_list))
+        metrics = {}
+        categories = r.metric_slugs_by_category()
+        for category_name, slug_list in categories.items():
+            metrics[category_name] = []
+            for slug in slug_list:
+                metric_values = r.get_metric_history(slug)
+                metrics[category_name].append(
+                    (slug, metric_values)
+                )
 
         # metrics is now:
         # --------------
         # { Category : [
-        #     ('foo', {'day': '3', 'month': '3', 'week': '3', 'year': '3'}),
-        #     ('bar', {'day': '1', 'month': '1', 'week': '1', 'year': '1'})]
+        #     ('foo', [('m:foo:2012-07-18', 1), ('m:foo:2012-07-19, 2), ...])
         #   ],
         #   ...
         # }
