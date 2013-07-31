@@ -31,6 +31,12 @@ class R(object):
         * ``host`` -- Redis host (default settings.REDIS_METRICS_HOST)
         * ``port`` -- Redis port (default settings.REDIS_METRICS_PORT)
         * ``db``   -- Redis DB (default settings.REDIS_METRICS_DB)
+        * ``password``   -- Redis password
+          (default settings.REDIS_METRICS_PASSWORD)
+        * ``socket_timeout``   -- Redis password
+          (default settings.REDIS_METRICS_SOCKET_TIMEOUT)
+        * ``connection_pool``   -- Redis password
+          (default settings.REDIS_METRICS_SOCKET_CONNECTION_POOL)
 
         """
         self._categories_key = kwargs.get('categories_key', 'categories')
@@ -49,8 +55,22 @@ class R(object):
             'db',
             int(getattr(settings, 'REDIS_METRICS_DB', 0)))
 
+        password = kwargs.pop(
+            'password', getattr(settings, 'REDIS_METRICS_PASSWORD', None))
+
+        socket_timeout = kwargs.pop(
+            'socket_timeout',
+            getattr(settings, 'REDIS_METRICS_SOCKET_TIMEOUT', None))
+
+        connection_pool = kwargs.pop(
+            'connection_pool',
+            getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None))
+
         # Create the connection to Redis
-        self.r = redis.StrictRedis(host=host, port=port, db=db)
+        self.r = redis.StrictRedis(host=host, port=port, db=db,
+                                   password=password,
+                                   socket_timeout=socket_timeout,
+                                   connection_pool=connection_pool)
 
     def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.datetime`` objects from
