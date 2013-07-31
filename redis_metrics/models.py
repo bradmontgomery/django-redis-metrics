@@ -16,7 +16,7 @@ from .templatetags import redis_metrics_filters as template_tags
 
 class R(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """Creates a connection to Redis, and sets the key used to store a
         set of slugs for all metrics.
 
@@ -120,13 +120,13 @@ class R(object):
         # we want to keep the order, here: daily, weekly, monthly, yearly
         patterns = SortedDict()
         patterns.insert(0, "daily",
-            "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
+                        "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
         patterns.insert(1, "weekly",
-            "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U")))
+                        "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U")))
         patterns.insert(2, "monthly",
-            "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
+                        "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
         patterns.insert(3, "yearly",
-            "m:{0}:y:{1}".format(slug, date.strftime("%Y")))
+                        "m:{0}:y:{1}".format(slug, date.strftime("%Y")))
         if granularity == 'all':
             return patterns.values()
         else:
@@ -204,7 +204,7 @@ class R(object):
 
         # Keep track of all of our keys
         self.r.sadd(self._metric_slugs_key,
-            day_key, week_key, month_key, year_key)
+                    day_key, week_key, month_key, year_key)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method; .incr accepts a second ``amound`` parameter.
@@ -236,7 +236,7 @@ class R(object):
             'week': self.r.get(week_key),
             'month': self.r.get(month_key),
             'year': self.r.get(year_key),
-       }
+        }
 
     def get_metrics(self, slug_list):
         """Get the metrics for multiple slugs.
