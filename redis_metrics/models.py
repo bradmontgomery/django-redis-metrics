@@ -37,23 +37,20 @@ class R(object):
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        if 'host' in kwargs:
-            self.host = kwargs['host']
-        else:
-            self.host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
+        host = kwargs.pop(
+            'host',
+            getattr(settings, 'REDIS_METRICS_HOST', 'localhost'))
 
-        if 'port' in kwargs:
-            self.port = kwargs['port']
-        else:
-            self.port = int(getattr(settings, 'REDIS_METRICS_PORT', 6379))
+        port = kwargs.pop(
+            'port',
+            int(getattr(settings, 'REDIS_METRICS_PORT', 6379)))
 
-        if 'db' in kwargs:
-            self.db = kwargs['db']
-        else:
-            self.db = int(getattr(settings, 'REDIS_METRICS_DB', 0))
+        db = kwargs.pop(
+            'db',
+            int(getattr(settings, 'REDIS_METRICS_DB', 0)))
 
         # Create the connection to Redis
-        self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
+        self.r = redis.StrictRedis(host=host, port=port, db=db)
 
     def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.datetime`` objects from
