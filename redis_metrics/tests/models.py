@@ -75,6 +75,23 @@ class TestR(TestCase):
                 host='HOST', port='PORT', db='DB', password="PASSWORD",
                 socket_timeout=1, connection_pool=1)
 
+    def test__init__with_default_kwargs(self):
+        """Test creation of an R object without parameters."""
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            inst = R()
+            self.assertEqual(inst.host, 'localhost')
+            self.assertEqual(inst.port, 6379)
+            self.assertEqual(inst.db, 0)
+            self.assertEqual(inst.password, None)
+            self.assertEqual(inst.socket_timeout, None)
+            self.assertEqual(inst.connection_pool, None)
+            self.assertEqual(inst._categories_key, 'categories')
+            self.assertEqual(inst._metric_slugs_key, "metric-slugs")
+            self.assertEqual(inst._gauge_slugs_key, "gauge-slugs")
+            mock_redis.assert_called_once_with(
+                host='localhost', port=6379, db=0, password=None,
+                socket_timeout=None, connection_pool=None)
+
     def test__date_range(self):
         """Tests ``R._date_range``."""
 
