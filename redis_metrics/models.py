@@ -43,34 +43,34 @@ class R(object):
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        host = kwargs.pop(
+        self.host = kwargs.pop(
             'host',
             getattr(settings, 'REDIS_METRICS_HOST', 'localhost'))
 
-        port = kwargs.pop(
+        self.port = kwargs.pop(
             'port',
             int(getattr(settings, 'REDIS_METRICS_PORT', 6379)))
 
-        db = kwargs.pop(
+        self.db = kwargs.pop(
             'db',
             int(getattr(settings, 'REDIS_METRICS_DB', 0)))
 
-        password = kwargs.pop(
+        self.password = kwargs.pop(
             'password', getattr(settings, 'REDIS_METRICS_PASSWORD', None))
 
-        socket_timeout = kwargs.pop(
+        self.socket_timeout = kwargs.pop(
             'socket_timeout',
             getattr(settings, 'REDIS_METRICS_SOCKET_TIMEOUT', None))
 
-        connection_pool = kwargs.pop(
+        self.connection_pool = kwargs.pop(
             'connection_pool',
             getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None))
 
         # Create the connection to Redis
-        self.r = redis.StrictRedis(host=host, port=port, db=db,
-                                   password=password,
-                                   socket_timeout=socket_timeout,
-                                   connection_pool=connection_pool)
+        self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db,
+                                   password=self.password,
+                                   socket_timeout=self.socket_timeout,
+                                   connection_pool=self.connection_pool)
 
     def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.datetime`` objects from
