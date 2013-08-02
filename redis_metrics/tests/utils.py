@@ -38,7 +38,8 @@ class TestUtils(TestCase):
             self.assertIsInstance(r, R)
             self.assertEqual(r, utils._redis_model)
             mock_redis.assert_called_once_with(
-                host="localhost", port=6379, db=0)
+                host="localhost", port=6379, db=0, password=None,
+                     connection_pool=None, socket_timeout=None)
 
     def test_metric(self):
         with patch("redis_metrics.utils.get_r") as mock_get_r:

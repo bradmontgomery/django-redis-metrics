@@ -16,7 +16,7 @@ from .templatetags import redis_metrics_filters as template_tags
 
 class R(object):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         """Creates a connection to Redis, and sets the key used to store a
         set of slugs for all metrics.
 
@@ -31,29 +31,46 @@ class R(object):
         * ``host`` -- Redis host (default settings.REDIS_METRICS_HOST)
         * ``port`` -- Redis port (default settings.REDIS_METRICS_PORT)
         * ``db``   -- Redis DB (default settings.REDIS_METRICS_DB)
+        * ``password``   -- Redis password
+          (default settings.REDIS_METRICS_PASSWORD)
+        * ``socket_timeout``   -- Redis password
+          (default settings.REDIS_METRICS_SOCKET_TIMEOUT)
+        * ``connection_pool``   -- Redis password
+          (default settings.REDIS_METRICS_SOCKET_CONNECTION_POOL)
 
         """
         self._categories_key = kwargs.get('categories_key', 'categories')
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        if 'host' in kwargs:
-            self.host = kwargs['host']
-        else:
-            self.host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
+        self.host = kwargs.pop(
+            'host',
+            getattr(settings, 'REDIS_METRICS_HOST', 'localhost'))
 
-        if 'port' in kwargs:
-            self.port = kwargs['port']
-        else:
-            self.port = int(getattr(settings, 'REDIS_METRICS_PORT', 6379))
+        self.port = kwargs.pop(
+            'port',
+            int(getattr(settings, 'REDIS_METRICS_PORT', 6379)))
 
-        if 'db' in kwargs:
-            self.db = kwargs['db']
-        else:
-            self.db = int(getattr(settings, 'REDIS_METRICS_DB', 0))
+        self.db = kwargs.pop(
+            'db',
+            int(getattr(settings, 'REDIS_METRICS_DB', 0)))
+
+        self.password = kwargs.pop(
+            'password', getattr(settings, 'REDIS_METRICS_PASSWORD', None))
+
+        self.socket_timeout = kwargs.pop(
+            'socket_timeout',
+            getattr(settings, 'REDIS_METRICS_SOCKET_TIMEOUT', None))
+
+        self.connection_pool = kwargs.pop(
+            'connection_pool',
+            getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None))
 
         # Create the connection to Redis
-        self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db)
+        self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db,
+                                   password=self.password,
+                                   socket_timeout=self.socket_timeout,
+                                   connection_pool=self.connection_pool)
 
     def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.datetime`` objects from
@@ -123,13 +140,13 @@ class R(object):
         # we want to keep the order, here: daily, weekly, monthly, yearly
         patterns = SortedDict()
         patterns.insert(0, "daily",
-            "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
+                        "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
         patterns.insert(1, "weekly",
-            "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U")))
+                        "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U")))
         patterns.insert(2, "monthly",
-            "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
+                        "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
         patterns.insert(3, "yearly",
-            "m:{0}:y:{1}".format(slug, date.strftime("%Y")))
+                        "m:{0}:y:{1}".format(slug, date.strftime("%Y")))
         if granularity == 'all':
             return patterns.values()
         else:
@@ -207,7 +224,7 @@ class R(object):
 
         # Keep track of all of our keys
         self.r.sadd(self._metric_slugs_key,
-            day_key, week_key, month_key, year_key)
+                    day_key, week_key, month_key, year_key)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method; .incr accepts a second ``amound`` parameter.
@@ -239,7 +256,7 @@ class R(object):
             'week': self.r.get(week_key),
             'month': self.r.get(month_key),
             'year': self.r.get(year_key),
-       }
+        }
 
     def get_metrics(self, slug_list):
         """Get the metrics for multiple slugs.
