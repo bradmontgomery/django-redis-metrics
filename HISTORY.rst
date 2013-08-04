@@ -1,8 +1,15 @@
 History
 -------
 
-0.6.0 (in progess)
+0.7.0 (2013-08-04)
 ++++++++++++++++++
+
+- Support for Redis password, socket timeout, and connection pool parameters.
+  Thanks @charles-vdulac!
+
+0.6.0 (2013-07-09)
+++++++++++++++++++
+
 - Default templates are now less hideous.
 - Separated list of gauges and metrics into separate views.
 - Added template tags: ``metric_list``, ``metric_detail``, ``metric_history``,
