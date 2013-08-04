@@ -20,6 +20,11 @@ class TestR(TestCase):
         self.old_host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
         self.old_port = getattr(settings, 'REDIS_METRICS_PORT', 6379)
         self.old_db = getattr(settings, 'REDIS_METRICS_DB', 0)
+        self.old_password = getattr(settings, 'REDIS_METRICS_PASSWORD', None)
+        self.old_socket_timeout = \
+            getattr(settings, 'REDIS_METRICS_SOCKET_TIMEOUT', None)
+        self.old_connection_pool = \
+            getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None)
         settings.REDIS_METRICS_HOST = 'localhost'
         settings.REDIS_METRICS_PORT = 6379
         settings.REDIS_METRICS_DB = 0
@@ -36,6 +41,9 @@ class TestR(TestCase):
         settings.REDIS_METRICS_HOST = self.old_host
         settings.REDIS_METRICS_PORT = self.old_port
         settings.REDIS_METRICS_DB = self.old_db
+        settings.REDIS_METRICS_PASSWORD = self.old_password
+        settings.REDIS_METRICS_SOCKET_TIMEOUT = self.old_socket_timeout
+        settings.REDIS_METRICS_SOCKET_CONNECTION_POOL = self.old_connection_pool
         self.redis = self.redis_patcher.stop()
         super(TestR, self).tearDown()
 
@@ -48,17 +56,41 @@ class TestR(TestCase):
                 'gauge_slugs_key': 'GSK',
                 'host': 'HOST',
                 'port': 'PORT',
-                'db': 'DB'
+                'db': 'DB',
+                'password': 'PASSWORD',
+                'socket_timeout': 1,
+                'connection_pool': 1
             }
             inst = R(**kwargs)
             self.assertEqual(inst.host, "HOST")
             self.assertEqual(inst.port, "PORT")
             self.assertEqual(inst.db, "DB")
+            self.assertEqual(inst.password, 'PASSWORD')
+            self.assertEqual(inst.socket_timeout, 1)
+            self.assertEqual(inst.connection_pool, 1)
             self.assertEqual(inst._categories_key, "CAT")
             self.assertEqual(inst._metric_slugs_key, "MSK")
             self.assertEqual(inst._gauge_slugs_key, "GSK")
             mock_redis.assert_called_once_with(
-                host='HOST', port='PORT', db='DB')
+                host='HOST', port='PORT', db='DB', password="PASSWORD",
+                socket_timeout=1, connection_pool=1)
+
+    def test__init__with_default_kwargs(self):
+        """Test creation of an R object without parameters."""
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            inst = R()
+            self.assertEqual(inst.host, 'localhost')
+            self.assertEqual(inst.port, 6379)
+            self.assertEqual(inst.db, 0)
+            self.assertEqual(inst.password, None)
+            self.assertEqual(inst.socket_timeout, None)
+            self.assertEqual(inst.connection_pool, None)
+            self.assertEqual(inst._categories_key, 'categories')
+            self.assertEqual(inst._metric_slugs_key, "metric-slugs")
+            self.assertEqual(inst._gauge_slugs_key, "gauge-slugs")
+            mock_redis.assert_called_once_with(
+                host='localhost', port=6379, db=0, password=None,
+                socket_timeout=None, connection_pool=None)
 
     def test__date_range(self):
         """Tests ``R._date_range``."""
@@ -361,7 +393,8 @@ class TestR(TestCase):
             r = R()
             r.delete_category("Foo")
             mock_redis.assert_has_calls([
-                call(host='localhost', db=0, port=6379),
+                call(host='localhost', db=0, port=6379, password=None,
+                     connection_pool=None, socket_timeout=None),
                 call().delete('c:Foo'),
                 call().srem("categories", "Foo")
             ])
@@ -380,7 +413,8 @@ class TestR(TestCase):
             r = R()
             r.reset_category("Stuff", ['foo', 'bar'])
             mock_redis.assert_has_calls([
-                call(host='localhost', db=0, port=6379),
+                call(host='localhost', db=0, port=6379, password=None,
+                     connection_pool=None, socket_timeout=None),
                 call().set('c:Stuff', '["foo", "bar"]'),
                 call().sadd('categories', 'Stuff'),
             ])
