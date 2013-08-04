@@ -61,6 +61,9 @@ Settings
 * ``REDIS_METRICS_HOST`` - Hostname of redis server, defaults to 'localhost'
 * ``REDIS_METRICS_PORT`` - redis port, defaults to '6379'
 * ``REDIS_METRICS_DB`` - redis database number to use, defaults to 0
+* ``REDIS_METRICS_PASSWORD`` - redis database password to use, defaults to None
+* ``REDIS_METRICS_SOCKET_TIMEOUT`` - redis database socket timeout, defaults to None
+* ``REDIS_METRICS_SOCKET_CONNECTION_POOL`` - redis database socket connection pool, defaults to None
 
 
 Usage
