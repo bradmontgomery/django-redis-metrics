@@ -9,6 +9,7 @@ from mock import call, patch, Mock
 
 from django.conf import settings
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from ..models import R
 
@@ -191,6 +192,20 @@ class TestR(TestCase):
         ]
         keys = self.r._build_keys(slug)
         self.assertEqual(keys, expected_results)
+        
+    @override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=True)    
+    def test__build_keys_week_starts_monday(self):
+        """Tests ``R._build_keys``. with default arguments."""
+        d = date.today()
+        slug = 'test-slug'
+        expected_results = [
+            "m:{0}:{1}".format(slug, d.strftime("%Y-%m-%d")),
+            "m:{0}:w:{1}".format(slug, d.strftime("%Y-%W")),
+            "m:{0}:m:{1}".format(slug, d.strftime("%Y-%m")),
+            "m:{0}:y:{1}".format(slug, d.strftime("%Y")),
+        ]
+        keys = self.r._build_keys(slug)
+        self.assertEqual(keys, expected_results)
 
     def test__build_keys_daily(self):
         """Tests ``R._build_keys``. with a *daily* granularity."""
@@ -203,6 +218,13 @@ class TestR(TestCase):
         d = date(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
         self.assertEqual(keys, ['m:test-slug:w:2012-14'])
+        
+    @override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=True)    
+    def test__build_keys_weekly_week_starts_monday(self):
+        """Tests ``R._build_keys``. with a *weekly* granularity."""
+        d = date(2012, 4, 1)  # April Fools!
+        keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
+        self.assertEqual(keys, ['m:test-slug:w:2012-13'])
 
     def test__build_keys_monthly(self):
         """Tests ``R._build_keys``. with a *monthly* granularity."""

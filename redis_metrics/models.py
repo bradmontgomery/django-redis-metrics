@@ -142,7 +142,9 @@ class R(object):
         patterns.insert(0, "daily",
                         "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
         patterns.insert(1, "weekly",
-                        "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U")))
+                        "m:{0}:w:{1}".format(slug, date.strftime(
+                            "%Y-%{0}".format(
+                                'W' if getattr(settings, 'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK', False) else 'U'))))
         patterns.insert(2, "monthly",
                         "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
         patterns.insert(3, "yearly",
