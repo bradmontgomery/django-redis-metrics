@@ -252,7 +252,7 @@ class TestViews(TestCase):
                 resp = self.client.post(url, data)
                 self.assertEqual(resp.status_code, 302)
                 # make sure the metric slug shows up in the redirect URL
-                self.assertIn('foo+bar', resp.get("Location", ''))
+                self.assertIn('foo%2Bbar', resp.get("Location", ''))
 
     def test_aggregate_detail_view(self):
         """Tests ``views.AggregateDetailView``."""
