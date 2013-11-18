@@ -3,13 +3,13 @@ This app doesn't have any models, per se, but the following ``R`` class is a
 lightweight wrapper around Redis.
 
 """
+from collections import OrderedDict
 import datetime
 import json
 import redis
 
 from django.conf import settings
 from django.template.defaultfilters import slugify
-from django.utils.datastructures import SortedDict
 
 from .templatetags import redis_metrics_filters as template_tags
 
@@ -138,21 +138,16 @@ class R(object):
             date = datetime.date.today()
 
         # we want to keep the order, here: daily, weekly, monthly, yearly
-        patterns = SortedDict()
-        patterns.insert(0, "daily",
-                        "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d")))
-        patterns.insert(1, "weekly",
-                        "m:{0}:w:{1}".format(slug, date.strftime(
-                            "%Y-%{0}".format(
-                                'W' if getattr(settings, 'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK', False) else 'U'))))
-        patterns.insert(2, "monthly",
-                        "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m")))
-        patterns.insert(3, "yearly",
-                        "m:{0}:y:{1}".format(slug, date.strftime("%Y")))
+        patts = OrderedDict()
+        patts["daily"] = "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d"))
+        patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U"))
+        patts["monthly"] = "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m"))
+        patts["yearly"] = "m:{0}:y:{1}".format(slug, date.strftime("%Y"))
+
         if granularity == 'all':
-            return patterns.values()
+            return patts.values()
         else:
-            return [patterns[granularity]]
+            return [patts[granularity]]
 
     def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)

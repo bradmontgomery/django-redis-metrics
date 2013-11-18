@@ -33,7 +33,10 @@ This code is distributed under the terms of the MIT license. See the
 Requirements
 ============
 
-The only requirement for this app is `redis-py`_ and Django 1.4 or above.
+This app works with Django 1.4, 1.5, and 1.6 and only requires `redis-py`_.
+
+If you'd like to run the tests, install the packages listed in
+``requirements/test.txt``.
 
 .. _`redis-py`: https://github.com/andymccurdy/redis-py
 

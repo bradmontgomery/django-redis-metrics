@@ -1,6 +1,12 @@
 History
 -------
 
+0.7.1 (2013-11-17)
+++++++++++++++++++
+
+- Minor changes to support Django 1.6
+- Replaced Django's ``SortedDict`` with ``collections.OrderedDict``
+
 0.7.0 (2013-08-04)
 ++++++++++++++++++
 

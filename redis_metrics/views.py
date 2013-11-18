@@ -113,20 +113,19 @@ class AggregateFormView(ProtectedFormView):
 
     def get_success_url(self):
         """Reverses the ``redis_metric_aggregate_detail`` URL using
-        ``self.metric_slugs`` as an argument. """
-        return reverse('redis_metric_aggregate_detail',
-                       args=[self.metric_slugs])
+        ``self.metric_slugs`` as an argument."""
+        slugs = '+'.join(self.metric_slugs)
+        url = reverse('redis_metric_aggregate_detail', args=[slugs])
+        # Django 1.6 quotes reversed URLs, which changes + into %2B. We want
+        # want to keep the + in the url (it's ok according to RFC 1738)
+        #https://docs.djangoproject.com/en/1.6/releases/1.6/#quoting-in-reverse
+        return url.replace("%2B", "+") # keep the plusses :-/
 
     def form_valid(self, form):
         """Pull the metrics from the submitted form, and store them as a
-        plus-delimited string in ``self.metric_slugs``.
-
-        For example, if the chosen slugs were 'foo' and 'bar', this would
-        essentially do: ``self.metric_slugs = "foo+bar"``.
-
+        list of strings in ``self.metric_slugs``.
         """
-        slugs = [k.strip() for k in form.cleaned_data['metrics']]
-        self.metric_slugs = '+'.join(slugs)
+        self.metric_slugs = [k.strip() for k in form.cleaned_data['metrics']]
         return super(AggregateFormView, self).form_valid(form)
 
 
