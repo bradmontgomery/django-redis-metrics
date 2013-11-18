@@ -140,7 +140,8 @@ class R(object):
         # we want to keep the order, here: daily, weekly, monthly, yearly
         patts = OrderedDict()
         patts["daily"] = "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d"))
-        patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U"))
+        patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%{0}".format(
+            'W' if getattr(settings, 'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK', False) else 'U')))
         patts["monthly"] = "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m"))
         patts["yearly"] = "m:{0}:y:{1}".format(slug, date.strftime("%Y"))
 
