@@ -4,7 +4,7 @@ lightweight wrapper around Redis.
 
 """
 from collections import OrderedDict
-import datetime
+from datetime import datetime, timedelta
 import json
 import redis
 
@@ -81,13 +81,13 @@ class R(object):
         * ``since`` -- a ``datetime.datetime`` object or None.
 
         """
-        now = datetime.datetime.today()
+        now = datetime.utcnow().today()
         if since is None:
             since_days = 365  # assume 1 year :-/
         else:
             delta = now - since  # The timedelta from "since" to "now"
             since_days = delta.days + 1
-        return (now - datetime.timedelta(days=d) for d in range(since_days))
+        return (now - timedelta(days=d) for d in range(since_days))
 
     def _category_key(self, category):
         return u"c:{0}".format(category)
@@ -121,19 +121,24 @@ class R(object):
         * ``slug`` -- a slug used for a metric, e.g. "user-signups"
         * ``date`` -- (optional) A ``datetime.date`` or ``datetime.datetime``
           objects used to generate the time period for the metric. If omitted,
-          the current date will be used.
+          the current date or time (in UTC) will be used.
         * ``granularity`` -- Must be one of: "all" (default), "daily",
-          "weekly", "monthly", "yearly".
+          "weekly", "monthly", "yearly", "hourly", "minutes", or "seconds"
 
         Returns a list of strings.
 
         """
         slug = slugify(slug)  # Make sure our slugs have a consistent format
         if date is None:
-            date = datetime.date.today()
+            now = datetime.utcnow()
+            date = now.date()
 
         # we want to keep the order, here: daily, weekly, monthly, yearly
         patts = OrderedDict()
+        patts["seconds"] = "m:{0}:s:{1}".format(slug, now.strftime("%Y-%m-%d-%H-%M-%S"))
+        patts["minutes"] = "m:{0}:i:{1}".format(slug, now.strftime("%Y-%m-%d-%H-%M"))
+        patts["hourly"] = "m:{0}:h:{1}".format(slug, now.strftime("%Y-%m-%d-%H"))
+
         patts["daily"] = "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d"))
         patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U"))
         patts["monthly"] = "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m"))
@@ -205,6 +210,10 @@ class R(object):
           metric will expire.
 
         Redis keys for each metric (slug) take the form:
+
+            m:<slug>:s:<yyyy-mm-dd-hh-mm-ss> # Second
+            m:<slug>:i:<yyyy-mm-dd-hh-mm>    # Minute
+            m:<slug>:h:<yyyy-mm-dd-hh>       # Hour
 
             m:<slug>:<yyyy-mm-dd>   # Day
             m:<slug>:w:<yyyy-num>   # Week (year - week number)
