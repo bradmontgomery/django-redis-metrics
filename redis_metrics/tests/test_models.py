@@ -51,6 +51,7 @@ class TestR(TestCase):
         """Test creation of an R object with parameters."""
         with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
             kwargs = {
+                'decode_responses': True,
                 'categories_key': 'CAT',
                 'metric_slugs_key': 'MSK',
                 'gauge_slugs_key': 'GSK',
@@ -72,11 +73,26 @@ class TestR(TestCase):
             self.assertEqual(inst._metric_slugs_key, "MSK")
             self.assertEqual(inst._gauge_slugs_key, "GSK")
             mock_redis.assert_called_once_with(
-                host='HOST', port='PORT', db='DB', password="PASSWORD",
-                socket_timeout=1, connection_pool=1)
+                decode_responses=True,
+                host='HOST',
+                port='PORT',
+                db='DB',
+                password="PASSWORD",
+                socket_timeout=1,
+                connection_pool=1
+            )
 
     def test__init__with_default_kwargs(self):
         """Test creation of an R object without parameters."""
+        r_kwargs = {
+            'decode_responses': True,
+            'host': 'localhost',
+            'db': 0,
+            'port': 6379,
+            'password': None,
+            'connection_pool': None,
+            'socket_timeout': None
+        }
         with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
             inst = R()
             self.assertEqual(inst.host, 'localhost')
@@ -88,9 +104,7 @@ class TestR(TestCase):
             self.assertEqual(inst._categories_key, 'categories')
             self.assertEqual(inst._metric_slugs_key, "metric-slugs")
             self.assertEqual(inst._gauge_slugs_key, "gauge-slugs")
-            mock_redis.assert_called_once_with(
-                host='localhost', port=6379, db=0, password=None,
-                socket_timeout=None, connection_pool=None)
+            mock_redis.assert_called_once_with(**r_kwargs)
 
     def test__date_range(self):
         """Tests ``R._date_range``."""
@@ -389,12 +403,20 @@ class TestR(TestCase):
         r.get_metrics.assert_called_once_with(['some-slug'])
 
     def test_delete_category(self):
+        r_kwargs = {
+            'decode_responses': True,
+            'host': 'localhost',
+            'db':0,
+            'port': 6379,
+            'password': None,
+            'connection_pool': None,
+            'socket_timeout': None
+        }
         with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
             r = R()
             r.delete_category("Foo")
             mock_redis.assert_has_calls([
-                call(host='localhost', db=0, port=6379, password=None,
-                     connection_pool=None, socket_timeout=None),
+                call(**r_kwargs),
                 call().delete('c:Foo'),
                 call().srem("categories", "Foo")
             ])
@@ -409,12 +431,20 @@ class TestR(TestCase):
             mock_delete_category.assert_called_once_with("Stuff")
 
     def test_reset_category(self):
+        r_kwargs = {
+            'decode_responses': True,
+            'host': 'localhost',
+            'db': 0,
+            'port': 6379,
+            'password': None,
+            'connection_pool': None,
+            'socket_timeout': None
+        }
         with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
             r = R()
             r.reset_category("Stuff", ['foo', 'bar'])
             mock_redis.assert_has_calls([
-                call(host='localhost', db=0, port=6379, password=None,
-                     connection_pool=None, socket_timeout=None),
+                call(**r_kwargs),
                 call().set('c:Stuff', '["foo", "bar"]'),
                 call().sadd('categories', 'Stuff'),
             ])
@@ -475,9 +505,9 @@ class TestR(TestCase):
             ('m:foo:y:2013', '4'),
         ]
         expected_results = [
-            ('Period',  'foo',  'bar'),
-            ('y:2012',  '3',    '1'),
-            ('y:2013',  '4',    '2'),
+            ('Period', 'foo', 'bar'),
+            ('y:2012', '3', '1'),
+            ('y:2013', '4', '2'),
         ]
         with patch('redis_metrics.models.redis.StrictRedis'):
             r = R()
