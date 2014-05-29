@@ -70,7 +70,8 @@ class R(object):
         self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db,
                                    password=self.password,
                                    socket_timeout=self.socket_timeout,
-                                   connection_pool=self.connection_pool)
+                                   connection_pool=self.connection_pool,
+                                   decode_responses=True)
 
     def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.datetime`` objects from

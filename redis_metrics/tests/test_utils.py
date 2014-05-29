@@ -32,14 +32,27 @@ class TestUtils(TestCase):
 
     def test_get_r(self):
         # Global `_redis_model` is None by default
+        r_kwargs = {
+            'decode_responses': True,
+            'host': 'localhost',
+            'db': 0,
+            'port': 6379,
+            'password': None,
+            'connection_pool': None,
+            'socket_timeout': None
+        }
+        with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
+            inst = R()
+            self.assertEqual(inst.host, 'localhost')
+            self.assertEqual(inst.port, 6379)
+            self.assertEqual(inst.db, 0)
+            self.assertEqual(inst.password, None)
         self.assertEqual(utils._redis_model, None)
         with patch("redis_metrics.models.redis.StrictRedis") as mock_redis:
             r = utils.get_r()
             self.assertIsInstance(r, R)
             self.assertEqual(r, utils._redis_model)
-            mock_redis.assert_called_once_with(
-                host="localhost", port=6379, db=0, password=None,
-                     connection_pool=None, socket_timeout=None)
+            mock_redis.assert_called_once_with(**r_kwargs)
 
     def test_metric(self):
         with patch("redis_metrics.utils.get_r") as mock_get_r:
