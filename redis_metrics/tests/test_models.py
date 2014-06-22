@@ -133,17 +133,17 @@ class TestR(TestCase):
         """Verify that this returns an empty list or a list of slugs."""
         # When there are no results from redis
         with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
-            mock_redis.return_value.get.return_value = None
+            mock_redis.return_value.smembers.return_value = set([])
             r = R()
             result = r._category_slugs("Sample Category")
-            self.assertEqual(result, [])
+            self.assertEqual(len(result), 0)
 
         # When there are no results from redis
         with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
-            mock_redis.return_value.get.return_value = '["slug-a", "slug-b"]'
+            mock_redis.return_value.smembers.return_value = set(["slug-a", "slug-b"])
             r = R()
             result = r._category_slugs("Sample Category")
-            self.assertEqual(result, ['slug-a', 'slug-b'])
+            self.assertEqual(set(result), set(['slug-a', 'slug-b']))
 
     @patch.object(R, '_category_slugs')
     def test__categorize(self, mock_category_slugs):
@@ -159,39 +159,9 @@ class TestR(TestCase):
             redis_instance = mock_redis.return_value
             r = R()
 
-            # When there are no existing slugs for a category
-            mock_category_slugs.return_value = []
             r._categorize(slug, cat)
-            mock_category_slugs.assert_called_once_with(cat)
-            json_slug = '["{0}"]'.format(slug)
-            redis_instance.set.assert_called_once_with(cat_key, json_slug)
-            # Verify that Category was added to the set
-            redis_instance.sadd.assert_called_once_with("categories", cat)
-
-            redis_instance.reset_mock()
-            mock_category_slugs.reset_mock()
-
-            # When there's an existing slug for a category
-            mock_category_slugs.return_value = ["existing-slug"]
-            r._categorize(slug, cat)
-            mock_category_slugs.assert_called_once_with(cat)
-            json_slug = '["{0}", "existing-slug"]'.format(slug)
-            redis_instance.set.assert_called_once_with(cat_key, json_slug)
-            # Verify that Category was added to the set
-            redis_instance.sadd.assert_called_once_with("categories", cat)
-
-            redis_instance.reset_mock()
-            mock_category_slugs.reset_mock()
-
-            # When we're setting a duplicate metric (should be no duplicates
-            # in the list that's set in Redis
-            mock_category_slugs.return_value = [slug]
-            r._categorize(slug, cat)
-            mock_category_slugs.assert_called_once_with(cat)
-            json_slug = '["{0}"]'.format(slug)
-            redis_instance.set.assert_called_once_with(cat_key, json_slug)
-            # Verify that Category was added to the set
-            redis_instance.sadd.assert_called_once_with("categories", cat)
+            calls = [call.sadd(cat_key, slug), call.sadd("categories", cat)]
+            redis_instance.assert_has_calls(calls, any_order=True)
 
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""

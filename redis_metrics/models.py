@@ -93,30 +93,24 @@ class R(object):
         return u"c:{0}".format(category)
 
     def _category_slugs(self, category):
-        """Returns a list of the metric slugs for the given category"""
+        """Returns a set of the metric slugs for the given category"""
         key = self._category_key(category)
-        slugs = self.r.get(key)
-        return [] if slugs is None else json.loads(slugs)
+        slugs = self.r.smembers(key)
+        return slugs
 
     def _categorize(self, slug, category):
         """Add the ``slug`` to the ``category``. We store category data as
-        JSON strings, with a key of the form::
+        as set, with a key of the form::
 
             c:<category name>
 
-        The data is a JSON-serialized list of metric slugs::
+        The data is set of metric slugs::
 
-            '["slug-a", "slug-b", ...]'
+            "slug-a", "slug-b", ...
 
         """
-        # Store existing slugs in a set, so we don't have duplicates
-        metric_slugs = set(self._category_slugs(category))
-        metric_slugs.add(slug)
-
-        # sets are not JSON-serializable, so convert to a list before storing
-        json_data = json.dumps(list(metric_slugs))
         key = self._category_key(category)
-        self.r.set(key, json_data)
+        self.r.sadd(key, slug)
 
         # Store all category names in a Redis set, for easy retrieval
         self.r.sadd(self._categories_key, category)
@@ -159,7 +153,7 @@ class R(object):
     def metric_slugs_by_category(self):
         """Return a dictionary of category->metrics data:
 
-            {<category_name>: [<slug1>, <slug2>, ...]}
+            {<category_name>: set(<slug1>, <slug2>, ...)}
 
         """
         result = {}
