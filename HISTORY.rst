@@ -1,6 +1,11 @@
 History
 -------
 
+0.7.2 (2014-06-22)
+++++++++++++++++++
+
+- Now Uses redis sets to store category slugs (thanks @remohammadi!)
+
 0.7.1 (2013-11-17)
 ++++++++++++++++++
 
