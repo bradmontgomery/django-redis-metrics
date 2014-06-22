@@ -12,6 +12,7 @@ def strip_metric_prefix(value):
     results:
 
 
+    * Hourly -- from: ``m:<slug>:h:<yyyy-mm-dd-hh>`` to ``<yyyy-mm-dd-hh>``
     * Daily -- from: ``m:<slug>:<yyyy-mm-dd>`` to ``<yyyy-mm-dd>``
     * Weekly -- from ``m:<slug>:w:<num>`` to ``w:<num>``
     * Monthly -- from ``m:<slug>:m:<yyyy-mm>`` to ``m:<yyyy-mm>``

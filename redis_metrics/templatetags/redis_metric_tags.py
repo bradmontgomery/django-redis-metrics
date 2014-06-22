@@ -69,7 +69,7 @@ def metric_history(slug, granularity="daily", since=None):
     """Template Tag to display a metric's history.
 
     * ``slug`` -- the metric's unique slug
-    * ``granularity`` -- the granularity: daily, weekly, monthly, yearly
+    * ``granularity`` -- the granularity: daily, hourly, weekly, monthly, yearly
     * ``since`` -- a date string of the form "YYYY-mm-dd";
 
     """
@@ -109,7 +109,7 @@ def aggregate_history(slugs, granularity="daily", since=None):
     """Template Tag to display history for multiple metrics.
 
     * ``slug_list`` -- A list of slugs to display
-    * ``granularity`` -- the granularity: daily, weekly, monthly, yearly
+    * ``granularity`` -- the granularity: daily, hourly, weekly, monthly, yearly
     * ``since`` -- a date string of the form "YYYY-mm-dd";
 
     """

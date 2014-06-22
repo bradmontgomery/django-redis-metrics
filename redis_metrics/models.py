@@ -122,7 +122,7 @@ class R(object):
         * ``date`` -- (optional) A ``datetime.date`` or ``datetime.datetime``
           objects used to generate the time period for the metric. If omitted,
           the current date will be used.
-        * ``granularity`` -- Must be one of: "all" (default), "daily",
+        * ``granularity`` -- Must be one of: "all" (default), "hourly", "daily",
           "weekly", "monthly", "yearly".
 
         Returns a list of strings.
@@ -132,8 +132,9 @@ class R(object):
         if date is None:
             date = datetime.date.today()
 
-        # we want to keep the order, here: daily, weekly, monthly, yearly
+        # we want to keep the order, here: hourly, daily, weekly, monthly, yearly
         patts = OrderedDict()
+        patts["hourly"] = "m:{0}:h:{1}".format(slug, date.strftime("%Y-%m-%d-%H"))
         patts["daily"] = "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d"))
         patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U"))
         patts["monthly"] = "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m"))
@@ -212,14 +213,15 @@ class R(object):
             m:<slug>:y:<yyyy>       # Year
 
         """
-        day_key, week_key, month_key, year_key = self._build_keys(slug)
+        hour_key, day_key, week_key, month_key, year_key = self._build_keys(slug)
 
         # Keep track of all of our keys
         self.r.sadd(self._metric_slugs_key,
-                    day_key, week_key, month_key, year_key)
+                    hour_key, day_key, week_key, month_key, year_key)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method; .incr accepts a second ``amound`` parameter.
+        self.r.incr(hour_key, num)
         self.r.incr(day_key, num)
         self.r.incr(week_key, num)
         self.r.incr(month_key, num)
@@ -230,6 +232,7 @@ class R(object):
 
         # Expire the Metric in ``expire`` seconds
         if expire:
+            self.r.expire(hour_key, expire)
             self.r.expire(day_key, expire)
             self.r.expire(week_key, expire)
             self.r.expire(month_key, expire)
@@ -242,8 +245,9 @@ class R(object):
         and year.
 
         """
-        day_key, week_key, month_key, year_key = self._build_keys(slug)
+        hour_key, day_key, week_key, month_key, year_key = self._build_keys(slug)
         return {
+            'hour': self.r.get(hour_key),
             'day': self.r.get(day_key),
             'week': self.r.get(week_key),
             'month': self.r.get(month_key),
@@ -306,7 +310,7 @@ class R(object):
 
         * ``slugs`` -- a slug OR a list of slugs
         * ``since`` -- the date from which we start pulling metrics
-        * ``granularity`` -- daily, weekly, monthly, yearly
+        * ``granularity`` -- hourly, daily, weekly, monthly, yearly
 
         Returns a list of tuples containing the Redis key and the associated
         metric::

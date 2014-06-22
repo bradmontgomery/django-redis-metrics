@@ -267,6 +267,7 @@ class TestViews(TestCase):
             metric_list = []
             for slug in slug_set:
                 metric_list.append((slug, {
+                        'hour': '00',
                         'day': '1',
                         'month': '22',
                         'week': '333',
@@ -292,7 +293,9 @@ class TestViews(TestCase):
         history = []
         value = 0
         for slug in slugs:
-            if granularity == "daily":
+            if granularity == "hourly":
+                key_pattern = "m:{0}:m:2013-01-10-00"
+            elif granularity == "daily":
                 key_pattern = "m:{0}:2013-01-10"
             elif granularity == "weekly":
                 key_pattern = "m:{0}:w:2013-01"
@@ -336,6 +339,9 @@ class TestViews(TestCase):
                 since=since
             )
             r.assert_has_calls([c])
+
+    def test_aggregate_history_view_hourly(self):
+        self._test_aggregate_history_view(['foo', 'bar'], 'hourly')
 
     def test_aggregate_history_view_daily(self):
         self._test_aggregate_history_view(['foo', 'bar'], 'daily')

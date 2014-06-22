@@ -51,6 +51,7 @@ Context for this Template:
     </ul>
 
     <ul class="subnav history">
+    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'hourly' %}">Hourly</a></li>
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'daily' %}">Daily</a></li>
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'weekly' %}">Weekly</a></li>
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'monthly' %}">Monthly</a></li>

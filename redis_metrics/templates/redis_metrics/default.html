@@ -68,7 +68,7 @@
     <h3>Metric History</h3>
     <p>Assuming that you've defined a <code>new-users</code> metric, you can
     use the <code>metric_history</code> template tag to view the its daily
-    (or weekly, monthly, yearly) values:</p>
+    (or hourly, weekly, monthly, yearly) values:</p>
     <pre><code>
     {% templatetag openblock %}load redis_metric_tags {% templatetag closeblock %}
     {% templatetag openblock %}metric_history 'new-users' 'daily' {% templatetag closeblock %}

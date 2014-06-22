@@ -38,6 +38,7 @@
     </ul>
 
     <ul class="subnav history">
+    <li><a href="{% url 'redis_metric_history' slug 'hourly' %}">Hourly</a></li>
     <li><a href="{% url 'redis_metric_history' slug 'daily' %}">Daily</a></li>
     <li><a href="{% url 'redis_metric_history' slug 'weekly' %}">Weekly</a></li>
     <li><a href="{% url 'redis_metric_history' slug 'monthly' %}">Monthly</a></li>

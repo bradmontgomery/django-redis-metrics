@@ -168,6 +168,7 @@ class TestR(TestCase):
         d = date.today()
         slug = 'test-slug'
         expected_results = [
+            "m:{0}:h:{1}".format(slug, d.strftime("%Y-%m-%d-%H")),
             "m:{0}:{1}".format(slug, d.strftime("%Y-%m-%d")),
             "m:{0}:w:{1}".format(slug, d.strftime("%Y-%U")),
             "m:{0}:m:{1}".format(slug, d.strftime("%Y-%m")),
@@ -175,6 +176,12 @@ class TestR(TestCase):
         ]
         keys = self.r._build_keys(slug)
         self.assertEqual(keys, expected_results)
+
+    def test__build_keys_hourly(self):
+        """Tests ``R._build_keys``. with a *hourly* granularity."""
+        d = date(2012, 4, 1)  # April Fools!
+        keys = self.r._build_keys('test-slug', date=d, granularity='hourly')
+        self.assertEqual(keys, ['m:test-slug:h:2012-04-01-00'])
 
     def test__build_keys_daily(self):
         """Tests ``R._build_keys``. with a *daily* granularity."""
@@ -252,13 +259,14 @@ class TestR(TestCase):
 
         # get the keys used for the metric, so we can check for the appropriate
         # calls
-        day, week, month, year = self.r._build_keys(slug)
+        hour, day, week, month, year = self.r._build_keys(slug)
         self.r.metric(slug, num=n)
 
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
         self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, day, week, month, year),
+            call.sadd(self.r._metric_slugs_key, hour, day, week, month, year),
+            call.incr(hour, n),
             call.incr(day, n),
             call.incr(week, n),
             call.incr(month, n),
@@ -277,13 +285,14 @@ class TestR(TestCase):
         n = 1
 
         # get the keys used for the metric, so we can check for calls
-        day, week, month, year = self.r._build_keys(slug)
+        hour, day, week, month, year = self.r._build_keys(slug)
         self.r.metric(slug, num=n, category=category)
 
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
         self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, day, week, month, year),
+            call.sadd(self.r._metric_slugs_key, hour, day, week, month, year),
+            call.incr(hour, n),
             call.incr(day, n),
             call.incr(week, n),
             call.incr(month, n),
@@ -305,13 +314,14 @@ class TestR(TestCase):
         n = 1
 
         # get the keys used for the metric, so we can check for calls
-        day, week, month, year = self.r._build_keys(slug)
+        hour, day, week, month, year = self.r._build_keys(slug)
         self.r.metric(slug, num=n, expire=3600)
 
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
         self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, day, week, month, year),
+            call.sadd(self.r._metric_slugs_key, hour, day, week, month, year),
+            call.incr(hour, n),
             call.incr(day, n),
             call.incr(week, n),
             call.incr(month, n),
@@ -335,8 +345,9 @@ class TestR(TestCase):
         self.r.get_metric(slug)
 
         # Verify that we GET the keys from redis
-        day, week, month, year = self.r._build_keys(slug)
+        hour, day, week, month, year = self.r._build_keys(slug)
         self.redis.assert_has_calls([
+            call.get(hour),
             call.get(day),
             call.get(week),
             call.get(month),
@@ -351,8 +362,8 @@ class TestR(TestCase):
         # Build the various keys for each metric
         keys = []
         for s in slugs:
-            day, week, month, year = self.r._build_keys(s)
-            keys.extend([day, week, month, year])
+            hour, day, week, month, year = self.r._build_keys(s)
+            keys.extend([hour, day, week, month, year])
 
         # construct the calls to redis
         calls = [call.get(k) for k in keys]
@@ -437,6 +448,10 @@ class TestR(TestCase):
         self.r.get_metric_history(slugs, granularity=granularity)
         self.redis.assert_has_calls([call.mget(keys)])
 
+    def test_get_metric_history_hourly(self):
+        """Tests ``R.get_metric_history`` with hourly granularity."""
+        self._test_get_metric_history('test-slug', 'hourly')
+
     def test_get_metric_history_daily(self):
         """Tests ``R.get_metric_history`` with daily granularity."""
         self._test_get_metric_history('test-slug', 'daily')
@@ -452,6 +467,9 @@ class TestR(TestCase):
     def test_get_metric_history_yearly(self):
         """Tests ``R.get_metric_history`` with yearly granularity."""
         self._test_get_metric_history('test-slug', 'yearly')
+
+    def test_get_metric_multiple_history_hourly(self):
+        self._test_get_metric_history(['foo', 'bar'], 'hourly')
 
     def test_get_metric_multiple_history_daily(self):
         self._test_get_metric_history(['foo', 'bar'], 'daily')
@@ -513,6 +531,9 @@ class TestR(TestCase):
                 call().get_metric_history_as_columns(slugs,
                                                      granularity=granularity)
             ])
+
+    def test_get_metric_history_as_columns_hourly(self):
+        self._test_get_metric_history_as_columns(['foo', 'bar'], 'hourly')
 
     def test_get_metric_history_as_columns_daily(self):
         self._test_get_metric_history_as_columns(['foo', 'bar'], 'daily')

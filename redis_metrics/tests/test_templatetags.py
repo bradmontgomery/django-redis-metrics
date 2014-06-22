@@ -208,6 +208,11 @@ class TestTemplateFilters(TestCase):
     """Verify that the custom filters return expected results."""
 
     def test_strip_metric_prefix(self):
+        # Hourly -- from: ``m:<slug>:h:<yyyy-mm-dd-hh>`` to ``<yyyy-mm-dd-hh>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:h:2000-01-30-00"), "h:2000-01-30-00"
+        )
+
         # Daily -- from: ``m:<slug>:<yyyy-mm-dd>`` to ``<yyyy-mm-dd>``
         self.assertEqual(
             strip_metric_prefix("m:test:2000-01-30"), "2000-01-30"
