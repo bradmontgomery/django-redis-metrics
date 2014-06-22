@@ -67,6 +67,7 @@ Settings
 * ``REDIS_METRICS_PASSWORD`` - redis database password to use, defaults to None
 * ``REDIS_METRICS_SOCKET_TIMEOUT`` - redis database socket timeout, defaults to None
 * ``REDIS_METRICS_SOCKET_CONNECTION_POOL`` - redis database socket connection pool, defaults to None
+* ``REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK`` - set to True if week should start on monday, defaults to False
 
 
 Usage
