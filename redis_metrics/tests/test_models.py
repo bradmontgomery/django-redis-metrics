@@ -133,7 +133,7 @@ class TestR(TestCase):
         """Verify that this returns an empty list or a list of slugs."""
         # When there are no results from redis
         with patch('redis_metrics.models.redis.StrictRedis') as mock_redis:
-            mock_redis.return_value.get.return_value = None
+            mock_redis.return_value.smembers.return_value = set([])
             r = R()
             result = r._category_slugs("Sample Category")
             self.assertEqual(len(result), 0)
