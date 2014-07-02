@@ -119,25 +119,24 @@ class R(object):
         """Builds redis keys used to store metrics.
 
         * ``slug`` -- a slug used for a metric, e.g. "user-signups"
-        * ``date`` -- (optional) A ``datetime.date`` or ``datetime.datetime``
-          objects used to generate the time period for the metric. If omitted,
-          the current date or time (in UTC) will be used.
+        * ``date`` -- (optional) A ``datetime.datetime`` object used to
+          generate the time period for the metric. If omitted, the current date
+          and time (in UTC) will be used.
         * ``granularity`` -- Must be one of: "all" (default), "yearly",
         "monthly", "weekly", "daily", "hourly", "minutes", or "seconds".
 
         Returns a list of strings.
 
         """
-        slug = slugify(slug)  # Make sure our slugs have a consistent format
+        slug = slugify(slug)  # Ensure slugs have a consistent format
         if date is None:
-            now = datetime.utcnow()
-            date = now.date()
+            date = datetime.utcnow()
 
         # we want to keep the order, here: hourly, daily, weekly, monthly, yearly
         patts = OrderedDict()
-        patts["seconds"] = "m:{0}:s:{1}".format(slug, now.strftime("%Y-%m-%d-%H-%M-%S"))
-        patts["minutes"] = "m:{0}:i:{1}".format(slug, now.strftime("%Y-%m-%d-%H-%M"))
-        patts["hourly"] = "m:{0}:h:{1}".format(slug, now.strftime("%Y-%m-%d-%H"))
+        patts["seconds"] = "m:{0}:s:{1}".format(slug, date.strftime("%Y-%m-%d-%H-%M-%S"))
+        patts["minutes"] = "m:{0}:i:{1}".format(slug, date.strftime("%Y-%m-%d-%H-%M"))
+        patts["hourly"] = "m:{0}:h:{1}".format(slug, date.strftime("%Y-%m-%d-%H"))
         patts["daily"] = "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d"))
         patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U"))
         patts["monthly"] = "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m"))
@@ -391,8 +390,9 @@ class R(object):
                     periods.append(period)
 
             _history.append(column)  # Remember that slug's column of data
-        _history.insert(0, periods)  # Finally, stick the time periods in the
-                                     # first column.
+
+        # Finally, stick the time periods in the first column.
+        _history.insert(0, periods)
         return zip(*_history)  # Transpose the rows & columns
 
     # Gauges. Gauges have a different prefix "g:" in order to differentiate
