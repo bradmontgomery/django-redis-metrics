@@ -165,23 +165,37 @@ class TestR(TestCase):
 
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""
-        d = date.today()
-        slug = 'test-slug'
-        expected_results = [
-            "m:{0}:h:{1}".format(slug, d.strftime("%Y-%m-%d-%H")),
-            "m:{0}:{1}".format(slug, d.strftime("%Y-%m-%d")),
-            "m:{0}:w:{1}".format(slug, d.strftime("%Y-%U")),
-            "m:{0}:m:{1}".format(slug, d.strftime("%Y-%m")),
-            "m:{0}:y:{1}".format(slug, d.strftime("%Y")),
-        ]
-        keys = self.r._build_keys(slug)
-        self.assertEqual(keys, expected_results)
+        with patch('redis_metrics.models.datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = datetime(2014, 7, 2, 12, 6, 34)
+            expected_results = [
+                "m:test-slug:s:2014-07-02-12-06-34",
+                "m:test-slug:i:2014-07-02-12-06",
+                "m:test-slug:h:2014-07-02-12",
+                "m:test-slug:2014-07-02",
+                "m:test-slug:w:2014-26",
+                "m:test-slug:m:2014-07",
+                "m:test-slug:y:2014",
+            ]
+            keys = self.r._build_keys('test-slug')
+            self.assertEqual(keys, expected_results)
+
+    def test__build_keys_seconds(self):
+        """Tests ``R._build_keys``. with a *seconds* granularity."""
+        d = date(2012, 4, 1, 11, 30, 59)  # April Fools!
+        keys = self.r._build_keys('test-slug', date=d, granularity='seconds')
+        self.assertEqual(keys, ['m:test-slug:s:2012-04-01-11-30-59'])
+
+    def test__build_keys_minutes(self):
+        """Tests ``R._build_keys``. with a *minutes* granularity."""
+        d = date(2012, 4, 1, 11, 30)  # April Fools!
+        keys = self.r._build_keys('test-slug', date=d, granularity='minutes')
+        self.assertEqual(keys, ['m:test-slug:i:2012-04-01-11-30'])
 
     def test__build_keys_hourly(self):
         """Tests ``R._build_keys``. with a *hourly* granularity."""
-        d = date(2012, 4, 1)  # April Fools!
+        d = date(2012, 4, 1, 11, 30)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='hourly')
-        self.assertEqual(keys, ['m:test-slug:h:2012-04-01-00'])
+        self.assertEqual(keys, ['m:test-slug:h:2012-04-01-11'])
 
     def test__build_keys_daily(self):
         """Tests ``R._build_keys``. with a *daily* granularity."""
@@ -387,7 +401,7 @@ class TestR(TestCase):
         r_kwargs = {
             'decode_responses': True,
             'host': 'localhost',
-            'db':0,
+            'db': 0,
             'port': 6379,
             'password': None,
             'connection_pool': None,
