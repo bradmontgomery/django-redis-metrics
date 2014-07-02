@@ -252,13 +252,16 @@ class R(object):
     def get_metric(self, slug):
         """Get the current values for a metric.
 
-        Returns a dict with metric values accumulated for the day, week, month,
-        and year.
+        Returns a dictionary with metric values accumulated for the seconds,
+        minutes, hours, day, week, month, and year.
 
         """
-        hour_key, day_key, week_key, month_key, year_key = self._build_keys(slug)
+        keys = self._build_keys(slug)
+        sec_key, min_key, hour_key, day_key, week_key, month_key, year_key = keys
         return {
-            'hour': self.r.get(hour_key),
+            'seconds': self.r.get(sec_key),
+            'minutes': self.r.get(min_key),
+            'hours': self.r.get(hour_key),
             'day': self.r.get(day_key),
             'week': self.r.get(week_key),
             'month': self.r.get(month_key),
@@ -271,7 +274,12 @@ class R(object):
         Returns a list of two-tuples containing the metric slug and a
         dictionary like the one returned by ``get_metric``::
 
-            (some-metric, {'day': 0, 'week': 0, 'month': 0, 'year': 0})
+            (
+                some-metric, {
+                    'seconds': 0, 'minutes': 0, 'hours': 0,
+                    'day': 0, 'week': 0, 'month': 0, 'year': 0
+                }
+            )
 
         NOTE: This method calls ``get_metric`` for each slug in the
         ``slug_list``, which really isn't very efficient.
