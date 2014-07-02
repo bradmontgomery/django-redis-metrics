@@ -67,11 +67,15 @@ class R(object):
             getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None))
 
         # Create the connection to Redis
-        self.r = redis.StrictRedis(host=self.host, port=self.port, db=self.db,
-                                   password=self.password,
-                                   socket_timeout=self.socket_timeout,
-                                   connection_pool=self.connection_pool,
-                                   decode_responses=True)
+        self.r = redis.StrictRedis(
+            host=self.host,
+            port=self.port,
+            db=self.db,
+            password=self.password,
+            socket_timeout=self.socket_timeout,
+            connection_pool=self.connection_pool,
+            decode_responses=True
+        )
 
     def _date_range(self, since=None):
         """Returns a generator that yields ``datetime.datetime`` objects from
@@ -81,7 +85,7 @@ class R(object):
         * ``since`` -- a ``datetime.datetime`` object or None.
 
         """
-        now = datetime.utcnow().today()
+        now = datetime.utcnow()
         if since is None:
             since_days = 365  # assume 1 year :-/
         else:
@@ -313,15 +317,13 @@ class R(object):
             category.
 
         """
+        key = self._category_key(category)
         if len(metric_slugs) == 0:
             # If there are no metrics, just remove the category
             self.delete_category(category)
         else:
-            # Convert metrics to json (removing any duplicates)
-            json_data = json.dumps(list(metric_slugs))
-            self.r.set(self._category_key(category), json_data)
-
-            # Store all category names in a Redis set, for easy retrieval
+            # Save all the slugs in the category, and save the category name
+            self.r.sadd(key, *metric_slugs)
             self.r.sadd(self._categories_key, category)
 
     def get_metric_history(self, slugs, since=None, granularity='daily'):
