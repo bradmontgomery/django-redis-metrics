@@ -1,6 +1,13 @@
 History
 -------
 
+(coming soon!) 0.8.0
+++++++++++++++++++++
+
+- Autodecode data from redis (`PR #18 <https://github.com/bradmontgomery/django-redis-metrics/pull/18>`_, thanks @jellonek)
+- Support for granularity at hour, minute, seconds. (See `Issue #13 <https://github.com/bradmontgomery/django-redis-metrics/issues/13>`_)
+- **Potential Breaking change**: Always store dates & times in UTC
+
 0.7.2 (2014-06-22)
 ++++++++++++++++++
 
