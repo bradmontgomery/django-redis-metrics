@@ -132,7 +132,8 @@ class R(object):
         if date is None:
             date = datetime.utcnow()
 
-        # we want to keep the order, here: hourly, daily, weekly, monthly, yearly
+        # we want to keep the order, here, from smallest to largest granularity:
+        # seconds, minutes, hourly, daily, weekly, monthly, yearly
         patts = OrderedDict()
         patts["seconds"] = "m:{0}:s:{1}".format(slug, date.strftime("%Y-%m-%d-%H-%M-%S"))
         patts["minutes"] = "m:{0}:i:{1}".format(slug, date.strftime("%Y-%m-%d-%H-%M"))
@@ -219,14 +220,16 @@ class R(object):
             m:<slug>:y:<yyyy>       # Year
 
         """
-        hour_key, day_key, week_key, month_key, year_key = self._build_keys(slug)
+        keys = self._build_keys(slug)
+        sec_key, min_key, hour_key, day_key, week_key, month_key, year_key = keys
 
         # Keep track of all of our keys
-        self.r.sadd(self._metric_slugs_key,
-                    hour_key, day_key, week_key, month_key, year_key)
+        self.r.sadd(self._metric_slugs_key, *keys)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method; .incr accepts a second ``amound`` parameter.
+        self.r.incr(sec_key, num)
+        self.r.incr(min_key, num)
         self.r.incr(hour_key, num)
         self.r.incr(day_key, num)
         self.r.incr(week_key, num)
@@ -238,6 +241,8 @@ class R(object):
 
         # Expire the Metric in ``expire`` seconds
         if expire:
+            self.r.expire(sec_key, expire)
+            self.r.expire(min_key, expire)
             self.r.expire(hour_key, expire)
             self.r.expire(day_key, expire)
             self.r.expire(week_key, expire)
