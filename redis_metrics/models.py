@@ -306,13 +306,13 @@ class R(object):
                 }
             )
 
-        NOTE: This method calls ``get_metric`` for each slug in the
-        ``slug_list``, which really isn't very efficient.
-
         """
         results = []
         for slug in slug_list:
-            results.append((slug, self.get_metric(slug)))
+            keys = ['seconds', 'minutes', 'hours', 'day', 'week', 'month', 'year']
+            metrics = self.r.mget(*self._build_keys(slug))
+            d = dict(zip(keys, metrics))
+            results.append((slug, d))
         return results
 
     def get_category_metrics(self, category):

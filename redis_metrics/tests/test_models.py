@@ -411,16 +411,18 @@ class TestR(TestCase):
         slugs = ['metric-1', 'metric-2']
 
         # Build the various keys for each metric
-        keys = []
+        keys_list = []
         for s in slugs:
-            keys.extend(self.r._build_keys(s))
+            keys_list.append(self.r._build_keys(s))
 
-        # construct the calls to redis
-        calls = [call.get(k) for k in keys]
+        # construct the calls to redis.mget
+        calls = [call(*keys) for keys in keys_list]
 
         # Test our method
         self.r.get_metrics(slugs)
-        self.redis.assert_has_calls(calls)
+        self.assertEqual(self.redis.mget.call_args_list, calls)
+        self.assertTrue(self.redis.mget.called)  # mget was called...
+        self.assertEqual(self.redis.mget.call_count, 2)  # ...twice
 
     def test_get_category_metrics(self):
         """returns metrics for a given category"""
