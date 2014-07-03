@@ -450,7 +450,7 @@ class TestR(TestCase):
             r.reset_category("Stuff", ['foo', 'bar'])
             mock_redis.assert_has_calls([
                 call(**r_kwargs),
-                call().set('c:Stuff', '["foo", "bar"]'),
+                call().sadd('c:Stuff', 'foo', 'bar'),
                 call().sadd('categories', 'Stuff'),
             ])
 
