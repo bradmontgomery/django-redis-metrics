@@ -94,6 +94,9 @@ class R(object):
         objects that differ by 1 second each.
 
         """
+        if since is None:  # Default to 1 year
+            since = datetime.utcnow() - timedelta(days=365)
+
         now = datetime.utcnow()
         elapsed = (now - since)
 
