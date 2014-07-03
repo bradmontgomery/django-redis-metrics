@@ -94,8 +94,8 @@ class R(object):
         objects that differ by 1 second each.
 
         """
-        if since is None:  # Default to the last 90 days
-            since = datetime.utcnow() - timedelta(days=90)
+        if since is None:  # Default to the last 7 day
+            since = datetime.utcnow() - timedelta(days=7)
 
         now = datetime.utcnow()
         elapsed = (now - since)
