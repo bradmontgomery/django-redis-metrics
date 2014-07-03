@@ -3,7 +3,10 @@ from .models import R
 
 
 class AggregateMetricForm(forms.Form):
-    metrics = forms.MultipleChoiceField(choices=[])
+    metrics = forms.MultipleChoiceField(
+        choices=[],
+        widget=forms.widgets.CheckboxSelectMultiple(),
+    )
 
     def __init__(self, *args, **kwargs):
         super(AggregateMetricForm, self).__init__(*args, **kwargs)
