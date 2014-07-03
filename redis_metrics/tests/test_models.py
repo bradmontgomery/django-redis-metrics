@@ -4,7 +4,7 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from mock import call, patch, Mock
 
 from django.conf import settings
@@ -109,44 +109,44 @@ class TestR(TestCase):
     def test__date_range_seconds(self):
         """Tests ``R._date_range`` at the "seconds" granularity."""
         since = datetime.utcnow() - timedelta(seconds=5)
-        values = r._date_range('seconds', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('seconds', since)
+        self.assertEqual(len(list(values)), 5)
 
     def test__date_range_minutes(self):
         """Tests ``R._date_range`` at the "minutes" granularity."""
         since = datetime.utcnow() - timedelta(minutes=5)
-        values = r._date_range('minutes', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('minutes', since)
+        self.assertEqual(len(list(values)), 5)
 
     def test__date_range_hourly(self):
         """Tests ``R._date_range`` at the "hourly" granularity."""
         since = datetime.utcnow() - timedelta(hours=5)
-        values = r._date_range('hourly', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('hourly', since)
+        self.assertEqual(len(list(values)), 5)
 
     def test__date_range_daily(self):
         """Tests ``R._date_range`` at the "daily" granularity."""
         since = datetime.utcnow() - timedelta(days=5)
-        values = r._date_range('daily', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('daily', since)
+        self.assertEqual(len(list(values)), 6)  # 6 because we do days + 1
 
     def test__date_range_weekly(self):
         """Tests ``R._date_range`` at the "weekly" granularity."""
         since = datetime.utcnow() - timedelta(days=5)
-        values = r._date_range('weekly', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('weekly', since)
+        self.assertEqual(len(list(values)), 6)  # 6 because we do days + 1
 
     def test__date_range_monthly(self):
         """Tests ``R._date_range`` at the "monthly" granularity."""
         since = datetime.utcnow() - timedelta(days=5)
-        values = r._date_range('montly', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('montly', since)
+        self.assertEqual(len(list(values)), 6)  # 6 because we do days + 1
 
     def test__date_range_yearly(self):
         """Tests ``R._date_range`` at the "yearly" granularity."""
         since = datetime.utcnow() - timedelta(days=5)
-        values = r._date_range('yearly', since)
-        self.assertEqual(len(values), 5)
+        values = self.r._date_range('yearly', since)
+        self.assertEqual(len(list(values)), 6)  # 6 because we do days + 1
 
     def test__category_key(self):
         """Creates a redis key for a given category string."""

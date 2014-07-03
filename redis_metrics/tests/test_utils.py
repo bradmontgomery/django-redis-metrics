@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import datetime, timedelta
 from mock import call, patch, Mock
 
 from django.conf import settings
@@ -88,10 +88,13 @@ class TestUtils(TestCase):
 
     def test__dates(self):
         # The following line is the expected result of _dates for 5 days
-        expected = (date.today() - timedelta(days=d) for d in range(5))
-        result = utils._dates(5)
-        self.assertEqual(type(expected), type(result))
-        self.assertEqual(list(utils._dates(5)), list(expected))
+        d = datetime(2014, 1, 1, 2, 30, 45)
+        with patch('redis_metrics.utils.datetime') as mock_datetime:
+            mock_datetime.utcnow.return_value = d
+            expected = (d - timedelta(days=i) for i in range(5))
+            result = utils._dates(5)
+            self.assertEqual(type(expected), type(result))
+            self.assertEqual(list(expected), list(result))
 
     def test_generate_test_metrics(self):
         config = {
@@ -123,13 +126,15 @@ class TestUtils(TestCase):
             mock_r.r.incr.assert_called_once_with('key', 100)
 
     def test_delete_test_metrics(self):
-        d = list(utils._dates(1))[0]  # Date used inside function
-        with patch('redis_metrics.utils.get_r') as mock_get_r:
-            mock_r = mock_get_r.return_value
-            mock_r._metric_slugs_key = 'MSK'
-            mock_r._build_keys.return_value = ['keys']
+        d = datetime.utcnow()
+        with patch('redis_metrics.utils._dates') as mock_dates:
+            mock_dates.return_value = [d]
+            with patch('redis_metrics.utils.get_r') as mock_get_r:
+                mock_r = mock_get_r.return_value
+                mock_r._metric_slugs_key = 'MSK'
+                mock_r._build_keys.return_value = ['keys']
 
-            utils.delete_test_metrics(slug="test-metric", num=1)
-            mock_r._build_keys.assert_called_once_with("test-metric", date=d)
-            mock_r.r.srem.assert_called_once_with('MSK', 'keys')
-            mock_r.r.delete.assert_called_once_with('keys')
+                utils.delete_test_metrics(slug="test-metric", num=1)
+                mock_r._build_keys.assert_called_once_with("test-metric", date=d)
+                mock_r.r.srem.assert_called_once_with('MSK', 'keys')
+                mock_r.r.delete.assert_called_once_with('keys')
