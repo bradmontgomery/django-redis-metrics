@@ -94,8 +94,10 @@ class R(object):
         objects that differ by 1 second each.
 
         """
-        if since is None:  # Default to the last 7 day
-            since = datetime.utcnow() - timedelta(days=7)
+        if since is None and granularity in ['seconds', 'minutes']:
+            since = datetime.utcnow() - timedelta(days=1)  # Default to a day
+        elif since is None:
+            since = datetime.utcnow() - timedelta(days=7)  # Default to 7 days
 
         now = datetime.utcnow()
         elapsed = (now - since)
