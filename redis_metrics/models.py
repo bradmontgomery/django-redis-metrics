@@ -94,8 +94,8 @@ class R(object):
         objects that differ by 1 second each.
 
         """
-        if since is None:  # Default to 1 year
-            since = datetime.utcnow() - timedelta(days=365)
+        if since is None:  # Default to the last 90 days
+            since = datetime.utcnow() - timedelta(days=90)
 
         now = datetime.utcnow()
         elapsed = (now - since)
@@ -311,8 +311,9 @@ class R(object):
         for slug in slug_list:
             keys = ['seconds', 'minutes', 'hours', 'day', 'week', 'month', 'year']
             metrics = self.r.mget(*self._build_keys(slug))
-            d = dict(zip(keys, metrics))
-            results.append((slug, d))
+            if any(metrics):  # Only if we have data.
+                d = dict(zip(keys, metrics))
+                results.append((slug, d))
         return results
 
     def get_category_metrics(self, category):
@@ -382,7 +383,11 @@ class R(object):
         for slug in slugs:
             for date in self._date_range(granularity, since):
                 keys.update(set(self._build_keys(slug, date, granularity)))
-        return sorted(zip(keys, self.r.mget(keys)))
+
+        # Fetch our data, but exclude any missing values
+        results = filter(None, self.r.mget(keys))
+        results = zip(keys, results)
+        return sorted(results)
 
     def get_metric_history_as_columns(self, slugs, since=None,
                                       granularity='daily'):
