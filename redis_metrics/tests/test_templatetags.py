@@ -208,6 +208,16 @@ class TestTemplateFilters(TestCase):
     """Verify that the custom filters return expected results."""
 
     def test_strip_metric_prefix(self):
+        # Seconds -- from: ``m:<slug>:s:<yyyy-mm-dd-hh-MM-SS>`` to ``<yyyy-mm-dd-hh-MM-SS>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:s:2000-01-30-14-45-37"), "s:2000-01-30-14-45-37"
+        )
+
+        # Minutes -- from: ``m:<slug>:i:<yyyy-mm-dd-hh-MM>`` to ``<yyyy-mm-dd-hh-MM>``
+        self.assertEqual(
+            strip_metric_prefix("m:test:i:2000-01-30-14-45"), "i:2000-01-30-14-45"
+        )
+
         # Hourly -- from: ``m:<slug>:h:<yyyy-mm-dd-hh>`` to ``<yyyy-mm-dd-hh>``
         self.assertEqual(
             strip_metric_prefix("m:test:h:2000-01-30-00"), "h:2000-01-30-00"
@@ -234,6 +244,15 @@ class TestTemplateFilters(TestCase):
         )
 
     def test_metric_slug(self):
+        # Converts ``m:foo:s:<yyyy-mm-dd-hh-mm-ss>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:s:2000-01-31-14-45-37"), "foo")
+
+        # Converts ``m:foo:i:<yyyy-mm-dd-hh-mm>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:i:2000-01-31-14-45"), "foo")
+
+        # Converts ``m:foo:h:<yyyy-mm-dd-hh>`` to ``foo``
+        self.assertEqual(metric_slug("m:foo:h:2000-01-31-14"), "foo")
+
         # Converts ``m:foo:<yyyy-mm-dd>`` to ``foo``
         self.assertEqual(metric_slug("m:foo:2000-01-31"), "foo")
 
