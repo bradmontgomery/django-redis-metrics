@@ -109,7 +109,8 @@ def aggregate_history(slugs, granularity="daily", since=None):
     """Template Tag to display history for multiple metrics.
 
     * ``slug_list`` -- A list of slugs to display
-    * ``granularity`` -- the granularity: daily, hourly, weekly, monthly, yearly
+    * ``granularity`` -- the granularity: seconds, minutes, hourly,
+                         daily, weekly, monthly, yearly
     * ``since`` -- a date string of the form "YYYY-mm-dd";
 
     """

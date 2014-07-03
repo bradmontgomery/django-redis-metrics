@@ -201,7 +201,7 @@ class R(object):
     def metric(self, slug, num=1, category=None, expire=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
         if it does. All metrics are prefixed with 'm', and automatically
-        aggregate for Day, Week, Month, and Year.
+        aggregate for Seconds, Minutes, Hours, Day, Week, Month, and Year.
 
         Parameters:
 
@@ -217,11 +217,10 @@ class R(object):
             m:<slug>:s:<yyyy-mm-dd-hh-mm-ss> # Second
             m:<slug>:i:<yyyy-mm-dd-hh-mm>    # Minute
             m:<slug>:h:<yyyy-mm-dd-hh>       # Hour
-
-            m:<slug>:<yyyy-mm-dd>   # Day
-            m:<slug>:w:<yyyy-num>   # Week (year - week number)
-            m:<slug>:m:<yyyy-mm>    # Month
-            m:<slug>:y:<yyyy>       # Year
+            m:<slug>:<yyyy-mm-dd>            # Day
+            m:<slug>:w:<yyyy-num>            # Week (year - week number)
+            m:<slug>:m:<yyyy-mm>             # Month
+            m:<slug>:y:<yyyy>                # Year
 
         """
         keys = self._build_keys(slug)
@@ -331,7 +330,8 @@ class R(object):
 
         * ``slugs`` -- a slug OR a list of slugs
         * ``since`` -- the date from which we start pulling metrics
-        * ``granularity`` -- hourly, daily, weekly, monthly, yearly
+        * ``granularity`` -- seconds, minutes, hourly,
+                             daily, weekly, monthly, yearly
 
         Returns a list of tuples containing the Redis key and the associated
         metric::
