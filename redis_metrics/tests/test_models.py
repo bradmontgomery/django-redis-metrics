@@ -106,6 +106,20 @@ class TestR(TestCase):
             self.assertEqual(inst._gauge_slugs_key, "gauge-slugs")
             mock_redis.assert_called_once_with(**r_kwargs)
 
+    def test__date_range(self):
+        """Tests ``R._date_range`` at various granularities *without* a
+        ``since`` date."""
+        # minutes or seconds should start with a timedelta of 1 day
+        self.assertEqual(len(list(self.r._date_range('seconds', None))), 86400)
+        self.assertEqual(len(list(self.r._date_range('minutes', None))), 1440)
+
+        # Everything else should have a timedelta of 7 days
+        self.assertEqual(len(list(self.r._date_range('hourly', None))), 168)
+        self.assertEqual(len(list(self.r._date_range('daily', None))), 8)
+        self.assertEqual(len(list(self.r._date_range('weekly', None))), 8)
+        self.assertEqual(len(list(self.r._date_range('monthly', None))), 8)
+        self.assertEqual(len(list(self.r._date_range('yearly', None))), 8)
+
     def test__date_range_seconds(self):
         """Tests ``R._date_range`` at the "seconds" granularity."""
         since = datetime.utcnow() - timedelta(seconds=5)
@@ -406,6 +420,9 @@ class TestR(TestCase):
         ])
 
     def test_get_metrics(self):
+        # Set a return value for mget, so all of the method gets exercised.
+        prev_return = self.redis.mget.return_value
+        self.redis.mget.return_value = [u'1', u'2']
 
         # Slugs for metrics we want
         slugs = ['metric-1', 'metric-2']
@@ -423,6 +440,9 @@ class TestR(TestCase):
         self.assertEqual(self.redis.mget.call_args_list, calls)
         self.assertTrue(self.redis.mget.called)  # mget was called...
         self.assertEqual(self.redis.mget.call_count, 2)  # ...twice
+
+        # Reset mget's previous return value
+        self.redis.mget.return_value = prev_return
 
     def test_get_category_metrics(self):
         """returns metrics for a given category"""
