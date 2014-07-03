@@ -5,9 +5,9 @@ The roadmap...
 
 For the 0.8.0 release
 ---------------------
-* update views/template tags to display new granularity levels.
-* update utils.metric to target granularity
-* make sure we're using utc everywhere.
+* Finally merge https://github.com/bradmontgomery/django-redis-metrics/pull/16
+* Issue #20
+
 
 Future
 ------

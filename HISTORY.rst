@@ -4,6 +4,7 @@ History
 (coming soon!) 0.8.0
 ++++++++++++++++++++
 
+- Support for metrics at a granularity of Seconds, Minutes, and Hours, (`#24 <https://github.com/bradmontgomery/django-redis-metrics/pull/24>`_ and `#13 <https://github.com/bradmontgomery/django-redis-metrics/issues/13>`_, thanks @mvillarejo)
 - Autodecode data from redis (`PR #18 <https://github.com/bradmontgomery/django-redis-metrics/pull/18>`_, thanks @jellonek)
 - Support for granularity at hour, minute, seconds. (See `Issue #13 <https://github.com/bradmontgomery/django-redis-metrics/issues/13>`_)
 - **Potential Breaking change**: Always store dates & times in UTC
