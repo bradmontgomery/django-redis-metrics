@@ -1,5 +1,6 @@
-import datetime
 import random
+
+from datetime import datetime, timedelta
 from .models import R
 
 
@@ -24,9 +25,9 @@ def gauge(slug, current_value):
 
 
 def _dates(num):
-    """Yields a generator of datetime.date objects for the past ``num`` days"""
-    today = datetime.date.today()
-    return (today - datetime.timedelta(days=d) for d in range(num))
+    """Yields a generator of datetime objects for the past ``num`` days"""
+    now = datetime.utcnow()
+    return (now - timedelta(days=d) for d in range(num))
 
 
 def generate_test_metrics(slug='test-metric', num=100, randomize=False):
