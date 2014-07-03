@@ -9,6 +9,9 @@
   function drawChart() {
     var data = google.visualization.arrayToDataTable([
       ['Metric', 'Value'],
+      ['Seconds',    {{ metrics.seconds|default:0 }}],
+      ['Minutes',    {{ metrics.minutes|default:0 }}],
+      ['Hours',    {{ metrics.hours|default:0 }}],
       ['Day',    {{ metrics.day|default:0 }}],
       ['Week',   {{ metrics.week|default:0 }}],
       ['Month',  {{ metrics.month|default:0 }}],
@@ -38,6 +41,8 @@
     <h2>Metric History</h2>
 
     <ul class="subnav history">
+    <li><a href="{% url 'redis_metric_history' slug 'seconds' %}">Seconds</a></li>
+    <li><a href="{% url 'redis_metric_history' slug 'minutes' %}">Minutes</a></li>
     <li><a href="{% url 'redis_metric_history' slug 'hourly' %}">Hourly</a></li>
     <li><a href="{% url 'redis_metric_history' slug 'daily' %}">Daily</a></li>
     <li><a href="{% url 'redis_metric_history' slug 'weekly' %}">Weekly</a></li>
@@ -53,6 +58,18 @@
             <tr><th>Time Period</th><th>Value</th></tr>
         </thead>
         <tbody>
+            <tr>
+                <td>Seconds</td>
+                <td class="value">{{ metrics.seconds|default_if_none:"-" }}</td>
+            </tr>
+            <tr>
+                <td>Minutes</td>
+                <td class="value">{{ metrics.minutes|default_if_none:"-" }}</td>
+            </tr>
+            <tr>
+                <td>Hours</td>
+                <td class="value">{{ metrics.hours|default_if_none:"-" }}</td>
+            </tr>
             <tr>
                 <td>Day</td>
                 <td class="value">{{ metrics.day|default_if_none:"-" }}</td>

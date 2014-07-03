@@ -6,6 +6,9 @@ google.setOnLoadCallback(drawChart);
 function drawChart() {
   var data = google.visualization.arrayToDataTable([
     ['Metric', 'Value'],
+    ['Seconds',    {{ metrics.seconds|default:0 }}],
+    ['Minutes',    {{ metrics.minutes|default:0 }}],
+    ['Hours',    {{ metrics.hours|default:0 }}],
     ['Day',    {{ metrics.day|default:0 }}],
     ['Week',   {{ metrics.week|default:0 }}],
     ['Month',  {{ metrics.month|default:0 }}],
