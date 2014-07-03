@@ -5,7 +5,6 @@ lightweight wrapper around Redis.
 """
 from collections import OrderedDict
 from datetime import datetime, timedelta
-import json
 import redis
 
 from django.conf import settings
