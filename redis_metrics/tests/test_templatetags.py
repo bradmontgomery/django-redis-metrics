@@ -30,35 +30,32 @@ class TestTemplateTags(TestCase):
         slug = "test-slug"
         years = 5
         link_type = "history"
-        t = datetime.today()
+        now = datetime(2014, 7, 4)
 
-        result = taglib.metrics_since(slug, years, link_type)
-        self.assertIn('link_type', result.keys())
-        self.assertIn('slug_values', result.keys())
-        self.assertEqual(result['link_type'], link_type)
+        module = 'redis_metrics.templatetags.redis_metric_tags.datetime'
+        with patch(module) as mock_datetime:
+            mock_datetime.utcnow.return_value = now
 
-        # Verify contents of `slug_values`
-        self.assertEqual(len(result['slug_values']), years)
-        self.assertEqual(
-            [s for s, d, y, g in result['slug_values']],
-            [slug for y in range(years)]
-        )
-        expected_dates = [
-            (t - timedelta(days=365 * y)).strftime("%Y-%m-%d")
-            for y in range(1, years + 1)
-        ]
-        self.assertEqual(
-            [d.strftime("%Y-%m-%d") for s, d, y, g in result['slug_values']],
-            expected_dates
-        )
-        self.assertEqual(
-            [y for s, d, y, g in result['slug_values']],
-            range(1, years + 1)
-        )
-        self.assertEqual(
-            [g for s, d, y, g in result['slug_values']],
-            ['daily' for y in range(years)]
-        )
+            result = taglib.metrics_since(slug, years, link_type)
+            self.assertIn('link_type', result.keys())
+            self.assertIn('slug_values', result.keys())
+            self.assertEqual(result['link_type'], link_type)
+
+            # Verify contents of `slug_values`
+            # There should be entries for each year + 5 additional periods.
+            expected = [
+                (slug, now - timedelta(days=1), "Today", 'daily'),
+                (slug, now - timedelta(days=7), "1 Week", 'daily'),
+                (slug, now - timedelta(days=30), "30 Days", 'daily'),
+                (slug, now - timedelta(days=60), "60 Days", 'daily'),
+                (slug, now - timedelta(days=90), "90 Days", 'daily'),
+                (slug, now - timedelta(days=365), "1 Years", 'daily'),
+                (slug, now - timedelta(days=365 * 2), "2 Years", 'daily'),
+                (slug, now - timedelta(days=365 * 3), "3 Years", 'daily'),
+                (slug, now - timedelta(days=365 * 4), "4 Years", 'daily'),
+                (slug, now - timedelta(days=365 * 5), "5 Years", 'daily'),
+            ]
+            self.assertEqual(expected, result['slug_values'])
 
     def test_metrics_since_aggregate(self):
         """Tests the ``metrics_since`` template tag when displaying metric
@@ -68,35 +65,33 @@ class TestTemplateTags(TestCase):
         years = 5
         link_type = "aggregate"
         granularity = "weekly"
-        t = datetime.today()
+        now = datetime(2014, 7, 4)
 
-        result = taglib.metrics_since(slugs, years, link_type, granularity)
-        self.assertIn('link_type', result.keys())
-        self.assertIn('slug_values', result.keys())
-        self.assertEqual(result['link_type'], link_type)
+        module = 'redis_metrics.templatetags.redis_metric_tags.datetime'
+        with patch(module) as mock_datetime:
+            mock_datetime.utcnow.return_value = now
 
-        # Verify contents of `slug_values`
-        self.assertEqual(len(result['slug_values']), years)
-        self.assertEqual(
-            [s for s, d, y, g in result['slug_values']],
-            ["+".join(slugs) for y in range(years)]
-        )
-        expected_dates = [
-            (t - timedelta(days=365 * y)).strftime("%Y-%m-%d")
-            for y in range(1, years + 1)
-        ]
-        self.assertEqual(
-            [d.strftime("%Y-%m-%d") for s, d, y, g in result['slug_values']],
-            expected_dates
-        )
-        self.assertEqual(
-            [y for s, d, y, g in result['slug_values']],
-            range(1, years + 1)
-        )
-        self.assertEqual(
-            [g for s, d, y, g in result['slug_values']],
-            [granularity for y in range(years)]
-        )
+            result = taglib.metrics_since(slugs, years, link_type, granularity)
+            self.assertIn('link_type', result.keys())
+            self.assertIn('slug_values', result.keys())
+            self.assertEqual(result['link_type'], link_type)
+
+            # Verify contents of `slug_values`
+            # There should be entries for each year + 5 additional periods.
+            slugs = "+".join(slugs)
+            expected = [
+                (slugs, now - timedelta(days=1), "Today", granularity),
+                (slugs, now - timedelta(days=7), "1 Week", granularity),
+                (slugs, now - timedelta(days=30), "30 Days", granularity),
+                (slugs, now - timedelta(days=60), "60 Days", granularity),
+                (slugs, now - timedelta(days=90), "90 Days", granularity),
+                (slugs, now - timedelta(days=365), "1 Years", granularity),
+                (slugs, now - timedelta(days=365 * 2), "2 Years", granularity),
+                (slugs, now - timedelta(days=365 * 3), "3 Years", granularity),
+                (slugs, now - timedelta(days=365 * 4), "4 Years", granularity),
+                (slugs, now - timedelta(days=365 * 5), "5 Years", granularity),
+            ]
+            self.assertEqual(expected, result['slug_values'])
 
     def test_gauge(self):
         with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:

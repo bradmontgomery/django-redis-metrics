@@ -20,6 +20,8 @@ def metrics_since(slugs, years, link_type="detail", granularity=None):
       default is "daily"
 
     """
+    now = datetime.utcnow()
+
     # Determine if we're looking at one slug or multiple slugs
     if type(slugs) in [list, set]:
         slugs = "+".join(s.lower().strip() for s in slugs)
@@ -27,12 +29,21 @@ def metrics_since(slugs, years, link_type="detail", granularity=None):
     # Set the default granularity if it's omitted
     granularity = granularity.lower().strip() if granularity else "daily"
 
-    # Build the parameters passed to the `url` template tag
-    slug_values = []  # Each item is: (slug, since, num_years, granularity)
+    # Each item is: (slug, since, text, granularity)
+    # Always include values for Today, 1 week, 30 days, 60 days, 90 days...
+    slug_values = [
+        (slugs, now - timedelta(days=1), "Today", granularity),
+        (slugs, now - timedelta(days=7), "1 Week", granularity),
+        (slugs, now - timedelta(days=30), "30 Days", granularity),
+        (slugs, now - timedelta(days=60), "60 Days", granularity),
+        (slugs, now - timedelta(days=90), "90 Days", granularity),
+    ]
+
+    # Then an additional number of years
     for y in range(1, years + 1):
-        slug_values.append(
-            (slugs, datetime.today() - timedelta(days=365 * y), y, granularity)
-        )
+        t = now - timedelta(days=365 * y)
+        text = "{0} Years".format(y)
+        slug_values.append((slugs, t, text, granularity))
     return {'slug_values': slug_values, 'link_type': link_type.lower().strip()}
 
 
