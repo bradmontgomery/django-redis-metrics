@@ -106,21 +106,47 @@ class TestR(TestCase):
             self.assertEqual(inst._gauge_slugs_key, "gauge-slugs")
             mock_redis.assert_called_once_with(**r_kwargs)
 
-    def test__date_range(self):
-        """Tests ``R._date_range``."""
+    def test__date_range_seconds(self):
+        """Tests ``R._date_range`` at the "seconds" granularity."""
+        since = datetime.utcnow() - timedelta(seconds=5)
+        values = r._date_range('seconds', since)
+        self.assertEqual(len(values), 5)
 
-        # Verify that omitting the ``since`` parameter gives you dates for the
-        # previous year.
-        dates = [d for d in self.r._date_range()]
-        self.assertEqual(len(dates), 365)
+    def test__date_range_minutes(self):
+        """Tests ``R._date_range`` at the "minutes" granularity."""
+        since = datetime.utcnow() - timedelta(minutes=5)
+        values = r._date_range('minutes', since)
+        self.assertEqual(len(values), 5)
 
-        # Provide a ``since`` parameter.
-        t = datetime(2012, 12, 25)  # Merry Christmas!
-        # NOTE: just check for dates, ignoring hours, mins, seconds, etc.
-        dates = [d.date() for d in self.r._date_range(since=t)]
+    def test__date_range_hourly(self):
+        """Tests ``R._date_range`` at the "hourly" granularity."""
+        since = datetime.utcnow() - timedelta(hours=5)
+        values = r._date_range('hourly', since)
+        self.assertEqual(len(values), 5)
 
-        self.assertIn(t.date(), dates)  # Should include our specified date
-        self.assertGreater(len(dates), 1)  # There should be some dates
+    def test__date_range_daily(self):
+        """Tests ``R._date_range`` at the "daily" granularity."""
+        since = datetime.utcnow() - timedelta(days=5)
+        values = r._date_range('daily', since)
+        self.assertEqual(len(values), 5)
+
+    def test__date_range_weekly(self):
+        """Tests ``R._date_range`` at the "weekly" granularity."""
+        since = datetime.utcnow() - timedelta(days=5)
+        values = r._date_range('weekly', since)
+        self.assertEqual(len(values), 5)
+
+    def test__date_range_monthly(self):
+        """Tests ``R._date_range`` at the "monthly" granularity."""
+        since = datetime.utcnow() - timedelta(days=5)
+        values = r._date_range('montly', since)
+        self.assertEqual(len(values), 5)
+
+    def test__date_range_yearly(self):
+        """Tests ``R._date_range`` at the "yearly" granularity."""
+        since = datetime.utcnow() - timedelta(days=5)
+        values = r._date_range('yearly', since)
+        self.assertEqual(len(values), 5)
 
     def test__category_key(self):
         """Creates a redis key for a given category string."""
@@ -462,7 +488,7 @@ class TestR(TestCase):
             slugs = [slugs]
         keys = set()
         for slug in slugs:
-            for date in self.r._date_range(since):
+            for date in self.r._date_range(granularity, since):
                 keys.update(set(self.r._build_keys(slug, date, granularity)))
         return keys
 

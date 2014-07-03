@@ -76,21 +76,41 @@ class R(object):
             decode_responses=True
         )
 
-    def _date_range(self, since=None):
+    def _date_range(self, granularity, since):
         """Returns a generator that yields ``datetime.datetime`` objects from
-        the ``since`` date until *now*. If ``since`` is omitted, returns dates
-        for one year.
+        the ``since`` date until *now*.
 
-        * ``since`` -- a ``datetime.datetime`` object or None.
+        * ``granularity`` -- The granularity at which the generated datetime
+          objects should be created: seconds, minutes, hourly, daily, weekly,
+          monthly, or yearly
+        * ``since`` -- a ``datetime.datetime`` object, from which we start
+          generating periods of time.
+
+        If ``granularity`` is one of daily, weekly, monthly, or yearly, this
+        function gives objects at the daily level, otherwise, the granularity
+        of the datetime objects returned is tied to the granularity parameter.
+
+        For example, if granularity is "seconds", we'll receive datetime
+        objects that differ by 1 second each.
 
         """
         now = datetime.utcnow()
-        if since is None:
-            since_days = 365  # assume 1 year :-/
+        elapsed = (now - since)
+
+        # Figure out how many units to generate for the elapsed time.
+        # I'm going to use `granularity` as a keyword parameter to timedelta,
+        # so I need to change the wording for hours and anything > days.
+        if granularity == "seconds":
+            units = elapsed.total_seconds()
+        elif granularity == "minutes":
+            units = elapsed.total_seconds() / 60
+        elif granularity == "hourly":
+            granularity = "hours"
+            units = elapsed.total_seconds() / 3600
         else:
-            delta = now - since  # The timedelta from "since" to "now"
-            since_days = delta.days + 1
-        return (now - timedelta(days=d) for d in range(since_days))
+            granularity = "days"
+            units = elapsed.days + 1
+        return (now - timedelta(**{granularity: u}) for u in range(int(units)))
 
     def _category_key(self, category):
         return u"c:{0}".format(category)
@@ -357,7 +377,7 @@ class R(object):
         # Build the set of Redis keys that we need to get.
         keys = set()
         for slug in slugs:
-            for date in self._date_range(since):
+            for date in self._date_range(granularity, since):
                 keys.update(set(self._build_keys(slug, date, granularity)))
         return sorted(zip(keys, self.r.mget(keys)))
 
