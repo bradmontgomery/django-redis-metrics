@@ -4,6 +4,17 @@ from django.template.defaultfilters import stringfilter
 register = template.Library()
 
 
+@register.filter(name="int")
+@stringfilter
+def to_int(value):
+    """Converts the given string value into an integer. Returns 0 if the
+    conversion fails."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
 @register.filter(name='strip_metric_prefix')
 @stringfilter
 def strip_metric_prefix(value):

@@ -7,7 +7,7 @@ from django.test import TestCase
 from mock import patch
 from redis_metrics.templatetags import redis_metric_tags as taglib
 from redis_metrics.templatetags.redis_metrics_filters import (
-    strip_metric_prefix, metric_slug
+    metric_slug, strip_metric_prefix, to_int
 )
 
 
@@ -201,6 +201,13 @@ class TestTemplateTags(TestCase):
 
 class TestTemplateFilters(TestCase):
     """Verify that the custom filters return expected results."""
+
+    def test_to_int(self):
+        """Verify that the ``int`` filter converts strings to numbers and that
+        it returns 0 when given unexpected values."""
+        self.assertEqual(to_int(u"3"), 3)
+        self.assertEqual(to_int(u"asdf"), 0)
+        self.assertEqual(to_int(None), 0)
 
     def test_strip_metric_prefix(self):
         # Seconds -- from: ``m:<slug>:s:<yyyy-mm-dd-hh-MM-SS>`` to ``<yyyy-mm-dd-hh-MM-SS>``
