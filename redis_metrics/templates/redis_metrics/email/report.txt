@@ -1,15 +1,12 @@
 {% if metrics %}
-Here are your Redis metrics for {{ today }}!
+Here are your Redis metrics since {{ today }}!
 
 {% for category, metric_data in metrics.items %}
-=== {{ category|upper }}
-{% for slug, data in metric_data %}
----- {{ slug }}
-Day:   {{ data.day }}
-Week:  {{ data.week }}
-Month: {{ data.month }}
-Year:  {{ data.year }}
-
+=== {{ category|upper }} ===
+{% for slug, values in metric_data %}
+---- {{ slug }} ---
+{% for k, v in values %}{{ k }}: {{ v }}
+{% endfor %}
 {% endfor %}
 {% endfor %}
 

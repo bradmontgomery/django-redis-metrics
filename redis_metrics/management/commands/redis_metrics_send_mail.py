@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
@@ -16,12 +16,13 @@ class Command(NoArgsCommand):
         """Send Report E-mails."""
 
         r = R()
+        since = datetime.utcnow() - timedelta(days=1)
         metrics = {}
         categories = r.metric_slugs_by_category()
         for category_name, slug_list in categories.items():
             metrics[category_name] = []
             for slug in slug_list:
-                metric_values = r.get_metric_history(slug)
+                metric_values = r.get_metric_history(slug, since=since)
                 metrics[category_name].append(
                     (slug, metric_values)
                 )
@@ -36,12 +37,12 @@ class Command(NoArgsCommand):
 
         template = "redis_metrics/email/report.{fmt}"
         data = {
-            'today': date.today(),
+            'today': since,
             'metrics': metrics,
         }
+
         message = render_to_string(template.format(fmt='txt'), data)
         message_html = render_to_string(template.format(fmt='html'), data)
-
         msg = EmailMultiAlternatives(
             subject="Redis Metrics Report",
             body=message,
