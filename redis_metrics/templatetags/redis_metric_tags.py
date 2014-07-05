@@ -119,15 +119,18 @@ def metric_history(slug, granularity="daily", since=None, with_data_table=False)
 
 
 @register.inclusion_tag("redis_metrics/_aggregate_detail.html")
-def aggregate_detail(slug_list):
+def aggregate_detail(slug_list, with_data_table=False):
     """Template Tag to display multiple metrics.
 
     * ``slug_list`` -- A list of slugs to display
+    * ``with_data_table`` -- if True, prints the raw data in a table.
 
     """
     return {
+        'chart_id': "metric-aggregate-{0}".format("-".join(slug_list)),
         'slugs': slug_list,
-        'metrics': R().get_metrics(slug_list)
+        'metrics': R().get_metrics(slug_list),
+        'with_data_table': with_data_table,
     }
 
 

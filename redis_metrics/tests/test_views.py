@@ -202,31 +202,12 @@ class TestViews(TestCase):
         slugs = '+'.join(slug_set)
         url = reverse('redis_metric_aggregate_detail', args=[slugs])
 
-        with patch('redis_metrics.views.R') as mock_r:
-            # Set up a return value for ``R.get_metric(slug)``
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            metric_list = []
-            for slug in slug_set:
-                data = {
-                    'hour': '00',
-                    'day': '1',
-                    'month': '22',
-                    'week': '333',
-                    'year': '4444'
-                }
-                metric_list.append((slug, data))
-            r.get_metric.return_value = metric_list
+        # Do the Request & test results
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('slugs', resp.context_data)
+        self.assertEqual(resp.context_data['slugs'], slug_set)
 
-            # Do the Request & test results
-            resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
-            self.assertIn('slugs', resp.context_data)
-            self.assertIn('metrics', resp.context_data)
-            self.assertEqual(resp.context_data['slugs'], slug_set)
-
-            # Make sure our Mocked R instance had its ``get_metrics`` method
-            # called with the correct parameter
-            r.assert_has_calls([call.get_metrics(slug_set)])
 
     def _metrichistory(self, slugs, granularity):
         """Create an appropriate return value for ``R.get_metric_history``
