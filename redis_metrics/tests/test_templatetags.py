@@ -133,6 +133,7 @@ class TestTemplateTags(TestCase):
             expected_result = {
                 'slug': 'test',
                 'metrics': "RESULT",
+                'with_data_table': False,
             }
             self.assertEqual(result, expected_result)
             mock_r.assert_called_once_with()
@@ -149,6 +150,8 @@ class TestTemplateTags(TestCase):
                 'slug': 'test',
                 'granularity': "daily",
                 'metric_history': history,
+                'since': None,
+                'with_data_table': False,
             }
             self.assertEqual(result, expected_result)
             mock_r.assert_called_once_with()
@@ -166,8 +169,10 @@ class TestTemplateTags(TestCase):
 
             result = taglib.aggregate_detail(slugs)
             expected_result = {
+                'chart_id': 'metric-aggregate-a1-a2',
                 'slugs': slugs,
                 'metrics': 'RESULTS',
+                'with_data_table': False,
             }
             self.assertEqual(result, expected_result)
             mock_r.assert_called_once_with()
@@ -175,26 +180,91 @@ class TestTemplateTags(TestCase):
 
     def test_aggregate_history(self):
         with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
-            history = [
+            history = {
+                'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
+                'data': [
+                    {
+                        'slug': 'bar',
+                        'values': [1, 2, 3]
+                    },
+                    {
+                        'slug': 'foo',
+                        'values': [4, 5, 6]
+                    },
+                ]
+            }
+            inst = mock_r.return_value
+            inst.get_metric_history_chart_data.return_value = history
+
+            result = taglib.aggregate_history(set(['foo', 'bar']))
+            expected_result = {
+                'chart_id': 'metric-aggregate-history-foo-bar',
+                'slugs': ['foo', 'bar'],
+                'since': None,
+                'granularity': "daily",
+                'metric_history': history,
+                'tabular_data': None,
+                'with_data_table': False,
+            }
+
+            self.assertEqual(result, expected_result)
+            mock_r.assert_called_once_with()  # Create the R object
+            inst.get_metric_history_chart_data.assert_called_once_with(
+                slugs=['foo', 'bar'],
+                since=None,
+                granularity='daily'
+            )
+
+    def test_aggregate_history_with_tabular_data(self):
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            history = {
+                'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
+                'data': [
+                    {
+                        'slug': 'bar',
+                        'values': [1, 2, 3]
+                    },
+                    {
+                        'slug': 'foo',
+                        'values': [4, 5, 6]
+                    },
+                ]
+            }
+            tabular_history = [
                 ('Period', 'foo', 'bar'),
                 (u'2000-01-01', '100', '200'),
                 (u'2000-01-02', '200', '300'),
                 (u'2000-01-02', '300', '400'),
             ]
             inst = mock_r.return_value
-            inst.get_metric_history_as_columns.return_value = history
+            inst.get_metric_history_chart_data.return_value = history
+            inst.get_metric_history_as_columns.return_value = tabular_history
 
-            result = taglib.aggregate_history(set(['foo', 'bar']))
+            result = taglib.aggregate_history(
+                set(['foo', 'bar']),
+                since="2000-01-01 11:30:45",
+                with_data_table=True
+            )
             expected_result = {
+                'chart_id': 'metric-aggregate-history-foo-bar',
                 'slugs': ['foo', 'bar'],
+                'since': datetime(2000, 1, 1, 11, 30, 45),
                 'granularity': "daily",
                 'metric_history': history,
+                'tabular_data': tabular_history,
+                'with_data_table': True,
             }
+
             self.assertEqual(result, expected_result)
-            mock_r.assert_called_once_with()
+            mock_r.assert_called_once_with()  # Create the R object
+            inst.get_metric_history_chart_data.assert_called_once_with(
+                slugs=['foo', 'bar'],
+                since=datetime(2000, 1, 1, 11, 30, 45),
+                granularity='daily'
+            )
             inst.get_metric_history_as_columns.assert_called_once_with(
                 slugs=['foo', 'bar'],
-                since=None,
+                since=datetime(2000, 1, 1, 11, 30, 45),
                 granularity='daily'
             )
 
