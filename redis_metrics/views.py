@@ -132,7 +132,6 @@ class AggregateDetailView(ProtectedTemplateView):
         data = super(AggregateDetailView, self).get_context_data(**kwargs)
         slug_set = set(kwargs['slugs'].split('+'))
         data['slugs'] = slug_set
-        data['metrics'] = R().get_metrics(slug_set)
         return data
 
 
@@ -150,7 +149,7 @@ class AggregateHistoryView(ProtectedTemplateView):
             if since and len(since) == 10:  # yyyy-mm-dd
                 since = datetime.strptime(since, "%Y-%m-%d")
 
-            history = R().get_metric_history_as_rows(
+            history = R().get_metric_history_chart_data(
                 slugs=list(slug_set),
                 since=since,
                 granularity=granularity
