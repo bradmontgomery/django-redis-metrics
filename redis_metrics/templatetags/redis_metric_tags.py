@@ -48,15 +48,27 @@ def metrics_since(slugs, years, link_type="detail", granularity=None):
 
 
 @register.inclusion_tag("redis_metrics/_gauge.html")
-def gauge(slug, maximum=9000, size=125):
+def gauge(slug, maximum=9000, size=200):
+    """Include a Donut Chart for the specified Gauge.
+
+    * ``slug`` -- the unique slug for the Gauge.
+    * ``maximum`` -- The maximum value for the gauge (default is 9000)
+    * ``size`` -- The size (in pixels) of the gauge (default is 200)
+
+    """
     r = R()
+    value = int(r.get_gauge(slug))
+    if value < maximum:
+        diff = maximum - value
+    else:
+        diff = 0
+
     return {
         'slug': slug,
-        'current_value': r.get_gauge(slug),
+        'current_value': value,
         'max_value': maximum,
         'size': size,
-        'yellow': maximum - (maximum / 2),
-        'red': maximum - (maximum / 4),
+        'diff': diff,
     }
 
 

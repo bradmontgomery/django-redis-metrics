@@ -1,35 +1,39 @@
+{% load static %}
+
 {% comment %}
 
 This is the template for the ``gauge`` inclusion tag. It expects the
 following context:
 
     * slug
-    * current_value
+    * current_value -- The current gauge value.
     * max_value  (used to mark the max value on the gauge chart)
-    * size (the size--width, height--of the chart, in pixels)
-    * yellow (used to indicate warning levels)
-    * red (used to indicate error levels)
+    * diff -- The difference betwee the current value and the max_value
+    * size -- The size (in pixels) for the chart.
 
 {% endcomment %}
 
-<div id="gauge-{{ slug }}" class="gauge"
-    style="width: {{ size }}px; height: {{ size }}px; padding:0; margin: 10px; float: left;"></div>
-<script type="text/javascript" src="//www.google.com/jsapi"></script>
+<div class="chart gauge" style="width: {{size}}px; height: {{size}}px;">
+  <canvas id="gauge-{{ slug }}"></canvas>
+</div>
+<script type="text/javascript" src="{% static 'redis_metrics/js/Chart.min.js' %}"></script>
 <script type="text/javascript">
-google.load('visualization', '1', {packages:['gauge']});
-google.setOnLoadCallback(drawChart);
-function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-        ['Label', 'Value'],
-        ['{{ slug }}', {{ current_value|default:0 }}]
-    ]);
-    var options = {
-        width: {{ size }}, height: {{ size }}, max: {{ max_value }},
-        yellowFrom: {{ yellow }}, yellowTo: {{ red }},  {# Warning Levels #}
-        redFrom: {{ red }}, redTo: {{ max_value }},     {# Error Levels #}
-    };
-    var chart_div = document.getElementById('gauge-{{slug}}');
-    var chart = new google.visualization.Gauge(chart_div);
-    chart.draw(data, options);
-}
+var ctx = document.getElementById("gauge-{{slug}}").getContext("2d");
+//var options = {animation:false, responsive: true};
+var options = {responsive: true};
+var data = [
+  {
+    value: {{ diff }},
+    color: "#ccc",
+    highlight: "#ccc",
+    label: "Until Max"
+  },
+  {
+    value: {{ current_value }},
+    color: "#f88",
+    highlight: "#f00",
+    label: "{{ slug }}"
+  }
+];
+var chart = new Chart(ctx).Doughnut(data,options);
 </script>

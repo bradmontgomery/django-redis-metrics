@@ -94,18 +94,40 @@ class TestTemplateTags(TestCase):
             self.assertEqual(expected, result['slug_values'])
 
     def test_gauge(self):
+        """Tests the result of the gauge template tag."""
         with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
             inst = mock_r.return_value
             inst.get_gauge.return_value = 100
 
-            result = taglib.gauge("test-slug", 1000, 50)
+            size = 50
+            maximum = 200
+            result = taglib.gauge("test-slug", maximum, size)
             expected_result = {
                 'slug': "test-slug",
                 'current_value': 100,
-                'max_value': 1000,
-                'size': 50,
-                'yellow': 1000 - (1000 / 2),
-                'red': 1000 - (1000 / 4),
+                'max_value': maximum,
+                'size': size,
+                'diff': maximum - 100
+            }
+            self.assertEqual(result, expected_result)
+            mock_r.assert_called_once_with()
+            inst.get_gauge.assert_called_once_with("test-slug")
+
+    def test_gauge_when_overloaded(self):
+        """Tests the result of a gauge whose current value > the maximum"""
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            inst = mock_r.return_value
+            inst.get_gauge.return_value = 500
+
+            size = 50
+            maximum = 200
+            result = taglib.gauge("test-slug", maximum, size)
+            expected_result = {
+                'slug': "test-slug",
+                'current_value': 500,
+                'max_value': maximum,
+                'size': size,
+                'diff': 0,  # deff should default to 0 when overloaded.
             }
             self.assertEqual(result, expected_result)
             mock_r.assert_called_once_with()
