@@ -108,7 +108,8 @@ class TestUtils(TestCase):
             with patch("redis_metrics.utils.random") as mock_random:
                 mock_random.randint.return_value = 9999
                 utils.generate_test_metrics(
-                    slug="test_slug", num=1, randomize=True)
+                    slug="test_slug", num=1, randomize=True
+                )
                 mock_get_r.assert_called_once_with()
                 mock_r.r.sadd.assert_called_once_with('MSK', 'key')
                 mock_random.seed.assert_called_once_with()
@@ -120,10 +121,36 @@ class TestUtils(TestCase):
 
             # When called with random = False
             utils.generate_test_metrics(
-                slug="test_slug", num=1, randomize=False)
+                slug="test_slug", num=1, randomize=False
+            )
             mock_get_r.assert_called_once_with()
             mock_r.r.sadd.assert_called_once_with('MSK', 'key')
             mock_r.r.incr.assert_called_once_with('key', 100)
+
+    def test_generate_test_metrics_with_cap(self):
+        config = {
+            '_build_keys.return_value': ['key'],
+            '_metric_slugs_key': 'MSK',
+            'r.get.return_value': 100,
+        }
+        mock_r = Mock(**config)
+        config = {'return_value': mock_r}
+        with patch("redis_metrics.utils.get_r", **config) as mock_get_r:
+            # When called with random = True
+            with patch("redis_metrics.utils.random") as mock_random:
+                mock_random.randint.return_value = 9999
+                utils.generate_test_metrics(
+                    slug="test_slug", num=1, randomize=True, cap=5
+                )
+                mock_get_r.assert_called_once_with()
+                mock_r.r.sadd.assert_called_once_with('MSK', 'key')
+                mock_random.seed.assert_called_once_with()
+                mock_random.randint.assert_called_once_with(0, 100 + 100)
+                # Should be no increment due to cap
+                mock_r.r.incr.assert_called_once_with('key', 0)
+
+            mock_get_r.reset_mock()
+            mock_r.reset_mock()
 
     def test_delete_test_metrics(self):
         d = datetime.utcnow()
