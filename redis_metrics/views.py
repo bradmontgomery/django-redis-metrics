@@ -149,15 +149,10 @@ class AggregateHistoryView(ProtectedTemplateView):
             if since and len(since) == 10:  # yyyy-mm-dd
                 since = datetime.strptime(since, "%Y-%m-%d")
 
-            history = R().get_metric_history_chart_data(
-                slugs=list(slug_set),
-                since=since,
-                granularity=granularity
-            )
             data.update({
                 'slugs': slug_set,
                 'granularity': granularity,
-                'metric_history': history,
+                'since': since,
             })
         except KeyError:
             raise Http404

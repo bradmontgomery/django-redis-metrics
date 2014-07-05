@@ -135,29 +135,54 @@ def aggregate_detail(slug_list, with_data_table=False):
 
 
 @register.inclusion_tag("redis_metrics/_aggregate_history.html")
-def aggregate_history(slugs, granularity="daily", since=None):
+def aggregate_history(slugs, granularity="daily", since=None, with_data_table=False):
     """Template Tag to display history for multiple metrics.
 
     * ``slug_list`` -- A list of slugs to display
     * ``granularity`` -- the granularity: seconds, minutes, hourly,
                          daily, weekly, monthly, yearly
-    * ``since`` -- a date string of the form "YYYY-mm-dd";
+    * ``since`` -- a datetime object or a string string matching one of the
+      following patterns: "YYYY-mm-dd" for a date or "YYYY-mm-dd HH:MM:SS" for
+      a date & time.
+    * ``with_data_table`` -- if True, prints the raw data in a table.
+
+    NOTE: If you specify with_data_table=True, this code will make an additional
+    call out to retreive metrics and format them properly, which could be a
+    little slow.
 
     """
+    r = R()
     slugs = list(slugs)
-    try:
-        since_date = datetime.strptime(since, "%Y-%m-%d")
-    except (TypeError, ValueError):
-        since_date = None
 
-    metric_history = R().get_metric_history_as_columns(
+    try:
+        if since and len(since) == 10:  # yyyy-mm-dd
+            since = datetime.strptime(since, "%Y-%m-%d")
+        elif since and len(since) == 19:  # yyyy-mm-dd HH:MM:ss
+            since = datetime.strptime(since, "%Y-%m-%d %H:%M:%S")
+    except (TypeError, ValueError):
+        # assume we got a datetime object or leave since = None
+        pass
+
+    history = r.get_metric_history_chart_data(
         slugs=slugs,
-        since=since_date,
+        since=since,
         granularity=granularity
     )
+    # If we want to display the raw data, fetch it in a columnar format
+    tabular_data = None
+    if with_data_table:
+        tabular_data = r.get_metric_history_as_columns(
+            slugs=slugs,
+            since=since,
+            granularity=granularity
+        )
 
     return {
+        'chart_id': "metric-aggregate-history-{0}".format("-".join(slugs)),
         'slugs': slugs,
+        'since': since,
         'granularity': granularity,
-        'metric_history': metric_history,
+        'metric_history': history,
+        'with_data_table': with_data_table,
+        'tabular_data': tabular_data,
     }
