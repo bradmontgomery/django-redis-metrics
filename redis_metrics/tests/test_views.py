@@ -207,27 +207,6 @@ class TestViews(TestCase):
         self.assertIn('slugs', resp.context_data)
         self.assertEqual(resp.context_data['slugs'], slug_set)
 
-    def _metrichistory(self, slugs, granularity):
-        """Create an appropriate return value for ``R.get_metric_history``
-        based on the given slugs and granularity."""
-        history = []
-        value = 0
-        for slug in slugs:
-            if granularity == "hourly":
-                key_pattern = "m:{0}:m:2013-01-10-00"
-            elif granularity == "daily":
-                key_pattern = "m:{0}:2013-01-10"
-            elif granularity == "weekly":
-                key_pattern = "m:{0}:w:2013-01"
-            elif granularity == "monthly":
-                key_pattern = "m:{0}:m:2013-01"
-            elif granularity == "yearly":
-                key_pattern = "m:{0}:y:2013"
-
-            history.append((key_pattern.format(slug), value))
-            value += 1
-        return history
-
     def _test_aggregate_history_view(self, slugs, granularity):
         """Tests ``views.AggregateHistoryView`` with the given slugs,
         granularity, without a specified date verifying the values are
