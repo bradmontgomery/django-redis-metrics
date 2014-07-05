@@ -30,25 +30,32 @@ def _dates(num):
     return (now - timedelta(days=d) for d in range(num))
 
 
-def generate_test_metrics(slug='test-metric', num=100, randomize=False):
-    """Generate some dummy (but increasing) metrics for the given ``slug`` and
-    the past ``num`` days.
+def generate_test_metrics(slug='test-metric', num=100, randomize=False, cap=None):
+    """Generate some dummy metrics for the given ``slug``.
 
-    If ``randomize`` is True, the metrics will be random integers.
+    * ``slug`` -- the Metric slug
+    * ``num`` -- Number of days worth of metrics (default is 100)
+    * ``randomize`` -- Generate random metric values (default is False)
+    * ``cap`` -- If given, cap the maximum metric value.
 
     """
     _r = get_r()
     i = 100
+    if randomize:
+        random.seed()
+
     for date in _dates(num):
         for key in _r._build_keys(slug, date=date):
             # The following is normally done in _r.metric, but we're adding
             # metrics for past days here, so this is duplicate code.
             _r.r.sadd(_r._metric_slugs_key, key)  # keep track of the keys
+            value = i
             if randomize:
-                random.seed()
-                _r.r.incr(key, random.randint(0, i + 100))
-            else:
-                _r.r.incr(key, i)  # incr the key an increasing number of times
+                value = random.randint(0, i + 100)
+            if cap and _r.r.get(key) >= cap:
+                value = 0  # Dont' increment this one any more.
+            _r.r.incr(key, value)
+
         i += 100
 
 
