@@ -1,11 +1,30 @@
+import json
 from django import template
-from django.template.defaultfilters import stringfilter
+from django.template.defaultfilters import stringfilter, mark_safe
 
 register = template.Library()
 
 
+@register.filter(name="json")
+def to_json(values):
+    return mark_safe(json.dumps(values))
+
+
+@register.filter(name="int_list")
+def to_int_list(values):
+    """Converts the given list of vlues into a list of integers. If the
+    integer conversion fails (e.g. non-numeric strings or None-values), this
+    filter will include a 0 instead."""
+    results = []
+    for v in values:
+        try:
+            results.append(int(v))
+        except (TypeError, ValueError):
+            results.append(0)
+    return results
+
+
 @register.filter(name="int")
-@stringfilter
 def to_int(value):
     """Converts the given string value into an integer. Returns 0 if the
     conversion fails."""
