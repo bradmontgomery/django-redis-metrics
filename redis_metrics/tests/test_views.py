@@ -111,7 +111,6 @@ class TestViews(TestCase):
     def test_metric_history(self):
         slug = u'test-metric'
         granularity = u'daily'
-        since = None
         url = reverse('redis_metric_history', args=[slug, granularity])
 
         # Do the Request & test results
@@ -208,7 +207,6 @@ class TestViews(TestCase):
         self.assertIn('slugs', resp.context_data)
         self.assertEqual(resp.context_data['slugs'], slug_set)
 
-
     def _metrichistory(self, slugs, granularity):
         """Create an appropriate return value for ``R.get_metric_history``
         based on the given slugs and granularity."""
@@ -230,37 +228,23 @@ class TestViews(TestCase):
             value += 1
         return history
 
-    def _test_aggregate_history_view(self, slugs, granularity, since=None):
-        """Tests ``views.AggregateHistoryView`` with the given slugs and
-        granularity (i.e. 'daily', 'weekly', 'monthly', 'yearly')."""
+    def _test_aggregate_history_view(self, slugs, granularity):
+        """Tests ``views.AggregateHistoryView`` with the given slugs,
+        granularity, without a specified date verifying the values are
+        correctly passed to the template."""
         slug_set = set(slugs)
         url = reverse('redis_metric_aggregate_history',
                       args=['+'.join(slugs), granularity])
 
-        with patch('redis_metrics.views.R') as mock_r:
-            # Set up a return value for ``get_metric_history_as_columns``
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            r.get_metric_history.return_value = self._metrichistory(
-                slugs, granularity)
-
-            # Do the Request & test results
-            resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
-            self.assertIn('slugs', resp.context_data)
-            self.assertIn('granularity', resp.context_data)
-            self.assertIn('metric_history', resp.context_data)
-            self.assertEqual(resp.context_data['slugs'], slug_set)
-            self.assertEqual(resp.context_data['granularity'], granularity)
-
-            # Make sure our Mocked R instance had its
-            # ``get_metric_history_as_columns`` method called with the correct
-            # parameters
-            c = call.get_metric_history_as_columns(
-                slugs=slugs,
-                granularity=granularity,
-                since=since
-            )
-            r.assert_has_calls([c])
+        # Do the Request & test results
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn('slugs', resp.context_data)
+        self.assertIn('granularity', resp.context_data)
+        self.assertIn('since', resp.context_data)
+        self.assertEqual(resp.context_data['slugs'], slug_set)
+        self.assertEqual(resp.context_data['granularity'], granularity)
+        self.assertIsNone(resp.context_data['since'])
 
     def test_aggregate_history_view_hourly(self):
         self._test_aggregate_history_view(['foo', 'bar'], 'hourly')
@@ -281,49 +265,25 @@ class TestViews(TestCase):
         """Tests ``views.AggregateHistoryView`` with a ``since`` parameter."""
         slugs = ['foo', 'bar']
         granularity = 'yearly'
-        url = reverse('redis_metric_aggregate_history',
-                      args=['+'.join(slugs), granularity])
+        url = reverse(
+            'redis_metric_aggregate_history',
+            args=['+'.join(slugs), granularity]
+        )
 
-        with patch('redis_metrics.views.R') as mock_r:
-            # Set up a return value for ``get_metric_history_as_columns``
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            r.get_metric_history.return_value = self._metrichistory(
-                slugs, granularity)
+        # Do the Request & test results with a just a date
+        resp = self.client.get(url, {'since': "2012-12-25"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsInstance(resp.context_data['since'], datetime)
+        self.assertEqual(resp.context_data['since'], datetime(2012, 12, 25))
 
-            # Do the Request & test results
-            resp = self.client.get(url, {'since': "2012-12-25"})
-            self.assertEqual(resp.status_code, 200)
-
-            # Make sure our Mocked R instance had its
-            # ``get_metric_history_as_columns`` method called with the correct
-            # parameters
-            c = call.get_metric_history_as_columns(
-                slugs=slugs,
-                granularity=granularity,
-                since=datetime(2012, 12, 25)
-            )
-            r.assert_has_calls([c])
-
-    def test_aggregate_history_view_raises_keyerror(self):
-        """Tests ``views.AggregateHistoryView`` raises a 404 if
-        there's a KeyError."""
-
-        slugs = ['foo', 'bar']
-        granularity = 'yearly'
-        url = reverse('redis_metric_aggregate_history',
-                      args=['+'.join(slugs), granularity])
-
-        with patch('redis_metrics.views.R') as mock_r:
-            # there are a couple ways we could get a KeyError (e.g., invalid
-            # kwargs passed into ``get_context_data``, but it's convenient to
-            # test that ``get_metric_history`` raises this, since we're already
-            # mocking it.
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            r.get_metric_history_as_columns.side_effect = KeyError
-
-            # Do the Request & test results
-            resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 404)
+        # Do the Request & test results with a date & time
+        resp = self.client.get(url, {'since': "2012-12-25 11:30:45"})
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsInstance(resp.context_data['since'], datetime)
+        self.assertEqual(
+            resp.context_data['since'],
+            datetime(2012, 12, 25, 11, 30, 45)
+        )
 
     def test_category_form_view(self):
         """Verifies that GET requests to the ``CategoryFormView`` have the
