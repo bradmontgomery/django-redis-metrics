@@ -16,7 +16,7 @@ Examples:
 
 """
 from django.core.management.base import BaseCommand, CommandError
-from redis_metrics.utils import metric
+from redis_metrics.utils import metric, gauge
 
 try:
     import psutil
@@ -81,15 +81,15 @@ class Command(BaseCommand):
 
     def _cpu(self):
         """Record CPU usage."""
-        metric("cpu", int(psutil.cpu_percent()), category=self.category)
+        value = int(psutil.cpu_percent())
+        metric("cpu", value, category=self.category)
+        gauge("cpu", value)
 
     def _mem(self):
         """Record Memory usage."""
-        metric(
-            "memory",
-            int(psutil.virtual_memory().percent),
-            category=self.category
-        )
+        value = int(psutil.virtual_memory().percent)
+        metric("memory", value, category=self.category)
+        gauge("memory", value)
 
     def _disk(self):
         """Record Disk usage."""
@@ -100,29 +100,24 @@ class Command(BaseCommand):
         if len(mountpoints) != 1:
             raise CommandError("Unknown device: {0}".format(self.device))
 
-        metric(
-            "disk-{0}".format(self.device),
-            int(psutil.disk_usage(mountpoints[0]).percent),
-            category=self.category
-        )
+        value = int(psutil.disk_usage(mountpoints[0]).percent)
+        metric("disk-{0}".format(self.device), value, category=self.category)
+        gauge("disk-{0}".format(self.device), value)
 
     def _net(self):
         """Record Network usage."""
         data = psutil.network_io_counters(pernic=True)
         if self.device not in data:
             raise CommandError("Unknown device: {0}".format(self.device))
+
         # Network bytes sent
-        metric(
-            "net-{0}-sent".format(self.device),
-            data[self.device].bytes_sent,
-            category=self.category
-        )
+        value = data[self.device].bytes_sent
+        metric("net-{0}-sent".format(self.device), value, category=self.category)
+        gauge("net-{0}-sent".format(self.device), value)
+
         # Network bytes received
-        metric(
-            "net-{0}-recv".format(self.device),
-            data[self.device].bytes_recv,
-            category=self.category
-        )
+        value = data[self.device].bytes_recv
+        metric("net-{0}-recv".format(self.device), value, category=self.category)
 
     def handle(self, *args, **options):
         # Make sure we've got psutil
