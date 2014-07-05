@@ -2,41 +2,32 @@
 {% load url from future %}
 {% load redis_metric_tags %}
 {% load redis_metrics_filters %}
+{% load static %}
 
 {% block extrahead %}
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-    google.load("visualization", "1", {packages:["corechart"]});
-    google.setOnLoadCallback(drawChart);
-    function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-        {% comment %}
-        ---------------------------------
-
-        Google Charts' LineChart wants data in the following format, so
-        ``metric_history`` is generated w/ ``R.get_metric_history_as_columns``
-
-            ['Period', 'foo', 'bar'],
-            ['2012-01', 222,   333],
-            ['2012-02', 999,   444],
-
-        -----------------------------------
-        {% endcomment %}
-
-        {# Header Row #}
-        [{% for header in metric_history.0  %}'{{header}}'{% if not forloop.last %}, {% endif %}{% endfor %}],
-        {# Data Rows -- first column is a string, the rest are integers #}
-        {% for row in metric_history|slice:"1:" %}
-        [{% for col in row %}{% if forloop.first %}'{{col}}'{% else %}{{ col|default_if_none:0}}{% endif %}{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
-        {% endfor %}
-    ]);
-    var options = {title: '{{ granularity }} history'};
-    var chart_div = document.getElementById('chart_div');
-    var chart = new google.visualization.LineChart(chart_div);
-    chart.draw(data, options);
-}
-</script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/zepto.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/Colors.js' %}"></script>
 {% endblock %}
+
+{% comment %}
+
+NOTE: This template gets a `metric_history` context that's organized like so:
+
+  metric_history = {
+      'periods': ['y:2012', 'y:2013', 'y:2014']
+      'data': [
+        {
+          'slug': 'bar',
+          'values': [1, 2, 3]
+        },
+        {
+          'slug': 'foo',
+          'values': [4, 5, 6]
+        },
+  }
+
+{% endcomment %}
 
 
 {% block content %}
@@ -60,28 +51,32 @@
 
     {% metrics_since slugs 5 "aggregate_history" granularity %}
 
-    <div id="chart_div"></div>
-
-    <table>
-        <caption>{{ granularity }} metrics</caption>
-        <thead>
-            <tr>
-                <th>Period</th>
-                {% for slug in slugs %}
-                <th><code>{{ slug }}</code></th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-        {% for row in metric_history %}
-            <tr>
-            {% for column in row %}
-                <td>
-                {{ column|default_if_none:"-" }}
-                </td>
-            {% endfor %}
-            </tr>
+    <div id="chart_div"><canvas id="chart"></canvas></div>
+    <script type="text/javascript">
+    var ctx = document.getElementById("chart").getContext("2d");
+    var options = {animation:false, responsive: true, datasetFill: false};
+    var data = {
+      labels: {{metric_history.periods|json}},
+      datasets: [
+        {% for d in metric_history.data %}
+        {
+            label: '{{d.slug}}',  {# the metric key, eg. time period #}
+            fillColor: Color({{forloop.counter0}}).fillColor,
+            strokeColor: Color({{forloop.counter0}}).fillColor,
+            highlightFill:Color({{forloop.counter0}}).highlightFill,
+            highlightStroke:Color({{forloop.counter0}}).highlightFill,
+            pointColor: Color({{forloop.counter0}}).fillColor,
+            pointStrokeColor: "#fff",
+            pointHighlightFill: Color({{forloop.counter0}}).highlightFill,
+            pointHighlightStroke: "#eee",
+            data: {{ d.values|json }}
+        },
         {% endfor %}
-        </tbody>
-    </table>
+      ]
+    };
+
+    var chart = new Chart(ctx).Line(data, options);
+    $("#chart_div").append(chart.generateLegend());
+    </script>
+
 {% endblock %}

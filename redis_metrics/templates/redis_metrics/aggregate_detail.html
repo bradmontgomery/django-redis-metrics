@@ -1,46 +1,31 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
+{% load static %}
 
 {% comment %}
-
 Context for this Template:
 
     * ``slugs`` -- a set of slugs for the metrics that we want to aggregate.
     * ``metrics`` -- the metric data. It's a list of two-tuples that looks
       something like this::
 
-        [('foo', {'day': '42', 'month': '90', 'week': '50', 'year': '9991'}),
-         ('bar', {'day': '2',  'month': '10', 'week': '5',  'year': '90'})]
+    [
+      ('foo', {
+          'seconds': 0, 'minutes': 0, 'hours': 4, 'day': '42',
+          'month': '90', 'week': '50', 'year': '9991'
+      }),
+      ('bar', {
+          'seconds': 0, 'minutes': 0, 'hours': 4, 'day': '42',
+          'month': '10', 'week': '5',  'year': '90'
+      })
+    ]
 
 {% endcomment %}
 
 {% block extrahead %}
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
-<script type="text/javascript">
-  google.load("visualization", "1", {packages:["corechart"]});
-  google.setOnLoadCallback(drawChart);
-  function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-      ['Period',{% for s, d in metrics %}'{{ s }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Seconds',   {% for s, d in metrics %}{{ d.seconds|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Minutes',   {% for s, d in metrics %}{{ d.minutes|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Hours',   {% for s, d in metrics %}{{ d.hours|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Day',   {% for s, d in metrics %}{{ d.day|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Week',  {% for s, d in metrics %}{{ d.week|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Month', {% for s, d in metrics %}{{ d.month|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-      ['Year',  {% for s, d in metrics %}{{ d.year|default_if_none:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}]
-    ]);
-
-    var options = {
-      title: 'Aggregate metrics',
-      vAxis: {title: 'Time Period',  titleTextStyle: {color: 'red'}},
-    };
-
-    var chart_div = document.getElementById('chart_div');
-    var chart = new google.visualization.BarChart(chart_div);
-    chart.draw(data, options);
-  }
-</script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/zepto.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/Colors.js' %}"></script>
 {% endblock %}
 
 
@@ -62,8 +47,36 @@ Context for this Template:
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'yearly' %}">Yearly</a></li>
     </ul>
 
-    <div id="chart_div"></div>
-
+    <div id="chart_div"><canvas id="chart"></canvas></div>
+    <script type="text/javascript">
+    var ctx = document.getElementById("chart").getContext("2d");
+    var options = {animation:false, responsive: true,};
+    var data = {
+      labels: ['Seconds', 'Minutes', 'Hours', 'Day', 'Week', 'Month', 'Year'],
+      datasets: [
+        {% for s,d in metrics %}
+        {
+          label: "{{ s }}",
+          fillColor: Color({{forloop.counter0}}).fillColor,
+          strokeColor: Color({{forloop.counter0}}).strokeColor,
+          highlightFill:Color({{forloop.counter0}}).highlightFill,
+          highlightStroke:Color({{forloop.counter0}}).highlightStroke,
+          data: [
+            {{ d.seconds|default_if_none:0 }},
+            {{ d.minutes|default_if_none:0 }},
+            {{ d.hours|default_if_none:0 }},
+            {{ d.day|default_if_none:0 }},
+            {{ d.week|default_if_none:0 }},
+            {{ d.month|default_if_none:0 }},
+            {{ d.year|default_if_none:0 }},
+          ]
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    };
+    var chart = new Chart(ctx).Bar(data, options);
+    $("#chart_div").append(chart.generateLegend());
+    </script>
     <table>
         <caption>Metrics Data</caption>
         <thead>
