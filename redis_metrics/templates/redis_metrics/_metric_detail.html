@@ -1,28 +1,69 @@
-<div id="metric-detail-chart-{{ slug }}"></div>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% load static %}
+<div class="chart">
+  <canvas id="metric-detail-chart-{{slug}}"></canvas>
+</div>
+<script type="text/javascript" src="{% static 'redis_metrics/js/Chart.min.js' %}"></script>
 <script type="text/javascript">
-google.load("visualization", "1", {packages:["corechart"]});
-google.setOnLoadCallback(drawChart);
-function drawChart() {
-  var data = google.visualization.arrayToDataTable([
-    ['Metric', 'Value'],
-    ['Seconds',    {{ metrics.seconds|default:0 }}],
-    ['Minutes',    {{ metrics.minutes|default:0 }}],
-    ['Hours',    {{ metrics.hours|default:0 }}],
-    ['Day',    {{ metrics.day|default:0 }}],
-    ['Week',   {{ metrics.week|default:0 }}],
-    ['Month',  {{ metrics.month|default:0 }}],
-    ['Year',   {{ metrics.year|default:0 }}],
-  ]);
-
-  var options = {
-    title: '{{ slug }} metrics',
-    vAxis: {title: 'Time Period',  titleTextStyle: {color: 'red'}},
-    legend: {position: 'none'}
-  };
-
-  var chart_div = document.getElementById('metric-detail-chart-{{ slug }}');
-  var chart = new google.visualization.BarChart(chart_div);
-  chart.draw(data, options);
-}
+var ctx = document.getElementById("metric-detail-chart-{{slug}}").getContext("2d");
+var options = {animation:false, responsive: true};
+var data = {
+  labels: ['Seconds', 'Minutes', 'Hours', 'Day', 'Week', 'Month', 'Year'],
+  datasets: [
+    {
+      label: "Metrics",
+      fillColor: "rgba(220,110,110,0.5)",
+      strokeColor: "rgba(220,220,220,0.8)",
+      highlightFill: "rgba(220,110,110,0.75)",
+      highlightStroke: "rgba(220,220,220,1)",
+      data: [
+        {{ metrics.seconds|default:0 }},
+        {{ metrics.minutes|default:0 }},
+        {{ metrics.hours|default:0 }},
+        {{ metrics.day|default:0 }},
+        {{ metrics.week|default:0 }},
+        {{ metrics.month|default:0 }},
+        {{ metrics.year|default:0 }}
+      ]
+    }
+  ]
+};
+var myBarChart = new Chart(ctx).Bar(data, options);
 </script>
+{% if with_data_table %}
+<table>
+    <caption><code>{{ slug }}</code> data</caption>
+    <thead>
+        <tr><th>Time Period</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Seconds</td>
+            <td class="value">{{ metrics.seconds|default_if_none:"-" }}</td>
+        </tr>
+        <tr>
+            <td>Minutes</td>
+            <td class="value">{{ metrics.minutes|default_if_none:"-" }}</td>
+        </tr>
+        <tr>
+            <td>Hours</td>
+            <td class="value">{{ metrics.hours|default_if_none:"-" }}</td>
+        </tr>
+        <tr>
+            <td>Day</td>
+            <td class="value">{{ metrics.day|default_if_none:"-" }}</td>
+        </tr>
+        <tr>
+            <td>Week</td>
+            <td class="value">{{ metrics.week|default_if_none:"-" }}</td>
+        </tr>
+        <tr>
+            <td>Month</td>
+            <td class="value">{{ metrics.month|default_if_none:"-" }}</td>
+        </tr>
+        <tr>
+            <td>Year</td>
+            <td class="value">{{ metrics.year|default_if_none:"-" }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endif %}

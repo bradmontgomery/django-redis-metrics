@@ -68,37 +68,53 @@ def metric_list():
 
 
 @register.inclusion_tag("redis_metrics/_metric_detail.html")
-def metric_detail(slug):
+def metric_detail(slug, with_data_table=False):
+    """Template Tag to display a metric's *current* detail.
+
+    * ``slug`` -- the metric's unique slug
+    * ``with_data_table`` -- if True, prints the raw data in a table.
+
+    """
     return {
         'slug': slug,
         'metrics': R().get_metric(slug),
+        'with_data_table': with_data_table,
     }
 
 
 @register.inclusion_tag("redis_metrics/_metric_history.html")
-def metric_history(slug, granularity="daily", since=None):
+def metric_history(slug, granularity="daily", since=None, with_data_table=False):
     """Template Tag to display a metric's history.
 
     * ``slug`` -- the metric's unique slug
     * ``granularity`` -- the granularity: daily, hourly, weekly, monthly, yearly
-    * ``since`` -- a date string of the form "YYYY-mm-dd";
+    * ``since`` -- a datetime object or a string string matching one of the
+      following patterns: "YYYY-mm-dd" for a date or "YYYY-mm-dd HH:MM:SS" for
+      a date & time.
+    * ``with_data_table`` -- if True, prints the raw data in a table.
 
     """
     try:
-        since_date = datetime.strptime(since, "%Y-%m-%d")
+        if since and len(since) == 10:  # yyyy-mm-dd
+            since = datetime.strptime(since, "%Y-%m-%d")
+        elif since and len(since) == 19:  # yyyy-mm-dd HH:MM:ss
+            since = datetime.strptime(since, "%Y-%m-%d %H:%M:%S")
     except (TypeError, ValueError):
-        since_date = None
+        # assume we got a datetime object or leave since = None
+        pass
 
     metric_history = R().get_metric_history(
         slugs=slug,
-        since=since_date,
+        since=since,
         granularity=granularity
     )
 
     return {
+        'since': since,
         'slug': slug,
         'granularity': granularity,
         'metric_history': metric_history,
+        'with_data_table': with_data_table,
     }
 
 

@@ -75,7 +75,6 @@ class MetricDetailView(ProtectedTemplateView):
         """Includes the metrics slugs in the context."""
         data = super(MetricDetailView, self).get_context_data(**kwargs)
         data['slug'] = kwargs['slug']
-        data['metrics'] = R().get_metric(kwargs['slug'])
         return data
 
 
@@ -85,23 +84,19 @@ class MetricHistoryView(ProtectedTemplateView):
     def get_context_data(self, **kwargs):
         """Includes the metrics slugs in the context."""
         data = super(MetricHistoryView, self).get_context_data(**kwargs)
-        try:
-            # Accept GET query params for ``since``
-            since = self.request.GET.get('since', None)
-            if since and len(since) == 10:  # yyyy-mm-dd
-                since = datetime.strptime(since, "%Y-%m-%d")
 
-            data.update({
-                'slug': kwargs['slug'],
-                'granularity': kwargs['granularity'],
-                'metric_history': R().get_metric_history(
-                    slugs=kwargs['slug'],
-                    since=since,
-                    granularity=kwargs['granularity']
-                )
-            })
-        except KeyError:
-            raise Http404
+        # Accept GET query params for ``since``
+        since = self.request.GET.get('since', None)
+        if since and len(since) == 10:  # yyyy-mm-dd
+            since = datetime.strptime(since, "%Y-%m-%d")
+        elif since and len(since) == 19:  # yyyy-mm-dd HH:MM:ss
+            since = datetime.strptime(since, "%Y-%m-%d %H:%M:%S")
+
+        data.update({
+            'since': since,
+            'slug': kwargs['slug'],
+            'granularity': kwargs['granularity'],
+        })
         return data
 
 

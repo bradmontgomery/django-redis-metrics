@@ -1,10 +1,6 @@
 {% extends "redis_metrics/base.html" %}
 {% load url from future %}
-{% load static %}
-
-{% block extrahead %}
-<script type="text/javascript" src="{% static 'redis_metrics/js/Chart.min.js' %}"></script>
-{% endblock %}
+{% load redis_metric_tags %}
 
 {% block content %}
     <h1><code>{{ slug }}</code> metrics</h1>
@@ -25,68 +21,6 @@
     <li><a href="{% url 'redis_metric_history' slug 'yearly' %}">Yearly</a></li>
     </ul>
 
-    <div id="chart_div"><canvas id="chart"></canvas></div>
-    <script type="text/javascript">
-    var ctx = document.getElementById("chart").getContext("2d");
-    var options = {animation:false, responsive: true};
-    var data = {
-      labels: ['Seconds', 'Minutes', 'Hours', 'Day', 'Week', 'Month', 'Year'],
-      datasets: [
-        {
-          label: "Metrics",
-          fillColor: "rgba(220,110,110,0.5)",
-          strokeColor: "rgba(220,220,220,0.8)",
-          highlightFill: "rgba(220,110,110,0.75)",
-          highlightStroke: "rgba(220,220,220,1)",
-          data: [
-            {{ metrics.seconds|default:0 }},
-            {{ metrics.minutes|default:0 }},
-            {{ metrics.hours|default:0 }},
-            {{ metrics.day|default:0 }},
-            {{ metrics.week|default:0 }},
-            {{ metrics.month|default:0 }},
-            {{ metrics.year|default:0 }}
-          ]
-        }
-      ]
-    };
-    var myBarChart = new Chart(ctx).Bar(data, options);
-    </script>
+    {% metric_detail slug True %}
 
-    <table>
-        <caption>{{ slug }} data</caption>
-        <thead>
-            <tr><th>Time Period</th><th>Value</th></tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Seconds</td>
-                <td class="value">{{ metrics.seconds|default_if_none:"-" }}</td>
-            </tr>
-            <tr>
-                <td>Minutes</td>
-                <td class="value">{{ metrics.minutes|default_if_none:"-" }}</td>
-            </tr>
-            <tr>
-                <td>Hours</td>
-                <td class="value">{{ metrics.hours|default_if_none:"-" }}</td>
-            </tr>
-            <tr>
-                <td>Day</td>
-                <td class="value">{{ metrics.day|default_if_none:"-" }}</td>
-            </tr>
-            <tr>
-                <td>Week</td>
-                <td class="value">{{ metrics.week|default_if_none:"-" }}</td>
-            </tr>
-            <tr>
-                <td>Month</td>
-                <td class="value">{{ metrics.month|default_if_none:"-" }}</td>
-            </tr>
-            <tr>
-                <td>Year</td>
-                <td class="value">{{ metrics.year|default_if_none:"-" }}</td>
-            </tr>
-        </tbody>
-    </table>
 {% endblock %}

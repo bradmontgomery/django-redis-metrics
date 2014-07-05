@@ -34,7 +34,8 @@ class TestViews(TestCase):
             email="redis_metrics_test_user@example.com",
             password="secret"
         )
-        assert self.client.login(username="redis_metrics_test_user",
+        assert self.client.login(
+            username="redis_metrics_test_user",
             password="secret")
         self.unauthed_client = Client()  # Keep an unauthenticated client
 
@@ -102,54 +103,24 @@ class TestViews(TestCase):
         slug = u'test-metric'
         url = reverse('redis_metric_detail', args=[slug])
 
-        with patch('redis_metrics.views.R') as mock_r:
-            # Set up a return value for ``R.get_metric(slug)``
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            m = {'day': '1', 'month': '1', 'week': '1', 'year': '1'}
-            r.get_metric.return_value = m
-
-            # Do the Request & test results
-            resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
-            self.assertEqual(resp.context_data['slug'], slug)
-            self.assertEqual(resp.context_data['metrics'], m)
-
-            # Make sure our Mocked R instance had its ``get_metric`` method
-            # called with the correct parameter
-            r.assert_has_calls([call.get_metric(slug)])
+        # Do the Request & test results
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.context_data['slug'], slug)
 
     def test_metric_history(self):
         slug = u'test-metric'
         granularity = u'daily'
+        since = None
         url = reverse('redis_metric_history', args=[slug, granularity])
 
-        with patch('redis_metrics.views.R') as mock_r:
-            # Set up a return value for ``R
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            mocked_history = [
-                ('m:{0}:2012-12-26'.format(slug), None),
-                ('m:{0}:2012-12-27'.format(slug), None),
-                ('m:{0}:2012-12-28'.format(slug), '1'),
-            ]
-            r.get_metric_history.return_value = mocked_history
-
-            # Do the Request & test results
-            resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 200)
-            context = resp.context_data
-            self.assertEqual(context['slug'], slug)
-            self.assertEqual(context['granularity'], granularity)
-            self.assertEqual(context['metric_history'], mocked_history)
-
-            # Make sure our Mocked R instance had its ``get_metric_history``
-            # method called with the correct parameters
-            r.assert_has_calls([
-                call.get_metric_history(
-                    since=None,
-                    slugs=slug,
-                    granularity=granularity
-                )
-            ])
+        # Do the Request & test results
+        resp = self.client.get(url)
+        self.assertEqual(resp.status_code, 200)
+        context = resp.context_data
+        self.assertEqual(context['slug'], slug)
+        self.assertEqual(context['since'], None)
+        self.assertEqual(context['granularity'], granularity)
 
     def test_metric_history_since(self):
         """Tests the ``MetricHistoryView`` when there's a ``since`` variable"""
@@ -157,51 +128,21 @@ class TestViews(TestCase):
         granularity = u'daily'
         url = reverse('redis_metric_history', args=[slug, granularity])
 
-        with patch('redis_metrics.views.R') as mock_r:
-            # Set up a return value for ``R
-            r = mock_r.return_value  # Get an instance of our Mocked R class
-            mocked_history = [
-                ('m:{0}:2012-12-26'.format(slug), None),
-                ('m:{0}:2012-12-27'.format(slug), None),
-                ('m:{0}:2012-12-28'.format(slug), '1'),
-            ]
-            r.get_metric_history.return_value = mocked_history
+        # Do the Request & test results for a Date
+        resp = self.client.get(url, {'since': '2012-12-25'})
+        self.assertEqual(resp.status_code, 200)
+        context = resp.context_data
+        self.assertEqual(context['since'], datetime(2012, 12, 25))
+        self.assertEqual(context['slug'], slug)
+        self.assertEqual(context['granularity'], granularity)
 
-            # Do the Request & test results
-            resp = self.client.get(url, {'since': '2012-12-25'})
-            self.assertEqual(resp.status_code, 200)
-            context = resp.context_data
-            self.assertEqual(context['slug'], slug)
-            self.assertEqual(context['granularity'], granularity)
-            self.assertEqual(context['metric_history'], mocked_history)
-
-            # Make sure our Mocked R instance had its ``get_metric_history``
-            # method called with the correct parameters
-            r.assert_has_calls([
-                call.get_metric_history(
-                    since=datetime(2012, 12, 25, 0, 0),
-                    slugs=slug,
-                    granularity=granularity
-                )
-            ])
-
-    def test_metric_history_raises_keyerror(self):
-        """Tests the ``MetricHistoryView`` when there's a ``since`` variable"""
-        slug = u'test-metric'
-        granularity = u'daily'
-        url = reverse('redis_metric_history', args=[slug, granularity])
-
-        with patch('redis_metrics.views.R') as mock_r:
-            # there are a couple ways we could get a KeyError (e.g., invalid
-            # kwargs passed into ``get_context_data``, but it's convenient to
-            # test that ``get_metric_history`` raises this, since we're already
-            # mocking it.
-            r = mock_r.return_value
-            r.get_metric_history.side_effect = KeyError
-
-            # Do the Request & test results
-            resp = self.client.get(url)
-            self.assertEqual(resp.status_code, 404)
+        # Do the Request & test results for a Date & Time
+        resp = self.client.get(url, {'since': '2012-12-25 11:30:45'})
+        self.assertEqual(resp.status_code, 200)
+        context = resp.context_data
+        self.assertEqual(context['since'], datetime(2012, 12, 25, 11, 30, 45))
+        self.assertEqual(context['slug'], slug)
+        self.assertEqual(context['granularity'], granularity)
 
     def test_metrics_list_requires_admin(self):
         """Verifies that ``MetricsListView`` requires authentication."""
@@ -266,14 +207,14 @@ class TestViews(TestCase):
             r = mock_r.return_value  # Get an instance of our Mocked R class
             metric_list = []
             for slug in slug_set:
-                metric_list.append((slug, {
-                        'hour': '00',
-                        'day': '1',
-                        'month': '22',
-                        'week': '333',
-                        'year': '4444'
-                    })
-                )
+                data = {
+                    'hour': '00',
+                    'day': '1',
+                    'month': '22',
+                    'week': '333',
+                    'year': '4444'
+                }
+                metric_list.append((slug, data))
             r.get_metric.return_value = metric_list
 
             # Do the Request & test results
