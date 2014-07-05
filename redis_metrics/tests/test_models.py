@@ -600,8 +600,9 @@ class TestR(TestCase):
             r = mock_r.return_value  # Get an instance of our Mocked R class
             r.get_metric_history_as_columns(slugs, granularity=granularity)
             mock_r.assert_has_calls([
-                call().get_metric_history_as_columns(slugs,
-                                                     granularity=granularity)
+                call().get_metric_history_as_columns(
+                    slugs, granularity=granularity
+                )
             ])
 
     def test_get_metric_history_as_columns_hourly(self):
@@ -618,6 +619,32 @@ class TestR(TestCase):
 
     def test_get_metric_history_as_columns_yearly(self):
         self._test_get_metric_history_as_columns(['foo', 'bar'], 'yearly')
+
+    @patch.object(R, 'get_metric_history')
+    def test_get_metric_history_chart_data(self, mock_metric_hist):
+        # set up some sample (yearly) metrics
+        mock_metric_hist.return_value = [
+            ("m:bar:y:2012", '1'),
+            ('m:bar:y:2013', '2'),
+            ('m:foo:y:2012', '3'),
+            ('m:foo:y:2013', '4'),
+        ]
+        expected_results = {
+            'periods': [u'y:2012', u'y:2013'],
+            'data': [
+                {'slug': u'bar', 'values': ['1', '2']},
+                {'slug': u'foo', 'values': ['3', '4']},
+            ]
+        }
+        with patch('redis_metrics.models.redis.StrictRedis'):
+            r = R()
+            kwargs = {
+                'slugs': ['foo', 'bar'],
+                'since': None,
+                'granularity': 'yearly',
+            }
+            results = r.get_metric_history_chart_data(**kwargs)
+            self.assertEqual(results, expected_results)
 
     def test_gauge_slugs(self):
         """Tests that ``R.gauge_slugs`` calls the SMEMBERS command."""

@@ -161,6 +161,54 @@ class TestTemplateTags(TestCase):
                 since=None
             )
 
+    def test_metric_history_with_date(self):
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            history = [("m:test:2000-01-01", 42)]
+            inst = mock_r.return_value
+            inst.get_metric_history.return_value = history
+            expected_result = {
+                'slug': 'test',
+                'granularity': "daily",
+                'metric_history': history,
+                'since': None,
+                'with_data_table': False,
+            }
+
+            # With a date string
+            since = datetime(2000, 1, 2)
+            expected_result['since'] = since
+            result = taglib.metric_history('test', since="2000-01-02")
+            self.assertEqual(result, expected_result)
+            inst.get_metric_history.assert_called_once_with(
+                slugs='test',
+                granularity='daily',
+                since=since
+            )
+            inst.reset_mock()
+
+            # With a datetime string
+            since = datetime(2000, 1, 2, 11, 30, 45)
+            expected_result['since'] = since
+            result = taglib.metric_history('test', since="2000-01-02 11:30:45")
+            self.assertEqual(result, expected_result)
+            inst.get_metric_history.assert_called_once_with(
+                slugs='test',
+                granularity='daily',
+                since=since
+            )
+            inst.reset_mock()
+
+            # With a datetime object
+            since = datetime(2000, 1, 2, 11, 30, 45)
+            expected_result['since'] = since
+            result = taglib.metric_history('test', since=since)
+            self.assertEqual(result, expected_result)
+            inst.get_metric_history.assert_called_once_with(
+                slugs='test',
+                granularity='daily',
+                since=since
+            )
+
     def test_aggregate_detail(self):
         with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
             slugs = ['a1', 'a2']
@@ -214,6 +262,50 @@ class TestTemplateTags(TestCase):
                 since=None,
                 granularity='daily'
             )
+
+    def test_aggregate_history_with_date(self):
+        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+            history = {
+                'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
+                'data': [
+                    {
+                        'slug': 'bar',
+                        'values': [1, 2, 3]
+                    },
+                    {
+                        'slug': 'foo',
+                        'values': [4, 5, 6]
+                    },
+                ]
+            }
+            inst = mock_r.return_value
+            inst.get_metric_history_chart_data.return_value = history
+            slugs = ['foo', 'bar']
+            expected_result = {
+                'chart_id': 'metric-aggregate-history-foo-bar',
+                'slugs': slugs,
+                'since': None,
+                'granularity': "daily",
+                'metric_history': history,
+                'tabular_data': None,
+                'with_data_table': False,
+            }
+
+            # When given a date string
+            result = taglib.aggregate_history(slugs, since="2000-01-02")
+            expected_result['since'] = datetime(2000, 1, 2)
+            self.assertEqual(result, expected_result)
+
+            # When given a datetime
+            result = taglib.aggregate_history(slugs, since="2000-01-02 11:30:45")
+            expected_result['since'] = datetime(2000, 1, 2, 11, 30, 45)
+            self.assertEqual(result, expected_result)
+
+            # When given a datetime object
+            d = datetime(2000, 1, 2, 11, 30, 45)
+            result = taglib.aggregate_history(slugs, since=d)
+            expected_result['since'] = d
+            self.assertEqual(result, expected_result)
 
     def test_aggregate_history_with_tabular_data(self):
         with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
