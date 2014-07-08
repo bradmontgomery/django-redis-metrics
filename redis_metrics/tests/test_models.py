@@ -294,15 +294,15 @@ class TestR(TestCase):
         """Verify that ``R.delete_metric`` deletes all keys and removes keys
         from the set of metric slugs."""
 
-        # Make sure SMEMBERS returns some data
-        self.redis.smembers.return_value = ["m:slug:0", "m:slug:1"]
+        # Make sure KEYS returns some data
+        self.redis.keys.return_value = ["m:slug:0", "m:slug:1"]
         self.r.delete_metric('slug')  # call delete_metric
 
         # Verify that the metric data is removed as are the keys from the set
         self.redis.assert_has_calls([
-            call.smembers(self.r._metric_slugs_key),
+            call.keys("m:slug:*"),
             call.delete("m:slug:0", "m:slug:1"),
-            call.srem(self.r._metric_slugs_key, "m:slug:0", "m:slug:1"),
+            call.srem(self.r._metric_slugs_key, "slug")
         ])
 
     def test_metric(self):
@@ -320,7 +320,7 @@ class TestR(TestCase):
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
         self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, *keys),
+            call.sadd(self.r._metric_slugs_key, slug),
             call.incr(second, n),
             call.incr(minute, n),
             call.incr(hour, n),
@@ -349,7 +349,7 @@ class TestR(TestCase):
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
         self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, *keys),
+            call.sadd(self.r._metric_slugs_key, slug),
             call.incr(second, n),
             call.incr(minute, n),
             call.incr(hour, n),
@@ -381,7 +381,7 @@ class TestR(TestCase):
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
         self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, *keys),
+            call.sadd(self.r._metric_slugs_key, slug),
             call.incr(seconds, n),
             call.incr(minutes, n),
             call.incr(hour, n),

@@ -179,8 +179,7 @@ class R(object):
     def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)
         for this app."""
-        keys = self.r.smembers(self._metric_slugs_key)
-        return set(s.split(":")[1] for s in keys)
+        return self.r.smembers(self._metric_slugs_key)
 
     def metric_slugs_by_category(self):
         """Return a dictionary of category->metrics data:
@@ -208,19 +207,14 @@ class R(object):
         """Removes all keys for the given ``slug``."""
 
         # To remove all keys for a slug, I need to retrieve them all from
-        # the set of metric keys, then filter the matching prefixes.
-        # This is quite possibly the most inefficient way to do this :-/
-        prefix = "m:{0}:".format(slug)
-        keys = [
-            k for k in self.r.smembers(self._metric_slugs_key)
-            if k.startswith(prefix)
-        ]
+        # the set of metric keys, This uses the redis "keys" command, which is
+        # inefficient, but this shouldn't be used all that often.
+        prefix = "m:{0}:*".format(slug)
+        keys = self.r.keys(prefix)
+        self.r.delete(*keys)  # Remove the metric data
 
-        # Remove the metric data
-        self.r.delete(*keys)
-
-        # Finally, remove keys from the set
-        self.r.srem(self._metric_slugs_key, *keys)
+        # Finally, remove the slug from the set
+        self.r.srem(self._metric_slugs_key, slug)
 
     def metric(self, slug, num=1, category=None, expire=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
@@ -250,11 +244,11 @@ class R(object):
         keys = self._build_keys(slug)
         sec_key, min_key, hour_key, day_key, week_key, month_key, year_key = keys
 
-        # Keep track of all of our keys
-        self.r.sadd(self._metric_slugs_key, *keys)
+        # Add the slug to the set of metric slugs
+        self.r.sadd(self._metric_slugs_key, slug)
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
-        # incrby method; .incr accepts a second ``amound`` parameter.
+        # incrby method; .incr accepts a second ``amount`` parameter.
         self.r.incr(sec_key, num)
         self.r.incr(min_key, num)
         self.r.incr(hour_key, num)
