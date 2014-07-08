@@ -666,7 +666,7 @@ class TestR(TestCase):
         is added to the set of gauge slugs and that the value gets set."""
         self.r.gauge('test-gauge', 9000)
         self.redis.assert_has_calls([
-            call.sadd(self.r._gauge_slugs_key, 'g:test-gauge'),
+            call.sadd(self.r._gauge_slugs_key, 'test-gauge'),
             call.set('g:test-gauge', 9000),
         ])
 
@@ -681,5 +681,5 @@ class TestR(TestCase):
         self.r.delete_gauge("test-gauge")
         self.redis.assert_has_calls([
             call.delete('g:test-gauge'),
-            call.srem(self.r._gauge_slugs_key, "g:test-gauge"),
+            call.srem(self.r._gauge_slugs_key, "test-gauge"),
         ])

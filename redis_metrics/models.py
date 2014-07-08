@@ -500,8 +500,7 @@ class R(object):
     def gauge_slugs(self):
         """Return a set of Gauges slugs (i.e. those used to create Redis keys)
         for this app."""
-        keys = self.r.smembers(self._gauge_slugs_key)
-        return set(s.split(":")[1] for s in keys)
+        return self.r.smembers(self._gauge_slugs_key)
 
     def _gauge_key(self, slug):
         """Make sure our slugs have a consistent format."""
@@ -515,7 +514,7 @@ class R(object):
 
         """
         k = self._gauge_key(slug)
-        self.r.sadd(self._gauge_slugs_key, k)  # keep track of all Gauges
+        self.r.sadd(self._gauge_slugs_key, slug)  # keep track of all Gauges
         self.r.set(k, current_value)
 
     def get_gauge(self, slug):
@@ -526,4 +525,4 @@ class R(object):
         """Removes all gauges with the given ``slug``."""
         key = self._gauge_key(slug)
         self.r.delete(key)  # Remove the Gauge
-        self.r.srem(self._gauge_slugs_key, key)  # Remove from the set of keys
+        self.r.srem(self._gauge_slugs_key, slug)  # Remove from the set of keys
