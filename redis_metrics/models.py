@@ -117,6 +117,11 @@ class R(object):
             units = elapsed.days + 1
         return (now - timedelta(**{granularity: u}) for u in range(int(units)))
 
+    def categories(self):
+        """Returns a set of Categories under which metrics may have been
+        organized."""
+        return self.r.smembers(self._categories_key)
+
     def _category_key(self, category):
         return u"c:{0}".format(category)
 

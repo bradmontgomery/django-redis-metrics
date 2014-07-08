@@ -162,6 +162,11 @@ class TestR(TestCase):
         values = self.r._date_range('yearly', since)
         self.assertEqual(len(list(values)), 6)  # 6 because we do days + 1
 
+    def test_categories(self):
+        """Verify that ``R.categories()`` calls redis SMEMBERS command."""
+        self.r.categories()
+        self.redis.smembers.assert_called_once_with("categories")
+
     def test__category_key(self):
         """Creates a redis key for a given category string."""
         self.assertEqual(
