@@ -57,6 +57,16 @@ and include the following in your Root URLconf::
 Then, to view your metrics, visit the /metrics/ url, (i.e. run the development
 server and go to http://127.0.0.1:8000/metrics/)
 
+Upgrading to 0.8.0
+==================
+
+If you used a prior version of this app, then installed 0.8.0, it's likely you'll
+run into this error::
+
+    WRONGTYPE Operation against a key holding the wrong kind of value
+
+To fix this, run the ``fix_redis_metrics_keys`` command, which should mitgrate
+data for metrics, gauges, and categories.
 
 Settings
 ========

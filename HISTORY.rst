@@ -8,7 +8,8 @@ History
 - Autodecode data from redis (`PR #18 <https://github.com/bradmontgomery/django-redis-metrics/pull/18>`_, thanks @jellonek)
 - Support for granularity at hour, minute, seconds. (See `Issue #13 <https://github.com/bradmontgomery/django-redis-metrics/issues/13>`_)
 - **Potential Breaking change**: Always store dates & times in UTC
-- Change the way we store Metric Slugs: Store only the slugs, not the redis keys.
+- Change the way we store Metric & Gauge Slugs: Store only the slugs, not the redis keys.
+- Added a ``fix_redis_metrics_keys`` command to migrate data for previous versions.
 
 0.7.2 (2014-06-22)
 ++++++++++++++++++
