@@ -8,3 +8,4 @@ In no particular order:
 - Daniel Lindsley `<https://github.com/toastdriven>`_
 - Charles Vallantin Dulac `<https://github.com/charles-vdulac>`_
 - Reza Mohammadi `<https://github.com/remohammadi>`_
+- mvillarejo `<https://github.com/mvillarejo>`_
