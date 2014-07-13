@@ -385,10 +385,10 @@ class R(object):
             for date in self._date_range(granularity, since):
                 keys.update(set(self._build_keys(slug, date, granularity)))
 
-        # Fetch our data, but exclude any missing values
-        results = filter(None, self.r.mget(keys))
+        # Fetch our data, replacing any None-values with zeros
+        results = [0 if v is None else v for v in self.r.mget(keys)]
         results = zip(keys, results)
-        return sorted(results)
+        return sorted(results, key=lambda t: t[0])
 
     def get_metric_history_as_columns(self, slugs, since=None,
                                       granularity='daily'):

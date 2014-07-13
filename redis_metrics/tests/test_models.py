@@ -560,6 +560,39 @@ class TestR(TestCase):
     def test_get_metric_multiple_history_yearly(self):
         self._test_get_metric_history(['foo', 'bar'], 'yearly')
 
+    @patch.object(R, '_date_range')
+    def test_get_metric_history_replaces_none_with_zero(self, mock_date_range):
+        """Ensure that None-values get replaced with Zeros in
+        ``R.get_metric_history``."""
+
+        # Mock the _date_ranch method so we can specify it's return values.
+        mock_date_range.return_value = [
+            datetime(2000, 1, 1),
+            datetime(2000, 1, 2),
+            datetime(2000, 1, 3),
+            datetime(2000, 1, 4),
+        ]
+
+        # Temporarily change the return value for mget
+        mget_return = self.redis.mget.return_value
+        self.redis.mget.return_value = [u'1', u'2', None, u'3']
+
+        # Note: we're not providing a since parameter here, since we've
+        # mocked the R._date_range method.
+        results = self.r.get_metric_history("foo", granularity="daily")
+
+        # Format the range of dates that for which we should get results
+        expected = [
+            ('m:foo:2000-01-01', u'1'),
+            ('m:foo:2000-01-02', u'2'),
+            ('m:foo:2000-01-03', 0),
+            ('m:foo:2000-01-04', u'3'),
+        ]
+        self.assertEqual(results, expected)
+
+        # Reset mget's previous return value
+        self.redis.mget.return_value = mget_return
+
     @patch.object(R, 'get_metric_history')
     def test_get_metric_history_as_columns(self, mock_metric_hist):
         # set up some sample (yearly) metrics
