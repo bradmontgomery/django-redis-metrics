@@ -109,12 +109,13 @@ class TestR(TestCase):
     def test__date_range(self):
         """Tests ``R._date_range`` at various granularities *without* a
         ``since`` date."""
-        # minutes or seconds should start with a timedelta of 1 day
-        self.assertEqual(len(list(self.r._date_range('seconds', None))), 86400)
-        self.assertEqual(len(list(self.r._date_range('minutes', None))), 1440)
+        # minutes, seconds and hours should be capped at 300, 480, and 720
+        d = datetime(2014, 1, 1)
+        self.assertEqual(len(list(self.r._date_range('seconds', d))), 300)
+        self.assertEqual(len(list(self.r._date_range('minutes', d))), 480)
+        self.assertEqual(len(list(self.r._date_range('hourly', d))), 720)
 
         # Everything else should have a timedelta of 7 days
-        self.assertEqual(len(list(self.r._date_range('hourly', None))), 168)
         self.assertEqual(len(list(self.r._date_range('daily', None))), 8)
         self.assertEqual(len(list(self.r._date_range('weekly', None))), 8)
         self.assertEqual(len(list(self.r._date_range('monthly', None))), 8)
