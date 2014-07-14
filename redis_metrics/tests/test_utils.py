@@ -54,6 +54,30 @@ class TestUtils(TestCase):
             self.assertEqual(r, utils._redis_model)
             mock_redis.assert_called_once_with(**r_kwargs)
 
+    def test_set_metric(self):
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.set_metric("test-slug", 42)
+            mock_get_r.assert_has_calls([
+                call(),
+                call().set_metric("test-slug", 42, category=None, expire=None),
+            ])
+
+    def test_set_metric_with_category(self):
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.set_metric("test-slug", 42, category="Woo")
+            mock_get_r.assert_has_calls([
+                call(),
+                call().set_metric("test-slug", 42, category="Woo", expire=None),
+            ])
+
+    def test_set_metric_with_expiration(self):
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.set_metric("test-slug", 42, expire=300)
+            mock_get_r.assert_has_calls([
+                call(),
+                call().set_metric("test-slug", 42, category=None, expire=300),
+            ])
+
     def test_metric(self):
         with patch("redis_metrics.utils.get_r") as mock_get_r:
             utils.metric("test-slug")

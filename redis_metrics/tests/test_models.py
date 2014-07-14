@@ -311,6 +311,80 @@ class TestR(TestCase):
             call.srem(self.r._metric_slugs_key, "slug")
         ])
 
+    @patch.object(R, '_build_keys')
+    def test_set_metric(self, mock_build_keys):
+        """Test setting metrics using ``R.set_metric``."""
+        # Define redis keys
+        mock_build_keys.return_value = [
+            'm:test-slug:s:2000-01-02-11-45-30',
+            'm:test-slug:i:2000-01-02-11-45',
+            'm:test-slug:h:2000-01-02-11',
+            'm:test-slug:2000-01-02',
+            'm:test-slug:m:2000-01',
+            'm:test-slug:w:2000-01',
+            'm:test-slug:y:2000'
+        ]
+        slug = 'test-slug'
+        value = 42
+
+        # get the metric keys so we can check for the appropriate calls
+        self.r.set_metric(slug, value)
+
+        # Verify that setting a metric adds the appropriate slugs to the keys
+        # set and then incrememts each key
+        self.redis.sadd.assert_called_once_with('metric-slugs', slug)
+        self.redis.mset.assert_called_once_with({
+            'm:test-slug:s:2000-01-02-11-45-30': 42,
+            'm:test-slug:i:2000-01-02-11-45': 42,
+            'm:test-slug:h:2000-01-02-11': 42,
+            'm:test-slug:2000-01-02': 42,
+            'm:test-slug:m:2000-01': 42,
+            'm:test-slug:w:2000-01': 42,
+            'm:test-slug:y:2000': 42,
+        })
+
+        # Expiration should not have gotten called
+        self.assertFalse(self.redis.expire.called)
+
+    @patch.object(R, '_build_keys')
+    def test_set_metric_with_expiration(self, mock_build_keys):
+        """Test setting metrics using ``R.set_metric`` with an expiration."""
+        # Define redis keys
+        mock_build_keys.return_value = [
+            'm:test-slug:s:2000-01-02-11-45-30',
+            'm:test-slug:i:2000-01-02-11-45',
+            'm:test-slug:h:2000-01-02-11',
+            'm:test-slug:2000-01-02',
+            'm:test-slug:m:2000-01',
+            'm:test-slug:w:2000-01',
+            'm:test-slug:y:2000'
+        ]
+        slug = 'test-slug'
+        value = 42
+
+        # get the metric keys so we can check for the appropriate calls
+        self.r.set_metric(slug, value, expire=500)
+
+        # Verify that each key had an expiration set.
+        self.redis.expire.assert_has_calls([
+            call('m:test-slug:s:2000-01-02-11-45-30', 500),
+            call('m:test-slug:i:2000-01-02-11-45', 500),
+            call('m:test-slug:h:2000-01-02-11', 500),
+            call('m:test-slug:2000-01-02', 500),
+            call('m:test-slug:m:2000-01', 500),
+            call('m:test-slug:w:2000-01', 500),
+            call('m:test-slug:y:2000', 500),
+        ])
+
+    @patch.object(R, '_categorize')
+    def test_set_metric_with_category(self, mock_categorize):
+        """Test setting metrics using ``R.set_metric`` when a category
+        is provided."""
+
+        # get the metric keys so we can check for the appropriate calls
+        self.r.set_metric('test-slug', 42, category='Test Category')
+        mock_categorize.assert_called_once_with('test-slug', "Test Category")
+
     def test_metric(self):
         """Test setting metrics using ``R.metric``."""
 
