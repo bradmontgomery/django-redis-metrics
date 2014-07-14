@@ -4,11 +4,16 @@ History
 (coming soon!) 0.8.0
 ++++++++++++++++++++
 
+- Replaced Google Charts with Chart.js (`Issue #21 <https://github.com/bradmontgomery/django-redis-metrics/issues/21>`_)
+- Added the ability to set a metric's value rather than increment it via the
+  ``set_metric`` function (`Issue #20 <https://github.com/bradmontgomery/django-redis-metrics/issues/20>`_)
 - Support for metrics at a granularity of Seconds, Minutes, and Hours, (`#24 <https://github.com/bradmontgomery/django-redis-metrics/pull/24>`_ and `#13 <https://github.com/bradmontgomery/django-redis-metrics/issues/13>`_, thanks @mvillarejo)
 - Autodecode data from redis (`PR #18 <https://github.com/bradmontgomery/django-redis-metrics/pull/18>`_, thanks @jellonek)
-- Support for granularity at hour, minute, seconds. (See `Issue #13 <https://github.com/bradmontgomery/django-redis-metrics/issues/13>`_)
+- Changed ``utils.generate_test_metrics`` so it only generates metrics at the
+  daily and above level.
 - **Potential Breaking change**: Always store dates & times in UTC
-- Change the way we store Metric & Gauge Slugs: Store only the slugs, not the redis keys.
+- **Potential Breaking change**: Change the way we store Metric & Gauge Slugs:
+  Store only the slugs, not the redis keys.
 - Added a ``fix_redis_metrics_keys`` command to migrate data for previous versions.
 
 0.7.2 (2014-06-22)
