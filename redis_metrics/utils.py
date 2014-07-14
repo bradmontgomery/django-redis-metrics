@@ -14,6 +14,11 @@ def get_r():
     return _redis_model
 
 
+def set_metric(slug, value, category=None, expire=None):
+    """Create/Increment a metric."""
+    get_r().set_metric(slug, value, category=category, expire=expire)
+
+
 def metric(slug, num=1, category=None, expire=None):
     """Create/Increment a metric."""
     get_r().metric(slug, num=num, category=category, expire=expire)
