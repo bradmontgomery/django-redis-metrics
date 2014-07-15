@@ -1,8 +1,8 @@
 History
 -------
 
-(coming soon!) 0.8.0
-++++++++++++++++++++
+0.8.0 (2014-07-15)
+++++++++++++++++++
 
 - Replaced Google Charts with Chart.js (`Issue #21 <https://github.com/bradmontgomery/django-redis-metrics/issues/21>`_)
 - Added the ability to set a metric's value rather than increment it via the
