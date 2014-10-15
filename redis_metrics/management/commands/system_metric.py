@@ -16,7 +16,7 @@ Examples:
 
 """
 from django.core.management.base import BaseCommand, CommandError
-from redis_metrics.utils import metric, gauge
+from redis_metrics.utils import set_metric, metric, gauge
 
 try:
     import psutil
@@ -82,13 +82,13 @@ class Command(BaseCommand):
     def _cpu(self):
         """Record CPU usage."""
         value = int(psutil.cpu_percent())
-        metric("cpu", value, category=self.category)
+        set_metric("cpu", value, category=self.category)
         gauge("cpu", value)
 
     def _mem(self):
         """Record Memory usage."""
         value = int(psutil.virtual_memory().percent)
-        metric("memory", value, category=self.category)
+        set_metric("memory", value, category=self.category)
         gauge("memory", value)
 
     def _disk(self):
@@ -101,7 +101,7 @@ class Command(BaseCommand):
             raise CommandError("Unknown device: {0}".format(self.device))
 
         value = int(psutil.disk_usage(mountpoints[0]).percent)
-        metric("disk-{0}".format(self.device), value, category=self.category)
+        set_metric("disk-{0}".format(self.device), value, category=self.category)
         gauge("disk-{0}".format(self.device), value)
 
     def _net(self):
