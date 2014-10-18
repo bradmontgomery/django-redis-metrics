@@ -5,6 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 
 from ..models import R
+from ..settings import app_settings
 from .. import utils
 
 
@@ -12,12 +13,19 @@ class TestUtils(TestCase):
     """Tests for functions in ``redis_metrics.utils``."""
 
     def setUp(self):
-        self.old_host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
-        self.old_port = getattr(settings, 'REDIS_METRICS_PORT', 6379)
-        self.old_db = getattr(settings, 'REDIS_METRICS_DB', 0)
+        self.old_host = app_settings['REDIS_METRICS_HOST']
+        self.old_port = app_settings['REDIS_METRICS_PORT']
+        self.old_db = app_settings['REDIS_METRICS_DB']
+        self.old_password = app_settings['REDIS_METRICS_PASSWORD']
+        self.old_socket_timeout = app_settings['REDIS_METRICS_SOCKET_TIMEOUT']
+        self.old_connection_pool = app_settings['REDIS_METRICS_SOCKET_CONNECTION_POOL']
+
         settings.REDIS_METRICS_HOST = 'localhost'
         settings.REDIS_METRICS_PORT = 6379
         settings.REDIS_METRICS_DB = 0
+        settings.REDIS_METRICS_PASSWORD = None
+        settings.REDIS_METRICS_SOCKET_TIMEOUT = None
+        settings.REDIS_METRICS_SOCKET_CONNECTION_POOL = None
 
         # The redis client instance on R is a MagicMock object
         # TODO: create a patcher for StrictRedis
@@ -26,6 +34,9 @@ class TestUtils(TestCase):
         settings.REDIS_METRICS_HOST = self.old_host
         settings.REDIS_METRICS_PORT = self.old_port
         settings.REDIS_METRICS_DB = self.old_db
+        settings.REDIS_METRICS_PASSWORD = self.old_password
+        settings.REDIS_METRICS_SOCKET_TIMEOUT = self.old_socket_timeout
+        settings.REDIS_METRICS_SOCKET_CONNECTION_POOL = self.old_connection_pool
         super(TestUtils, self).tearDown()
 
         # TODO: unpatch StrictRedis

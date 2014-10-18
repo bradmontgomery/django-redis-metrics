@@ -3,14 +3,13 @@ This app doesn't have any models, per se, but the following ``R`` class is a
 lightweight wrapper around Redis.
 
 """
-from collections import OrderedDict
-from datetime import datetime, timedelta
-
 import redis
 
-from django.conf import settings
+from collections import OrderedDict
+from datetime import datetime, timedelta
 from django.template.defaultfilters import slugify
 
+from .settings import app_settings
 from .templatetags import redis_metrics_filters as template_tags
 
 
@@ -43,28 +42,18 @@ class R(object):
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        self.host = kwargs.pop(
-            'host',
-            getattr(settings, 'REDIS_METRICS_HOST', 'localhost'))
-
-        self.port = kwargs.pop(
-            'port',
-            int(getattr(settings, 'REDIS_METRICS_PORT', 6379)))
-
-        self.db = kwargs.pop(
-            'db',
-            int(getattr(settings, 'REDIS_METRICS_DB', 0)))
-
-        self.password = kwargs.pop(
-            'password', getattr(settings, 'REDIS_METRICS_PASSWORD', None))
-
+        self.host = kwargs.pop('host', app_settings['REDIS_METRICS_HOST'])
+        self.port = kwargs.pop('port', app_settings['REDIS_METRICS_PORT'])
+        self.db = kwargs.pop('db', app_settings['REDIS_METRICS_DB'])
+        self.password = kwargs.pop('password', app_settings['REDIS_METRICS_PASSWORD'])
         self.socket_timeout = kwargs.pop(
             'socket_timeout',
-            getattr(settings, 'REDIS_METRICS_SOCKET_TIMEOUT', None))
-
+            app_settings['REDIS_METRICS_SOCKET_TIMEOUT']
+        )
         self.connection_pool = kwargs.pop(
             'connection_pool',
-            getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None))
+            app_settings['REDIS_METRICS_SOCKET_CONNECTION_POOL']
+        )
 
         # Create the connection to Redis
         self.r = redis.StrictRedis(

@@ -11,23 +11,26 @@ from django.conf import settings
 from django.test import TestCase
 
 from ..models import R
+from ..settings import app_settings
 
 
 class TestR(TestCase):
     """Tests for the ``R`` class."""
 
     def setUp(self):
-        self.old_host = getattr(settings, 'REDIS_METRICS_HOST', 'localhost')
-        self.old_port = getattr(settings, 'REDIS_METRICS_PORT', 6379)
-        self.old_db = getattr(settings, 'REDIS_METRICS_DB', 0)
-        self.old_password = getattr(settings, 'REDIS_METRICS_PASSWORD', None)
-        self.old_socket_timeout = \
-            getattr(settings, 'REDIS_METRICS_SOCKET_TIMEOUT', None)
-        self.old_connection_pool = \
-            getattr(settings, 'REDIS_METRICS_SOCKET_CONNECTION_POOL', None)
+        self.old_host = app_settings['REDIS_METRICS_HOST']
+        self.old_port = app_settings['REDIS_METRICS_PORT']
+        self.old_db = app_settings['REDIS_METRICS_DB']
+        self.old_password = app_settings['REDIS_METRICS_PASSWORD']
+        self.old_socket_timeout = app_settings['REDIS_METRICS_SOCKET_TIMEOUT']
+        self.old_connection_pool = app_settings['REDIS_METRICS_SOCKET_CONNECTION_POOL']
+
         settings.REDIS_METRICS_HOST = 'localhost'
         settings.REDIS_METRICS_PORT = 6379
         settings.REDIS_METRICS_DB = 0
+        settings.REDIS_METRICS_PASSWORD = None
+        settings.REDIS_METRICS_SOCKET_TIMEOUT = None
+        settings.REDIS_METRICS_SOCKET_CONNECTION_POOL = None
 
         # Patch the connection to redis, but keep a reference to the
         # created StrictRedis instance, so we can make assertions about how
