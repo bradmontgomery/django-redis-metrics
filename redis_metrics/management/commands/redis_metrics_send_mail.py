@@ -5,7 +5,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.core.management.base import NoArgsCommand
 from django.template.loader import render_to_string
 
-from redis_metrics.models import R
+from redis_metrics.utils import get_r
 
 
 class Command(NoArgsCommand):
@@ -15,7 +15,7 @@ class Command(NoArgsCommand):
     def handle_noargs(self, **options):
         """Send Report E-mails."""
 
-        r = R()
+        r = get_r()
         since = datetime.utcnow() - timedelta(days=1)
         metrics = {}
         categories = r.metric_slugs_by_category()

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from redis_metrics.models import R
+from redis_metrics.utils import get_r
 
 
 class Command(BaseCommand):
@@ -11,5 +11,5 @@ class Command(BaseCommand):
             raise CommandError("You must provide a metric name")
         metric_slug = args[0]
 
-        r = R()
+        r = get_r()
         r.delete_metric(metric_slug)

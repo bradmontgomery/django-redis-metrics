@@ -2,7 +2,7 @@ import re
 
 from datetime import date
 from django.core.management.base import BaseCommand, CommandError
-from redis_metrics.models import R
+from redis_metrics.utils import r
 
 
 class Command(BaseCommand):

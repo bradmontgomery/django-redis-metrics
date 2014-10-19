@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from redis_metrics.models import R
+from redis_metrics.utils import get_r
 
 
 class Command(BaseCommand):
@@ -9,5 +9,5 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if not len(args) == 1:
             raise CommandError("You must provide a gauge name")
-        r = R()
+        r = get_r()
         r.delete_gauge(args[0])
