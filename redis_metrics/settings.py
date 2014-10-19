@@ -22,7 +22,7 @@ class AppSettings(object):
     # list of (setting name, default value)
     _default_settings = {
         'REDIS_METRICS_HOST': 'localhost',
-        'REDIS_METRICS_PORT': 6397,
+        'REDIS_METRICS_PORT': 6379,
         'REDIS_METRICS_DB': 0,
         'REDIS_METRICS_PASSWORD': None,
         'REDIS_METRICS_SOCKET_TIMEOUT': None,
