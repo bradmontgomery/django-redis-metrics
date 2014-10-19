@@ -19,6 +19,9 @@ from .. import utils
 class TestUtils(TestCase):
     """Tests for functions in ``redis_metrics.utils``."""
 
+    def setUp(self):
+        utils._redis_model = None
+
     def test_get_r(self):
         # Global `_redis_model` is None by default
         r_kwargs = {
