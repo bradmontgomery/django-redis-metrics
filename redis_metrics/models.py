@@ -324,9 +324,12 @@ class R(object):
         minutes, hours, day, week, month, and year.
 
         """
+        results = OrderedDict()
         granularities = self._granularities()
         keys = self._build_keys(slug)
-        return {g: self.r.get(key) for g, key in zip(granularities, keys)}
+        for granularity, key in zip(granularities, keys):
+            results[granularity] = self.r.get(key)
+        return results
 
     def get_metrics(self, slug_list):
         """Get the metrics for multiple slugs.
