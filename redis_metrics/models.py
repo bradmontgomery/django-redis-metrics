@@ -9,7 +9,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 from django.template.defaultfilters import slugify
 
-from .settings import app_settings
+from .settings import app_settings, GRANULARITIES, METRIC_KEY_PATTERNS
 from .templatetags import redis_metrics_filters as template_tags
 
 
@@ -42,17 +42,17 @@ class R(object):
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        self.host = kwargs.pop('host', app_settings['REDIS_METRICS_HOST'])
-        self.port = kwargs.pop('port', app_settings['REDIS_METRICS_PORT'])
-        self.db = kwargs.pop('db', app_settings['REDIS_METRICS_DB'])
-        self.password = kwargs.pop('password', app_settings['REDIS_METRICS_PASSWORD'])
+        self.host = kwargs.pop('host', app_settings.REDIS_METRICS_HOST)
+        self.port = kwargs.pop('port', app_settings.REDIS_METRICS_PORT)
+        self.db = kwargs.pop('db', app_settings.REDIS_METRICS_DB)
+        self.password = kwargs.pop('password', app_settings.REDIS_METRICS_PASSWORD)
         self.socket_timeout = kwargs.pop(
             'socket_timeout',
-            app_settings['REDIS_METRICS_SOCKET_TIMEOUT']
+            app_settings.REDIS_METRICS_SOCKET_TIMEOUT
         )
         self.connection_pool = kwargs.pop(
             'connection_pool',
-            app_settings['REDIS_METRICS_SOCKET_CONNECTION_POOL']
+            app_settings.REDIS_METRICS_SOCKET_CONNECTION_POOL
         )
 
         # Create the connection to Redis
@@ -148,6 +148,30 @@ class R(object):
         # Store all category names in a Redis set, for easy retrieval
         self.r.sadd(self._categories_key, category)
 
+    def _granularities(self):
+        """Returns a generator of all possible granularities based on the
+        REDIS_METRICS_MIN_GRANULARITY and REDIS_METRICS_MAX_GRANULARITY settings.
+        """
+        keep = False
+        for g in GRANULARITIES:
+            if g == app_settings.REDIS_METRICS_MIN_GRANULARITY and not keep:
+                keep = True
+            elif g == app_settings.REDIS_METRICS_MAX_GRANULARITY and keep:
+                keep = False
+                yield g
+            if keep:
+                yield g
+
+    def _build_key_patterns(self, slug, date):
+        """Builds an OrderedDict of metric keys and patterns for the given slug
+        and date."""
+        # we want to keep the order, from smallest to largest granularity
+        patts = OrderedDict()
+        for g in self._granularities():
+            date_string = date.strftime(METRIC_KEY_PATTERNS[g]["date_format"])
+            patts[g] = METRIC_KEY_PATTERNS[g]["key"].format(slug, date_string)
+        return patts
+
     def _build_keys(self, slug, date=None, granularity='all'):
         """Builds redis keys used to store metrics.
 
@@ -164,22 +188,8 @@ class R(object):
         slug = slugify(slug)  # Ensure slugs have a consistent format
         if date is None:
             date = datetime.utcnow()
-
-        # we want to keep the order, here, from smallest to largest granularity:
-        # seconds, minutes, hourly, daily, weekly, monthly, yearly
-        patts = OrderedDict()
-        patts["seconds"] = "m:{0}:s:{1}".format(slug, date.strftime("%Y-%m-%d-%H-%M-%S"))
-        patts["minutes"] = "m:{0}:i:{1}".format(slug, date.strftime("%Y-%m-%d-%H-%M"))
-        patts["hourly"] = "m:{0}:h:{1}".format(slug, date.strftime("%Y-%m-%d-%H"))
-        patts["daily"] = "m:{0}:{1}".format(slug, date.strftime("%Y-%m-%d"))
-        patts["weekly"] = "m:{0}:w:{1}".format(slug, date.strftime("%Y-%U"))
-        patts["monthly"] = "m:{0}:m:{1}".format(slug, date.strftime("%Y-%m"))
-        patts["yearly"] = "m:{0}:y:{1}".format(slug, date.strftime("%Y"))
-
-        if granularity == 'all':
-            return patts.values()
-        else:
-            return [patts[granularity]]
+        patts = self._build_key_patterns(slug, date)
+        return patts.values() if granularity == "all" else [patts[granularity]]
 
     def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)
