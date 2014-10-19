@@ -10,12 +10,11 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
-from django.http import Http404
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
 
-from .models import R
+from .utils import get_r
 from .forms import AggregateMetricForm, MetricCategoryForm
 
 
@@ -51,7 +50,7 @@ class GaugesView(ProtectedTemplateView):
     def get_context_data(self, **kwargs):
         """Includes the Gauge slugs and data in the context."""
         data = super(GaugesView, self).get_context_data(**kwargs)
-        data.update({'gauges': R().gauge_slugs()})
+        data.update({'gauges': get_r().gauge_slugs()})
         return data
 
 
@@ -64,7 +63,7 @@ class MetricsListView(ProtectedTemplateView):
 
         # Metrics organized by category, like so:
         # { <category_name>: [ <slug1>, <slug2>, ... ]}
-        data.update({'metrics': R().metric_slugs_by_category()})
+        data.update({'metrics': get_r().metric_slugs_by_category()})
         return data
 
 
@@ -113,8 +112,8 @@ class AggregateFormView(ProtectedFormView):
         url = reverse('redis_metric_aggregate_detail', args=[slugs])
         # Django 1.6 quotes reversed URLs, which changes + into %2B. We want
         # want to keep the + in the url (it's ok according to RFC 1738)
-        #https://docs.djangoproject.com/en/1.6/releases/1.6/#quoting-in-reverse
-        return url.replace("%2B", "+") # keep the plusses :-/
+        # https://docs.djangoproject.com/en/1.6/releases/1.6/#quoting-in-reverse
+        return url.replace("%2B", "+")  # keep the plusses :-/
 
     def form_valid(self, form):
         """Pull the metrics from the submitted form, and store them as a

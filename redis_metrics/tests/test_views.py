@@ -66,7 +66,7 @@ class TestViews(TestCase):
     def test_gauges_view(self):
         """Test the ``GaugesView``."""
         url = reverse('redis_metrics_gauges')
-        with patch('redis_metrics.views.R') as mock_r:
+        with patch('redis_metrics.views.get_r') as mock_r:
             # Set appropriate return values for methods that'll get called
             # in the MetricsListView.
             r = mock_r.return_value  # Get an instance of our Mocked R class
@@ -87,7 +87,7 @@ class TestViews(TestCase):
     def test_metrics_list(self):
         """Test the ``MetricsListView``."""
         url = reverse('redis_metrics_list')
-        with patch('redis_metrics.views.R') as mock_r:
+        with patch('redis_metrics.views.get_r') as mock_r:
             # Set appropriate return values for methods that'll get called
             # in the MetricsListView.
             r = mock_r.return_value  # Get an instance of our Mocked R class
@@ -173,7 +173,7 @@ class TestViews(TestCase):
         correct context info (i.e. a form)."""
         url = reverse('redis_metric_aggregate')
         self.assertUnauthedRequestRedirects(url)
-        with patch('redis_metrics.views.R'):
+        with patch('redis_metrics.views.get_r'):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertIn('form', resp.context_data)
@@ -182,7 +182,7 @@ class TestViews(TestCase):
         """Verifies that POST requests to the ``AggregateFormView`` work as
         expected."""
         url = reverse('redis_metric_aggregate')
-        with patch('redis_metrics.views.R'):
+        with patch('redis_metrics.views.get_r'):
             with patch('redis_metrics.forms.R') as mock_r:
                 # Set up a return value for ``R.metric_slugs``, which is used
                 # in the ``AggregateMetricForm``
