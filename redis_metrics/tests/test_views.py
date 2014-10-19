@@ -16,8 +16,17 @@ except ImportError:  # pragma: no cover
     from django.contrib.auth.models import User  # pragma: no cover
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
+from django.test.utils import override_settings
 
 
+@override_settings(REDIS_METRICS_HOST='localhost')
+@override_settings(REDIS_METRICS_PORT=6379)
+@override_settings(REDIS_METRICS_DB=0)
+@override_settings(REDIS_METRICS_PASSWORD=None)
+@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
+@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
+@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
+@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
 class TestViews(TestCase):
     url = 'redis_metrics.urls'
 

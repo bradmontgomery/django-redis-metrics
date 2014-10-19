@@ -4,6 +4,7 @@
 from datetime import datetime, timedelta
 
 from django.test import TestCase
+from django.test.utils import override_settings
 from mock import patch
 from redis_metrics.templatetags import redis_metric_tags as taglib
 from redis_metrics.templatetags.redis_metrics_filters import (
@@ -11,6 +12,15 @@ from redis_metrics.templatetags.redis_metrics_filters import (
 )
 
 
+
+@override_settings(REDIS_METRICS_HOST='localhost')
+@override_settings(REDIS_METRICS_PORT=6379)
+@override_settings(REDIS_METRICS_DB=0)
+@override_settings(REDIS_METRICS_PASSWORD=None)
+@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
+@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
+@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
+@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
 class TestTemplateTags(TestCase):
     """Verify that template tags return the expected results."""
     maxDiff = None

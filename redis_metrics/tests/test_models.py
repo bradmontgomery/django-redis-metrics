@@ -7,31 +7,24 @@ Replace this with more appropriate tests for your application.
 from datetime import datetime, timedelta
 from mock import call, patch, Mock
 
-from django.conf import settings
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from ..models import R
-from ..settings import app_settings
 
 
+@override_settings(REDIS_METRICS_HOST='localhost')
+@override_settings(REDIS_METRICS_PORT=6379)
+@override_settings(REDIS_METRICS_DB=0)
+@override_settings(REDIS_METRICS_PASSWORD=None)
+@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
+@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
+@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
+@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
 class TestR(TestCase):
     """Tests for the ``R`` class."""
 
     def setUp(self):
-        self.old_host = app_settings['REDIS_METRICS_HOST']
-        self.old_port = app_settings['REDIS_METRICS_PORT']
-        self.old_db = app_settings['REDIS_METRICS_DB']
-        self.old_password = app_settings['REDIS_METRICS_PASSWORD']
-        self.old_socket_timeout = app_settings['REDIS_METRICS_SOCKET_TIMEOUT']
-        self.old_connection_pool = app_settings['REDIS_METRICS_SOCKET_CONNECTION_POOL']
-
-        settings.REDIS_METRICS_HOST = 'localhost'
-        settings.REDIS_METRICS_PORT = 6379
-        settings.REDIS_METRICS_DB = 0
-        settings.REDIS_METRICS_PASSWORD = None
-        settings.REDIS_METRICS_SOCKET_TIMEOUT = None
-        settings.REDIS_METRICS_SOCKET_CONNECTION_POOL = None
-
         # Patch the connection to redis, but keep a reference to the
         # created StrictRedis instance, so we can make assertions about how
         # it's called.
@@ -41,12 +34,6 @@ class TestR(TestCase):
         self.r = R()
 
     def tearDown(self):
-        settings.REDIS_METRICS_HOST = self.old_host
-        settings.REDIS_METRICS_PORT = self.old_port
-        settings.REDIS_METRICS_DB = self.old_db
-        settings.REDIS_METRICS_PASSWORD = self.old_password
-        settings.REDIS_METRICS_SOCKET_TIMEOUT = self.old_socket_timeout
-        settings.REDIS_METRICS_SOCKET_CONNECTION_POOL = self.old_connection_pool
         self.redis = self.redis_patcher.stop()
         super(TestR, self).tearDown()
 
@@ -211,6 +198,30 @@ class TestR(TestCase):
             r._categorize(slug, cat)
             calls = [call.sadd(cat_key, slug), call.sadd("categories", cat)]
             redis_instance.assert_has_calls(calls, any_order=True)
+
+    def test__granularities(self):
+        """Tests ``R._granularities with default test settings."""
+        # With default settings, min/max granularity is "seconds" and "yearly"
+        self.assertEqual(
+            list(self.r._granularities()),
+            ['seconds', 'minutes', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
+        )
+
+    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
+    def test__granularities_with_altered_min(self):
+        """Tests ``R._granularities with an altered minimum value."""
+        self.assertEqual(
+            list(self.r._granularities()),
+            ['daily', 'weekly', 'monthly', 'yearly']
+        )
+
+    @override_settings(REDIS_METRICS_MAX_GRANULARITY='daily')
+    def test__granularities_with_altered_max(self):
+        """Tests ``R._granularities with an altered maximum value."""
+        self.assertEqual(
+            list(self.r._granularities()),
+            ['seconds', 'minutes', 'hourly', 'daily']
+        )
 
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""
