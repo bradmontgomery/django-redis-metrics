@@ -1,6 +1,13 @@
 History
 -------
 
+0.8.1 (2014-10-18)
+++++++++++++++++++
+
+- Refactored the way we pull settings within the app, added ``settings.AppSettings`` to do this.
+- Added new settings: ``REDIS_METRICS_MIN_GRANULARITY`` and ``REDIS_METRICS_MAX_GRANULARITY`` (`Issue #34 <https://github.com/bradmontgomery/django-redis-metrics/issues/34>`_)
+- Dropping support for 1.5 (which just means I'm not testing against it)
+
 0.8.0 (2014-07-15)
 ++++++++++++++++++
 

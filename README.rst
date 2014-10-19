@@ -37,7 +37,7 @@ similar feature set but:
 Requirements
 ------------
 
-This app works with Python 2.7 and Django 1.4 - 1.6 and requires `redis-py`_.
+This app works with Python 2.7 and Django 1.4, 1.6, 1.7 and requires `redis-py`_.
 
 If you'd like to run the tests, install the packages listed in
 ``requirements/test.txt``, which includes coverage and mock.
@@ -62,10 +62,10 @@ Then, to view your metrics, visit the /metrics/ url, (i.e. run the development
 server and go to http://127.0.0.1:8000/metrics/)
 
 
-Upgrading to 0.8.0
+Upgrading to 0.8.x
 ------------------
 
-If you used a prior version of this app, then installed 0.8.0, it's likely that
+If you used a version of this app prior to 0.8.0, it's likely that
 you'll run into this error::
 
     WRONGTYPE Operation against a key holding the wrong kind of value
@@ -84,6 +84,10 @@ Settings
 * ``REDIS_METRICS_SOCKET_TIMEOUT`` - redis database socket timeout, defaults to None
 * ``REDIS_METRICS_SOCKET_CONNECTION_POOL`` - redis database socket connection
   pool, defaults to None
+* ``REDIS_METRICS_MIN_GRANULARITY`` - The minimum-time granularity for your
+  metrics (default is 'daily')
+* ``REDIS_METRICS_MAX_GRANULARITY`` - The maximum-time granularity for your
+  metrics (default is 'yearly')
 
 .. _usage:
 
