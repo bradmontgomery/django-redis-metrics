@@ -26,6 +26,16 @@ INSTALLED_APPS = [
     'redis_metrics',
 ]
 
+# Django 1.7 removed a bunch of defaults, but we currently require Session and
+# authentication (since we have a few restricted views).
+MIDDLEWARE_CLASSES = (
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+)
+
 REDIS_METRICS_HOST = 'localhost'
 REDIS_METRICS_PORT = '6379'
 REDIS_METRICS_DB = 0
