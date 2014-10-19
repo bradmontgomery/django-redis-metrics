@@ -7,7 +7,7 @@
 var ctx = document.getElementById("metric-detail-chart-{{slug}}").getContext("2d");
 var options = {animation:false, responsive: true};
 var data = {
-  labels: ['Seconds', 'Minutes', 'Hours', 'Day', 'Week', 'Month', 'Year'],
+  labels: [{% for g in granularities %}'{{g|title}}'{% if not forloop.last %},{% endif %}{% endfor %}],
   datasets: [
     {
       label: "Metrics",
@@ -15,14 +15,8 @@ var data = {
       strokeColor: "rgba(220,220,220,0.8)",
       highlightFill: "rgba(220,110,110,0.75)",
       highlightStroke: "rgba(220,220,220,1)",
-      data: [
-        {{ metrics.seconds|default:0 }},
-        {{ metrics.minutes|default:0 }},
-        {{ metrics.hours|default:0 }},
-        {{ metrics.day|default:0 }},
-        {{ metrics.week|default:0 }},
-        {{ metrics.month|default:0 }},
-        {{ metrics.year|default:0 }}
+      data: [{% for v in metrics.values %}
+        {{ v|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}
       ]
     }
   ]
@@ -36,34 +30,12 @@ var myBarChart = new Chart(ctx).Bar(data, options);
         <tr><th>Time Period</th><th>Value</th></tr>
     </thead>
     <tbody>
+    {% for metric, value in metrics.items %}
         <tr>
-            <td>Seconds</td>
-            <td class="value">{{ metrics.seconds|default_if_none:"-" }}</td>
+            <td>{{ metric|title }}</td>
+            <td class="value">{{ value|default_if_none:"-" }}</td>
         </tr>
-        <tr>
-            <td>Minutes</td>
-            <td class="value">{{ metrics.minutes|default_if_none:"-" }}</td>
-        </tr>
-        <tr>
-            <td>Hours</td>
-            <td class="value">{{ metrics.hours|default_if_none:"-" }}</td>
-        </tr>
-        <tr>
-            <td>Day</td>
-            <td class="value">{{ metrics.day|default_if_none:"-" }}</td>
-        </tr>
-        <tr>
-            <td>Week</td>
-            <td class="value">{{ metrics.week|default_if_none:"-" }}</td>
-        </tr>
-        <tr>
-            <td>Month</td>
-            <td class="value">{{ metrics.month|default_if_none:"-" }}</td>
-        </tr>
-        <tr>
-            <td>Year</td>
-            <td class="value">{{ metrics.year|default_if_none:"-" }}</td>
-        </tr>
+    {% endfor %}
     </tbody>
 </table>
 {% endif %}

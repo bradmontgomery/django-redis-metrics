@@ -160,9 +160,11 @@ class TestTemplateTags(TestCase):
         with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             inst = mock_r.return_value
             inst.get_metric.return_value = "RESULT"
+            inst._granularities.return_value = ['daily', 'weekly']
 
             result = taglib.metric_detail('test')
             expected_result = {
+                'granularities': ['daily', 'weekly'],
                 'slug': 'test',
                 'metrics': "RESULT",
                 'with_data_table': False,

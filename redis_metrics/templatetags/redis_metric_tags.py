@@ -90,6 +90,7 @@ def metric_detail(slug, with_data_table=False):
     """
     r = get_r()
     return {
+        'granularities': list(r._granularities()),
         'slug': slug,
         'metrics': r.get_metric(slug),
         'with_data_table': with_data_table,
