@@ -7,13 +7,6 @@ Replace this with more appropriate tests for your application.
 from datetime import datetime
 from mock import call, patch
 
-try:  # pragma: no cover
-    # Django 1.5
-    from django.contrib.auth import get_user_model  # pragma: no cover
-    User = get_user_model()  # pragma: no cover
-except ImportError:  # pragma: no cover
-    # Fallback for Django 1.4 (or lower)
-    from django.contrib.auth.models import User  # pragma: no cover
 from django.core.urlresolvers import reverse
 from django.test import TestCase, Client
 from django.test.utils import override_settings
@@ -30,6 +23,16 @@ from django.test.utils import override_settings
 class TestViews(TestCase):
     url = 'redis_metrics.urls'
 
+    def _get_user_model(self):
+        try:  # pragma: no cover
+            # Django >= 1.5
+            from django.contrib.auth import get_user_model  # pragma: no cover
+            User = get_user_model()  # pragma: no cover
+        except ImportError:  # pragma: no cover
+            # Fallback for Django 1.4 (or lower)
+            from django.contrib.auth.models import User  # pragma: no cover
+        return User
+
     def setUp(self):
         # Patch the connection to redis, but keep a reference to the
         # created StrictRedis instance, so we can make assertions about how
@@ -38,6 +41,7 @@ class TestViews(TestCase):
         mock_StrictRedis = self.redis_patcher.start()
         self.redis = mock_StrictRedis.return_value
 
+        User = self._get_user_model()
         self.user = User.objects.create_superuser(
             username="redis_metrics_test_user",
             email="redis_metrics_test_user@example.com",
