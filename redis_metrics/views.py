@@ -74,6 +74,7 @@ class MetricDetailView(ProtectedTemplateView):
         """Includes the metrics slugs in the context."""
         data = super(MetricDetailView, self).get_context_data(**kwargs)
         data['slug'] = kwargs['slug']
+        data['granularities'] = list(get_r()._granularities())
         return data
 
 
@@ -95,6 +96,7 @@ class MetricHistoryView(ProtectedTemplateView):
             'since': since,
             'slug': kwargs['slug'],
             'granularity': kwargs['granularity'],
+            'granularities': list(get_r()._granularities()),
         })
         return data
 
@@ -128,8 +130,10 @@ class AggregateDetailView(ProtectedTemplateView):
 
     def get_context_data(self, **kwargs):
         """Includes the metrics slugs in the context."""
+        r = get_r()
         data = super(AggregateDetailView, self).get_context_data(**kwargs)
         slug_set = set(kwargs['slugs'].split('+'))
+        data['granularities'] = list(r._granularities())
         data['slugs'] = slug_set
         return data
 
@@ -139,6 +143,7 @@ class AggregateHistoryView(ProtectedTemplateView):
 
     def get_context_data(self, **kwargs):
         """Includes the metrics slugs in the context."""
+        r = get_r()
         data = super(AggregateHistoryView, self).get_context_data(**kwargs)
         slug_set = set(kwargs['slugs'].split('+'))
         granularity = kwargs.get('granularity', 'daily')
@@ -154,6 +159,7 @@ class AggregateHistoryView(ProtectedTemplateView):
             'slugs': slug_set,
             'granularity': granularity,
             'since': since,
+            'granularities': list(r._granularities())
         })
         return data
 

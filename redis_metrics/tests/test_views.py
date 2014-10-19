@@ -109,26 +109,36 @@ class TestViews(TestCase):
             ])
 
     def test_metric_detail(self):
-        slug = u'test-metric'
-        url = reverse('redis_metric_detail', args=[slug])
+        with patch('redis_metrics.views.get_r') as mock_get_r:
+            inst = mock_get_r.return_value
+            inst._granularities.return_value = ['daily', 'weekly']
 
-        # Do the Request & test results
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.context_data['slug'], slug)
+            slug = u'test-metric'
+            url = reverse('redis_metric_detail', args=[slug])
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.context_data['slug'], slug)
+            self.assertEqual(resp.context_data['granularities'], ['daily', 'weekly'])
 
     def test_metric_history(self):
-        slug = u'test-metric'
-        granularity = u'daily'
-        url = reverse('redis_metric_history', args=[slug, granularity])
+        with patch('redis_metrics.views.get_r') as mock_get_r:
+            inst = mock_get_r.return_value
+            inst._granularities.return_value = ['daily', 'weekly']
 
-        # Do the Request & test results
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        context = resp.context_data
-        self.assertEqual(context['slug'], slug)
-        self.assertEqual(context['since'], None)
-        self.assertEqual(context['granularity'], granularity)
+            slug = u'test-metric'
+            granularity = u'daily'
+            url = reverse('redis_metric_history', args=[slug, granularity])
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            context = resp.context_data
+            self.assertEqual(context['slug'], slug)
+            self.assertEqual(context['since'], None)
+            self.assertEqual(context['granularity'], granularity)
+            self.assertEqual(context['granularities'], ['daily', 'weekly'])
 
     def test_metric_history_since(self):
         """Tests the ``MetricHistoryView`` when there's a ``since`` variable"""
@@ -205,34 +215,45 @@ class TestViews(TestCase):
 
     def test_aggregate_detail_view(self):
         """Tests ``views.AggregateDetailView``."""
+        with patch('redis_metrics.views.get_r') as mock_get_r:
+            inst = mock_get_r.return_value
+            inst._granularities.return_value = ['daily', 'weekly']
 
-        slug_set = set(['foo', 'bar', 'test-metric', 'yippitty-poo-bah'])
-        slugs = '+'.join(slug_set)
-        url = reverse('redis_metric_aggregate_detail', args=[slugs])
+            slug_set = set(['foo', 'bar', 'test-metric', 'yippitty-poo-bah'])
+            slugs = '+'.join(slug_set)
+            url = reverse('redis_metric_aggregate_detail', args=[slugs])
 
-        # Do the Request & test results
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn('slugs', resp.context_data)
-        self.assertEqual(resp.context_data['slugs'], slug_set)
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('slugs', resp.context_data)
+            self.assertIn('granularities', resp.context_data)
+            self.assertEqual(resp.context_data['slugs'], slug_set)
+            self.assertEqual(resp.context_data['granularities'], ['daily', 'weekly'])
 
     def _test_aggregate_history_view(self, slugs, granularity):
         """Tests ``views.AggregateHistoryView`` with the given slugs,
         granularity, without a specified date verifying the values are
         correctly passed to the template."""
-        slug_set = set(slugs)
-        url = reverse('redis_metric_aggregate_history',
-                      args=['+'.join(slugs), granularity])
+        with patch('redis_metrics.views.get_r') as mock_get_r:
+            inst = mock_get_r.return_value
+            inst._granularities.return_value = ['daily', 'weekly']
 
-        # Do the Request & test results
-        resp = self.client.get(url)
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn('slugs', resp.context_data)
-        self.assertIn('granularity', resp.context_data)
-        self.assertIn('since', resp.context_data)
-        self.assertEqual(resp.context_data['slugs'], slug_set)
-        self.assertEqual(resp.context_data['granularity'], granularity)
-        self.assertIsNone(resp.context_data['since'])
+            slug_set = set(slugs)
+            url = reverse('redis_metric_aggregate_history',
+                          args=['+'.join(slugs), granularity])
+
+            # Do the Request & test results
+            resp = self.client.get(url)
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn('slugs', resp.context_data)
+            self.assertIn('granularity', resp.context_data)
+            self.assertIn('since', resp.context_data)
+            self.assertIn('granularities', resp.context_data)
+            self.assertEqual(resp.context_data['slugs'], slug_set)
+            self.assertEqual(resp.context_data['granularity'], granularity)
+            self.assertEqual(resp.context_data['granularities'], ['daily', 'weekly'])
+            self.assertIsNone(resp.context_data['since'])
 
     def test_aggregate_history_view_hourly(self):
         self._test_aggregate_history_view(['foo', 'bar'], 'hourly')

@@ -11,13 +11,9 @@
     </ul>
 
     <ul class="subnav history">
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'seconds' %}">Seconds</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'minutes' %}">Minutes</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'hourly' %}">Hourly</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'daily' %}">Daily</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'weekly' %}">Weekly</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'monthly' %}">Monthly</a></li>
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" 'yearly' %}">Yearly</a></li>
+    {% for g in granularities %}
+    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
+    {% endfor %}
     </ul>
 
     {% aggregate_detail slugs True %}
