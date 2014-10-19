@@ -105,7 +105,7 @@ class TestTemplateTags(TestCase):
 
     def test_gauge(self):
         """Tests the result of the gauge template tag."""
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             inst = mock_r.return_value
             inst.get_gauge.return_value = 100
 
@@ -125,7 +125,7 @@ class TestTemplateTags(TestCase):
 
     def test_gauge_when_overloaded(self):
         """Tests the result of a gauge whose current value > the maximum"""
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             inst = mock_r.return_value
             inst.get_gauge.return_value = 500
 
@@ -144,7 +144,7 @@ class TestTemplateTags(TestCase):
             inst.get_gauge.assert_called_once_with("test-slug")
 
     def test_metric_list(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             inst = mock_r.return_value
             inst.metric_slugs_by_category.return_value = "RESULT"
 
@@ -157,7 +157,7 @@ class TestTemplateTags(TestCase):
             inst.metric_slugs_by_category.assert_called_once_with()
 
     def test_metric_detail(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             inst = mock_r.return_value
             inst.get_metric.return_value = "RESULT"
 
@@ -172,7 +172,7 @@ class TestTemplateTags(TestCase):
             inst.get_metric.assert_called_once_with('test')
 
     def test_metric_history(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             history = [("m:test:2000-01-01", 42)]
             inst = mock_r.return_value
             inst.get_metric_history.return_value = history
@@ -194,7 +194,7 @@ class TestTemplateTags(TestCase):
             )
 
     def test_metric_history_with_date(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             history = [("m:test:2000-01-01", 42)]
             inst = mock_r.return_value
             inst.get_metric_history.return_value = history
@@ -242,7 +242,7 @@ class TestTemplateTags(TestCase):
             )
 
     def test_aggregate_detail(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             slugs = ['a1', 'a2']
             inst = mock_r.return_value
             inst.get_metrics.return_value = 'RESULTS'
@@ -259,7 +259,7 @@ class TestTemplateTags(TestCase):
             inst.get_metrics.assert_called_once_with(slugs)
 
     def test_aggregate_history(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             history = {
                 'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
                 'data': [
@@ -296,7 +296,7 @@ class TestTemplateTags(TestCase):
             )
 
     def test_aggregate_history_with_date(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             history = {
                 'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
                 'data': [
@@ -340,7 +340,7 @@ class TestTemplateTags(TestCase):
             self.assertEqual(result, expected_result)
 
     def test_aggregate_history_with_tabular_data(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.R") as mock_r:
+        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             history = {
                 'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
                 'data': [

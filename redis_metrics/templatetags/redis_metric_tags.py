@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from django import template
-from redis_metrics.models import R
+from redis_metrics.utils import get_r
 
 register = template.Library()
 
@@ -56,7 +56,7 @@ def gauge(slug, maximum=9000, size=200):
     * ``size`` -- The size (in pixels) of the gauge (default is 200)
 
     """
-    r = R()
+    r = get_r()
     value = int(r.get_gauge(slug))
     if value < maximum:
         diff = maximum - value
@@ -74,8 +74,9 @@ def gauge(slug, maximum=9000, size=200):
 
 @register.inclusion_tag("redis_metrics/_metric_list.html")
 def metric_list():
+    r = get_r()
     return {
-        'metrics': R().metric_slugs_by_category(),
+        'metrics': r.metric_slugs_by_category(),
     }
 
 
@@ -87,9 +88,10 @@ def metric_detail(slug, with_data_table=False):
     * ``with_data_table`` -- if True, prints the raw data in a table.
 
     """
+    r = get_r()
     return {
         'slug': slug,
-        'metrics': R().get_metric(slug),
+        'metrics': r.get_metric(slug),
         'with_data_table': with_data_table,
     }
 
@@ -106,6 +108,7 @@ def metric_history(slug, granularity="daily", since=None, with_data_table=False)
     * ``with_data_table`` -- if True, prints the raw data in a table.
 
     """
+    r = get_r()
     try:
         if since and len(since) == 10:  # yyyy-mm-dd
             since = datetime.strptime(since, "%Y-%m-%d")
@@ -115,7 +118,7 @@ def metric_history(slug, granularity="daily", since=None, with_data_table=False)
         # assume we got a datetime object or leave since = None
         pass
 
-    metric_history = R().get_metric_history(
+    metric_history = r.get_metric_history(
         slugs=slug,
         since=since,
         granularity=granularity
@@ -138,10 +141,11 @@ def aggregate_detail(slug_list, with_data_table=False):
     * ``with_data_table`` -- if True, prints the raw data in a table.
 
     """
+    r = get_r()
     return {
         'chart_id': "metric-aggregate-{0}".format("-".join(slug_list)),
         'slugs': slug_list,
-        'metrics': R().get_metrics(slug_list),
+        'metrics': r.get_metrics(slug_list),
         'with_data_table': with_data_table,
     }
 
@@ -163,7 +167,7 @@ def aggregate_history(slugs, granularity="daily", since=None, with_data_table=Fa
     little slow.
 
     """
-    r = R()
+    r = get_r()
     slugs = list(slugs)
 
     try:
