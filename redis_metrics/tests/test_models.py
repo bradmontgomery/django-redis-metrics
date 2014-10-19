@@ -427,6 +427,28 @@ class TestR(TestCase):
         # Expiration should not have gotten called
         self.assertFalse(self.redis.expire.called)
 
+    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
+    @override_settings(REDIS_METRICS_MAX_GRANULARITY='weekly')
+    def test_metric_with_overridden_granularities(self):
+        slug = 'test-metric'
+        n = 1
+
+        # get the keys used for the metric, so we can check for the appropriate
+        # calls
+        daily, weekly = self.r._build_keys(slug)
+        self.r.metric(slug, num=n)
+
+        # Verify that setting a metric adds the appropriate slugs to the keys
+        # set and then incrememts each key
+        self.redis.assert_has_calls([
+            call.sadd(self.r._metric_slugs_key, slug),
+            call.incr(daily, n),
+            call.incr(weekly, n),
+        ])
+
+        # Expiration should not have gotten called
+        self.assertFalse(self.redis.expire.called)
+
     @patch.object(R, '_categorize')
     def test_metric_with_category(self, mock_categorize):
         """The ``metric`` method should call ``_categorize`` if passed a
@@ -469,32 +491,19 @@ class TestR(TestCase):
 
         # get the keys used for the metric, so we can check for calls
         keys = self.r._build_keys(slug)
-        seconds, minutes, hour, day, week, month, year = keys
         self.r.metric(slug, num=n, expire=3600)
 
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
-        self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, slug),
-            call.incr(seconds, n),
-            call.incr(minutes, n),
-            call.incr(hour, n),
-            call.incr(day, n),
-            call.incr(week, n),
-            call.incr(month, n),
-            call.incr(year, n),
-        ])
+        call_list = [call.sadd(self.r._metric_slugs_key, slug)]
+        for k in keys:
+            call_list.append(call.incr(k, n))
+            call_list.append(call.expire(k, 3600))
+
+        self.redis.assert_has_calls(call_list)
 
         # Make sure nothing was categorized.
         self.assertFalse(mock_categorize.called)
-
-        # Expiration should have gotten called
-        self.redis.expire.assert_has_calls([
-            call.expire(day, 3600),
-            call.expire(week, 3600),
-            call.expire(month, 3600),
-            call.expire(year, 3600),
-        ])
 
     def test_get_metric(self):
         """Tests getting a single metric; ``R.get_metric``."""
@@ -513,7 +522,47 @@ class TestR(TestCase):
             call.get(year),
         ])
 
+    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
+    @override_settings(REDIS_METRICS_MAX_GRANULARITY='weekly')
+    def test_get_metric_with_overridden_granularities(self):
+        slug = 'test-metric'
+        self.r.get_metric(slug)
+
+        # Verify that we GET the keys from redis
+        day, week = self.r._build_keys(slug)
+        self.redis.assert_has_calls([
+            call.get(day),
+            call.get(week),
+        ])
+
     def test_get_metrics(self):
+        # Set a return value for mget, so all of the method gets exercised.
+        prev_return = self.redis.mget.return_value
+        self.redis.mget.return_value = [u'1', u'2']
+
+        # Slugs for metrics we want
+        slugs = ['metric-1', 'metric-2']
+
+        # Build the various keys for each metric
+        keys_list = []
+        for s in slugs:
+            keys_list.append(self.r._build_keys(s))
+
+        # construct the calls to redis.mget
+        calls = [call(*keys) for keys in keys_list]
+
+        # Test our method
+        self.r.get_metrics(slugs)
+        self.assertEqual(self.redis.mget.call_args_list, calls)
+        self.assertTrue(self.redis.mget.called)  # mget was called...
+        self.assertEqual(self.redis.mget.call_count, 2)  # ...twice
+
+        # Reset mget's previous return value
+        self.redis.mget.return_value = prev_return
+
+    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
+    @override_settings(REDIS_METRICS_MAX_GRANULARITY='weekly')
+    def test_get_metrics_with_overridden_granularities(self):
         # Set a return value for mget, so all of the method gets exercised.
         prev_return = self.redis.mget.return_value
         self.redis.mget.return_value = [u'1', u'2']

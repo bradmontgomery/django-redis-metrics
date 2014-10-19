@@ -303,34 +303,19 @@ class R(object):
             m:<slug>:y:<yyyy>                # Year
 
         """
-        keys = self._build_keys(slug)
-        sec_key, min_key, hour_key, day_key, week_key, month_key, year_key = keys
-
         # Add the slug to the set of metric slugs
         self.r.sadd(self._metric_slugs_key, slug)
-
-        # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
-        # incrby method; .incr accepts a second ``amount`` parameter.
-        self.r.incr(sec_key, num)
-        self.r.incr(min_key, num)
-        self.r.incr(hour_key, num)
-        self.r.incr(day_key, num)
-        self.r.incr(week_key, num)
-        self.r.incr(month_key, num)
-        self.r.incr(year_key, num)
 
         if category:
             self._categorize(slug, category)
 
-        # Expire the Metric in ``expire`` seconds
-        if expire:
-            self.r.expire(sec_key, expire)
-            self.r.expire(min_key, expire)
-            self.r.expire(hour_key, expire)
-            self.r.expire(day_key, expire)
-            self.r.expire(week_key, expire)
-            self.r.expire(month_key, expire)
-            self.r.expire(year_key, expire)
+        # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
+        # incrby method; .incr accepts a second ``amount`` parameter.
+        keys = self._build_keys(slug)
+        for key in keys:
+            self.r.incr(key, num)
+            if expire:
+                self.r.expire(key, expire)
 
     def get_metric(self, slug):
         """Get the current values for a metric.
@@ -339,17 +324,9 @@ class R(object):
         minutes, hours, day, week, month, and year.
 
         """
+        granularities = self._granularities()
         keys = self._build_keys(slug)
-        sec_key, min_key, hour_key, day_key, week_key, month_key, year_key = keys
-        return {
-            'seconds': self.r.get(sec_key),
-            'minutes': self.r.get(min_key),
-            'hours': self.r.get(hour_key),
-            'day': self.r.get(day_key),
-            'week': self.r.get(week_key),
-            'month': self.r.get(month_key),
-            'year': self.r.get(year_key),
-        }
+        return {g: self.r.get(key) for g, key in zip(granularities, keys)}
 
     def get_metrics(self, slug_list):
         """Get the metrics for multiple slugs.
@@ -365,13 +342,18 @@ class R(object):
             )
 
         """
+        # meh. I should have been consistent here, but I'm lazy, so support these
+        # value names instead of granularity names, but respect the min/max
+        # granularity settings.
+        keys = ['seconds', 'minutes', 'hours', 'day', 'week', 'month', 'year']
+        key_mapping = {gran: key for gran, key in zip(GRANULARITIES, keys)}
+        keys = [key_mapping[gran] for gran in self._granularities()]
+
         results = []
         for slug in slug_list:
-            keys = ['seconds', 'minutes', 'hours', 'day', 'week', 'month', 'year']
             metrics = self.r.mget(*self._build_keys(slug))
             if any(metrics):  # Only if we have data.
-                d = dict(zip(keys, metrics))
-                results.append((slug, d))
+                results.append((slug, dict(zip(keys, metrics))))
         return results
 
     def get_category_metrics(self, category):
