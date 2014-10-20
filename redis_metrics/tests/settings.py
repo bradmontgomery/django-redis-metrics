@@ -1,5 +1,8 @@
 import os
 
+# Django 1.7 needs different settings than 1.4 - 1.6; see below.
+DJANGO_VERSION = os.environ.get('DJANGO', '')
+
 BASE_PATH = os.path.dirname(__file__)
 
 DATABASES = {
@@ -17,6 +20,17 @@ TEMPLATE_DIRS = (
     os.path.join(BASE_PATH, 'templates'),
 )
 
+if DJANGO_VERSION.startswith("1.7"):
+    # Django 1.7 removed a bunch of defaults, but we currently require Session and
+    # authentication (since we have a few restricted views).
+    MIDDLEWARE_CLASSES = (
+        'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.csrf.CsrfViewMiddleware',
+        'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
+    )
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -25,16 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'redis_metrics',
 ]
-
-# Django 1.7 removed a bunch of defaults, but we currently require Session and
-# authentication (since we have a few restricted views).
-MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-)
 
 REDIS_METRICS_HOST = 'localhost'
 REDIS_METRICS_PORT = '6379'
