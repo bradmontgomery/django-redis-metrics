@@ -21,6 +21,7 @@ from ..models import R
 @override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
 @override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
 @override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
+@override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=False)
 class TestR(TestCase):
     """Tests for the ``R`` class."""
 
@@ -223,6 +224,14 @@ class TestR(TestCase):
             ['seconds', 'minutes', 'hourly', 'daily']
         )
 
+    def test_metric_key_patterns(self):
+        # These two things should always be the same.
+        from ..settings import GRANULARITIES
+        self.assertEqual(
+            sorted(self.r._metric_key_patterns().keys()),
+            sorted(GRANULARITIES)
+        )
+
     def test__build_keys(self):
         """Tests ``R._build_keys``. with default arguments."""
         with patch('redis_metrics.models.datetime') as mock_datetime:
@@ -268,6 +277,13 @@ class TestR(TestCase):
         d = datetime(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
         self.assertEqual(keys, ['m:test-slug:w:2012-14'])
+    
+    @override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=True)   
+    def test__build_keys_weekly_week_starts_monday(self):
+        """Tests ``R._build_keys``. with a *weekly* granularity."""
+        d = datetime(2012, 4, 1)  # April Fools!
+        keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
+        self.assertEqual(keys, ['m:test-slug:w:2012-13'])
 
     def test__build_keys_monthly(self):
         """Tests ``R._build_keys``. with a *monthly* granularity."""

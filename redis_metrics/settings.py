@@ -29,6 +29,7 @@ class AppSettings(object):
         'REDIS_METRICS_SOCKET_CONNECTION_POOL': None,
         'REDIS_METRICS_MIN_GRANULARITY': 'daily',
         'REDIS_METRICS_MAX_GRANULARITY': 'yearly',
+        'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK': False,
     }
 
     def __getattr__(self, name):
@@ -49,15 +50,3 @@ app_settings = AppSettings()
 
 # All possible granularity values.
 GRANULARITIES = ['seconds', 'minutes', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
-
-
-# The Redis metric key and date formatting patterns for each key, by granularity
-METRIC_KEY_PATTERNS = {
-    "seconds": {"key": "m:{0}:s:{1}", "date_format": "%Y-%m-%d-%H-%M-%S"},
-    "minutes": {"key": "m:{0}:i:{1}", "date_format": "%Y-%m-%d-%H-%M"},
-    "hourly": {"key": "m:{0}:h:{1}", "date_format": "%Y-%m-%d-%H"},
-    "daily": {"key": "m:{0}:{1}", "date_format": "%Y-%m-%d"},
-    "weekly": {"key": "m:{0}:w:{1}", "date_format": "%Y-%U"},
-    "monthly": {"key": "m:{0}:m:{1}", "date_format": "%Y-%m"},
-    "yearly": {"key": "m:{0}:y:{1}", "date_format": "%Y"},
-}
