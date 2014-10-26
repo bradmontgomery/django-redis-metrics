@@ -9,3 +9,4 @@ In no particular order:
 - Charles Vallantin Dulac `<https://github.com/charles-vdulac>`_
 - Reza Mohammadi `<https://github.com/remohammadi>`_
 - mvillarejo `<https://github.com/mvillarejo>`_
+- vlinhart `<https://github.com/vlinhart>`_

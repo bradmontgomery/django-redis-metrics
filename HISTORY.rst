@@ -1,6 +1,11 @@
 History
 -------
 
+0.8.2 (coming soon)
++++++++++++++++++++
+
+- support for weekly stats starting on mondays (`PR #16 <https://github.com/bradmontgomery/django-redis-metrics/pull/36>`_)
+
 0.8.1 (2014-10-18)
 ++++++++++++++++++
 
