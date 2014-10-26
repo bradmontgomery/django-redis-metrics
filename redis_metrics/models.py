@@ -9,7 +9,7 @@ from collections import OrderedDict
 from datetime import datetime, timedelta
 from django.template.defaultfilters import slugify
 
-from .settings import app_settings, GRANULARITIES, METRIC_KEY_PATTERNS
+from .settings import app_settings, GRANULARITIES
 from .templatetags import redis_metrics_filters as template_tags
 
 
@@ -162,14 +162,29 @@ class R(object):
             if keep:
                 yield g
 
+    def _metric_key_patterns(self):
+        """ The Redis metric key and date formatting patterns for each key, by granularity"""
+        return {
+            "seconds": {"key": "m:{0}:s:{1}", "date_format": "%Y-%m-%d-%H-%M-%S"},
+            "minutes": {"key": "m:{0}:i:{1}", "date_format": "%Y-%m-%d-%H-%M"},
+            "hourly": {"key": "m:{0}:h:{1}", "date_format": "%Y-%m-%d-%H"},
+            "daily": {"key": "m:{0}:{1}", "date_format": "%Y-%m-%d"},
+            "weekly": {"key": "m:{0}:w:{1}",
+                       "date_format": "%Y-%{0}".format(
+                           'W' if app_settings.REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK else 'U')},
+            "monthly": {"key": "m:{0}:m:{1}", "date_format": "%Y-%m"},
+            "yearly": {"key": "m:{0}:y:{1}", "date_format": "%Y"},
+        }
+
     def _build_key_patterns(self, slug, date):
         """Builds an OrderedDict of metric keys and patterns for the given slug
         and date."""
         # we want to keep the order, from smallest to largest granularity
         patts = OrderedDict()
+        metric_key_patterns = self._metric_key_patterns()
         for g in self._granularities():
-            date_string = date.strftime(METRIC_KEY_PATTERNS[g]["date_format"])
-            patts[g] = METRIC_KEY_PATTERNS[g]["key"].format(slug, date_string)
+            date_string = date.strftime(metric_key_patterns[g]["date_format"])
+            patts[g] = metric_key_patterns[g]["key"].format(slug, date_string)
         return patts
 
     def _build_keys(self, slug, date=None, granularity='all'):

@@ -88,6 +88,7 @@ Settings
   metrics (default is 'daily')
 * ``REDIS_METRICS_MAX_GRANULARITY`` - The maximum-time granularity for your
   metrics (default is 'yearly')
+* ``REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK`` - set to True if week should start on monday, defaults to False
 
 .. _usage:
 
