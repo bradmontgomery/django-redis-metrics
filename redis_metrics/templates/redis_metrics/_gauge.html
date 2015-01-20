@@ -16,7 +16,7 @@ following context:
 <div class="chart gauge" style="width: {{size}}px; height: {{size}}px;">
   <canvas id="gauge-{{ slug }}"></canvas>
 </div>
-<script type="text/javascript" src="{% static 'redis_metrics/js/Chart.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'redis_metrics/js/chart.min.js' %}"></script>
 <script type="text/javascript">
 var ctx = document.getElementById("gauge-{{slug}}").getContext("2d");
 //var options = {animation:false, responsive: true};
