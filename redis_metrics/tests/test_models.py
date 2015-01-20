@@ -277,8 +277,8 @@ class TestR(TestCase):
         d = datetime(2012, 4, 1)  # April Fools!
         keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
         self.assertEqual(keys, ['m:test-slug:w:2012-14'])
-    
-    @override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=True)   
+
+    @override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=True)
     def test__build_keys_weekly_week_starts_monday(self):
         """Tests ``R._build_keys``. with a *weekly* granularity."""
         d = datetime(2012, 4, 1)  # April Fools!
@@ -431,13 +431,14 @@ class TestR(TestCase):
         # set and then incrememts each key
         self.redis.assert_has_calls([
             call.sadd(self.r._metric_slugs_key, slug),
-            call.incr(second, n),
-            call.incr(minute, n),
-            call.incr(hour, n),
-            call.incr(day, n),
-            call.incr(week, n),
-            call.incr(month, n),
-            call.incr(year, n),
+            call.pipeline(),
+            call.pipeline().incr(second, n),
+            call.pipeline().incr(minute, n),
+            call.pipeline().incr(hour, n),
+            call.pipeline().incr(day, n),
+            call.pipeline().incr(week, n),
+            call.pipeline().incr(month, n),
+            call.pipeline().incr(year, n),
         ])
 
         # Expiration should not have gotten called
@@ -458,8 +459,9 @@ class TestR(TestCase):
         # set and then incrememts each key
         self.redis.assert_has_calls([
             call.sadd(self.r._metric_slugs_key, slug),
-            call.incr(daily, n),
-            call.incr(weekly, n),
+            call.pipeline(),
+            call.pipeline().incr(daily, n),
+            call.pipeline().incr(weekly, n),
         ])
 
         # Expiration should not have gotten called
@@ -482,13 +484,14 @@ class TestR(TestCase):
         # set and then incrememts each key
         self.redis.assert_has_calls([
             call.sadd(self.r._metric_slugs_key, slug),
-            call.incr(second, n),
-            call.incr(minute, n),
-            call.incr(hour, n),
-            call.incr(day, n),
-            call.incr(week, n),
-            call.incr(month, n),
-            call.incr(year, n),
+            call.pipeline(),
+            call.pipeline().incr(second, n),
+            call.pipeline().incr(minute, n),
+            call.pipeline().incr(hour, n),
+            call.pipeline().incr(day, n),
+            call.pipeline().incr(week, n),
+            call.pipeline().incr(month, n),
+            call.pipeline().incr(year, n),
         ])
 
         # Make sure this gets categorized.
@@ -511,10 +514,10 @@ class TestR(TestCase):
 
         # Verify that setting a metric adds the appropriate slugs to the keys
         # set and then incrememts each key
-        call_list = [call.sadd(self.r._metric_slugs_key, slug)]
+        call_list = [call.sadd(self.r._metric_slugs_key, slug), call.pipeline()]
         for k in keys:
-            call_list.append(call.incr(k, n))
-            call_list.append(call.expire(k, 3600))
+            call_list.append(call.pipeline().incr(k, n))
+            call_list.append(call.pipeline().expire(k, 3600))
 
         self.redis.assert_has_calls(call_list)
 

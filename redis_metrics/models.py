@@ -327,10 +327,14 @@ class R(object):
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method; .incr accepts a second ``amount`` parameter.
         keys = self._build_keys(slug)
+
+        # Use a pipeline to speed up incrementing multiple keys
+        pipe = self.r.pipeline()
         for key in keys:
-            self.r.incr(key, num)
+            pipe.incr(key, num)
             if expire:
-                self.r.expire(key, expire)
+                pipe.expire(key, expire)
+        pipe.execute()
 
     def get_metric(self, slug):
         """Get the current values for a metric.
