@@ -1,10 +1,12 @@
 History
 -------
 
-0.8.2 (coming soon)
-+++++++++++++++++++
+0.8.2 (2015-01-19)
+++++++++++++++++++
 
 - support for weekly stats starting on mondays (`PR #16 <https://github.com/bradmontgomery/django-redis-metrics/pull/36>`_)
+- optimized redis writes (`#37 <https://github.com/bradmontgomery/django-redis-metrics/issues/37>`_)
+- Lower-cased JS files: changed ``Colors.js`` to ``colors.js`` and ``Chart.min.js`` to ``chart.min.js``
 
 0.8.1 (2014-10-18)
 ++++++++++++++++++
