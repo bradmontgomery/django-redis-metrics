@@ -10,3 +10,4 @@ In no particular order:
 - Reza Mohammadi `<https://github.com/remohammadi>`_
 - mvillarejo `<https://github.com/mvillarejo>`_
 - vlinhart `<https://github.com/vlinhart>`_
+- Dr. Stefan Schimanski `<https://github.com/sttts>`_

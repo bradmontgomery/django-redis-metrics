@@ -1,6 +1,11 @@
 History
 -------
 
+0.8.3 (2015-03-11)
+++++++++++++++++++
+
+- bugfix: Include javascript static files in setup.py. (`PR #41 <https://github.com/bradmontgomery/django-redis-metrics/pull/41>`)
+
 0.8.2 (2015-01-19)
 ++++++++++++++++++
 
