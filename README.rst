@@ -1,12 +1,7 @@
 Django Redis Metrics
 ====================
 
-.. image:: https://secure.travis-ci.org/bradmontgomery/django-redis-metrics.png
-    :alt: Build Status
-    :target: http://travis-ci.org/bradmontgomery/django-redis-metrics
-
-.. image:: https://pypip.in/d/django-redis-metrics/badge.png
-        :target: https://crate.io/packages/django-redis-metrics/
+|version| |travis| |coveralls| |license|
 
 
 This app allows you do define various named metrics (such as 'New Users',
@@ -204,3 +199,20 @@ License
 
 This code is distributed under the terms of the MIT license. See the
 ``LICENSE.txt`` file.
+
+
+.. |version| image:: http://img.shields.io/pypi/v/django-redis-metrics.svg?style=flat-square
+    :alt: Current Release
+    :target: https://pypi.python.org/pypi/django-redis-metrics/
+
+.. |travis| image:: http://img.shields.io/travis/bradmontgomery/django-redis-metrics/master.svg?style=flat-square
+    :alt: Build Status
+    :target: https://travis-ci.org/bradmontgomery/django-redis-metrics
+
+.. |coveralls| image:: http://img.shields.io/coveralls/bradmontgomery/django-redis-metrics/master.svg?style=flat-square
+    :alt: Code Coverage
+    :target: https://coveralls.io/r/bradmontgomery/django-redis-metrics
+
+.. |license| image:: http://img.shields.io/pypi/l/django-redis-metrics.svg?style=flat-square
+    :alt: License
+    :target: https://pypi.python.org/pypi/django-redis-metrics/
