@@ -14,14 +14,14 @@ def get_r():
     return _redis_model
 
 
-def set_metric(slug, value, category=None, expire=None):
+def set_metric(slug, value, category=None, expire=None, date=None):
     """Create/Increment a metric."""
-    get_r().set_metric(slug, value, category=category, expire=expire)
+    get_r().set_metric(slug, value, category=category, expire=expire, date=date)
 
 
-def metric(slug, num=1, category=None, expire=None):
+def metric(slug, num=1, category=None, expire=None, date=None):
     """Create/Increment a metric."""
-    get_r().metric(slug, num=num, category=category, expire=expire)
+    get_r().metric(slug, num=num, category=category, expire=expire, date=date)
 
 
 def gauge(slug, current_value):

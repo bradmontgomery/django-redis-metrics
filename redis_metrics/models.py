@@ -246,7 +246,7 @@ class R(object):
         # Finally, remove the slug from the set
         self.r.srem(self._metric_slugs_key, slug)
 
-    def set_metric(self, slug, value, category=None, expire=None):
+    def set_metric(self, slug, value, category=None, expire=None, date=None):
         """Assigns a specific value to the *current* metric. You can use this
         to start a metric at a value greater than 0 or to reset a metric.
 
@@ -261,6 +261,8 @@ class R(object):
         * ``category`` -- (optional) Assign the metric to a Category (a string)
         * ``expire`` -- (optional) Specify the number of seconds in which the
           metric will expire.
+        * ``date`` -- (optional) Specify the timestamp for the metric; default
+          used to build the keys will be the current date and time in UTC form.
 
         Redis keys for each metric (slug) take the form:
 
@@ -273,7 +275,7 @@ class R(object):
             m:<slug>:y:<yyyy>                # Year
 
         """
-        keys = self._build_keys(slug)
+        keys = self._build_keys(slug, date=date)
 
         # Add the slug to the set of metric slugs
         self.r.sadd(self._metric_slugs_key, slug)
@@ -293,7 +295,7 @@ class R(object):
             for k in keys:
                 self.r.expire(k, expire)
 
-    def metric(self, slug, num=1, category=None, expire=None):
+    def metric(self, slug, num=1, category=None, expire=None, date=None):
         """Records a metric, creating it if it doesn't exist or incrementing it
         if it does. All metrics are prefixed with 'm', and automatically
         aggregate for Seconds, Minutes, Hours, Day, Week, Month, and Year.
@@ -306,6 +308,8 @@ class R(object):
         * ``category`` -- (optional) Assign the metric to a Category (a string)
         * ``expire`` -- (optional) Specify the number of seconds in which the
           metric will expire.
+        * ``date`` -- (optional) Specify the timestamp for the metric; default
+          used to build the keys will be the current date and time in UTC form.
 
         Redis keys for each metric (slug) take the form:
 
@@ -326,7 +330,7 @@ class R(object):
 
         # Increment keys. NOTE: current redis-py (2.7.2) doesn't include an
         # incrby method; .incr accepts a second ``amount`` parameter.
-        keys = self._build_keys(slug)
+        keys = self._build_keys(slug, date=date)
 
         # Use a pipeline to speed up incrementing multiple keys
         pipe = self.r.pipeline()
