@@ -96,10 +96,10 @@ class TestUtils(TestCase):
 
     def test_metric_with_date(self):
         with patch("redis_metrics.utils.get_r") as mock_get_r:
-            utils.metric("test-slug", expire=300)
+            utils.metric("test-slug", date=datetime(2000, 1, 2))
             mock_get_r.assert_has_calls([
                 call(),
-                call().metric("test-slug", num=1, category=None, expire=300, date=datetime(2000, 1, 2)),
+                call().metric("test-slug", num=1, category=None, expire=None, date=datetime(2000, 1, 2)),
             ])
 
     def test_gauge(self):
