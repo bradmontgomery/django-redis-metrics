@@ -51,7 +51,7 @@ class TestUtils(TestCase):
             utils.set_metric("test-slug", 42)
             mock_get_r.assert_has_calls([
                 call(),
-                call().set_metric("test-slug", 42, category=None, expire=None),
+                call().set_metric("test-slug", 42, category=None, expire=None, date=None),
             ])
 
     def test_set_metric_with_category(self):
@@ -59,7 +59,7 @@ class TestUtils(TestCase):
             utils.set_metric("test-slug", 42, category="Woo")
             mock_get_r.assert_has_calls([
                 call(),
-                call().set_metric("test-slug", 42, category="Woo", expire=None),
+                call().set_metric("test-slug", 42, category="Woo", expire=None, date=None),
             ])
 
     def test_set_metric_with_expiration(self):
@@ -67,7 +67,7 @@ class TestUtils(TestCase):
             utils.set_metric("test-slug", 42, expire=300)
             mock_get_r.assert_has_calls([
                 call(),
-                call().set_metric("test-slug", 42, category=None, expire=300),
+                call().set_metric("test-slug", 42, category=None, expire=300, date=None),
             ])
 
     def test_metric(self):
@@ -75,7 +75,7 @@ class TestUtils(TestCase):
             utils.metric("test-slug")
             mock_get_r.assert_has_calls([
                 call(),
-                call().metric("test-slug", num=1, category=None, expire=None),
+                call().metric("test-slug", num=1, category=None, expire=None, date=None),
             ])
 
     def test_metric_with_category(self):
@@ -83,7 +83,7 @@ class TestUtils(TestCase):
             utils.metric("test-slug", category="Woo")
             mock_get_r.assert_has_calls([
                 call(),
-                call().metric("test-slug", num=1, category="Woo", expire=None),
+                call().metric("test-slug", num=1, category="Woo", expire=None, date=None),
             ])
 
     def test_metric_with_expiration(self):
@@ -91,7 +91,15 @@ class TestUtils(TestCase):
             utils.metric("test-slug", expire=300)
             mock_get_r.assert_has_calls([
                 call(),
-                call().metric("test-slug", num=1, category=None, expire=300),
+                call().metric("test-slug", num=1, category=None, expire=300, date=None),
+            ])
+
+    def test_metric_with_date(self):
+        with patch("redis_metrics.utils.get_r") as mock_get_r:
+            utils.metric("test-slug", expire=300)
+            mock_get_r.assert_has_calls([
+                call(),
+                call().metric("test-slug", num=1, category=None, expire=300, date=datetime(2000, 1, 2)),
             ])
 
     def test_gauge(self):
