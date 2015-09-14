@@ -11,3 +11,4 @@ In no particular order:
 - mvillarejo `<https://github.com/mvillarejo>`_
 - vlinhart `<https://github.com/vlinhart>`_
 - Dr. Stefan Schimanski `<https://github.com/sttts>`_
+- Seamus Mac Conaonaigh `<https://github.com/smaccona>`_
