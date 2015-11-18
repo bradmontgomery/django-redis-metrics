@@ -205,7 +205,9 @@ class R(object):
         if date is None:
             date = datetime.utcnow()
         patts = self._build_key_patterns(slug, date)
-        return patts.values() if granularity == "all" else [patts[granularity]]
+        if granularity == "all":
+            return list(patts.values())
+        return [patts[granularity]]
 
     def metric_slugs(self):
         """Return a set of metric slugs (i.e. those used to create Redis keys)
@@ -213,7 +215,7 @@ class R(object):
         return self.r.smembers(self._metric_slugs_key)
 
     def metric_slugs_by_category(self):
-        """Return a dictionary of category->metrics data:
+        """Return a dictionary of metrics data indexed by category:
 
             {<category_name>: set(<slug1>, <slug2>, ...)}
 
@@ -229,7 +231,7 @@ class R(object):
             slug for sublist in result.values() for slug in sublist
         ])
         f = lambda slug: slug not in categorized_metrics
-        uncategorized = filter(f, self.metric_slugs())
+        uncategorized = list(set(filter(f, self.metric_slugs())))
         if len(uncategorized) > 0:
             result['Uncategorized'] = uncategorized
         return result
@@ -446,10 +448,10 @@ class R(object):
             slugs = [slugs]
 
         # Build the set of Redis keys that we need to get.
-        keys = set()
+        keys = []
         for slug in slugs:
             for date in self._date_range(granularity, since):
-                keys.update(set(self._build_keys(slug, date, granularity)))
+                keys += self._build_keys(slug, date, granularity)
 
         # Fetch our data, replacing any None-values with zeros
         results = [0 if v is None else v for v in self.r.mget(keys)]
@@ -502,7 +504,7 @@ class R(object):
 
         # Finally, stick the time periods in the first column.
         _history.insert(0, periods)
-        return zip(*_history)  # Transpose the rows & columns
+        return list(zip(*_history))  # Transpose the rows & columns
 
     def get_metric_history_chart_data(self, slugs, since=None, granularity='daily'):
         """Provides the same data as ``get_metric_history``, but with metrics
