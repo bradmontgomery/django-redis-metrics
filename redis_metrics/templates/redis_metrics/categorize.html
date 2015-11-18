@@ -13,7 +13,7 @@
         <form action="{% url 'redis_metrics_categorize' %}" method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <p><input type="submit" value="Categorize Metrics"/></p>
+        <p><input type="submit" value="Categorize Metrics" class="btn btn-default"/></p>
         </form>
     {% endif %}
 

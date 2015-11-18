@@ -1,82 +1,44 @@
 {% load redis_metric_tags %}
+{% load static from staticfiles %}
 {% load url from future %}
+
 <!DOCTYPE html>
-<html>
-<head>
-<title>django-redis-metrics</title>
-<style type="text/css">
-body { padding: 0; margin: 0; font-size: 16px; font-family: "Palatino", "Times New Romain", serif;}
-#banner {margin:0; padding:0; background-color: #777; color: white; clear: both;}
-#banner h1 {margin:0; padding:0; padding-left: 2em;}
-#banner h1 a { color: white; }
-#banner h1 a:hover { background-color: transparent;}
-#nav {margin:0 1em 0 0; padding: .5em; width: 15%; display: block; float: left;
-    height: 100%; overflow: hidden;}
-#nav h2 { margin:0; margin-top: .5em; padding:0;}
-#nav ul { margin:0; padding:.5em;list-style-position:inside;}
-#content {margin:0; padding: .5em .5em .5em 1.5em; width: 70%; display: block;
-  float: left; border-left: 2px solid #777;}
-a, a:link {color: blue;text-decoration: none;}
-a:visited {color: #59c;}
-a:hover, a:active { background-color: #ffc;}
-table {border: 1px solid #ccc; width:80%; margin:0 auto;}
-caption {background-color: #eee; border:1px solid #ccc; border-bottom:0px;}
-table tbody tr td {border: 1px solid #ddd; padding: 3px 6px;}
-td.value {text-align: center;}
-tr:nth-child(even) {background-color: #eee;}
-ul.breadcrumb {
-  padding:5px; margin:0; margin-bottom:15px; list-style-type:none;
-  height: 20px; line-height: 20px; background-color: #ddd;
-}
-ul.breadcrumb > li {float:left; padding-right:5px;}
-ul.breadcrumb > li:after {content:" >"}
-ul.breadcrumb > li.active:after {content:""}
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Metrics, powered by django-redis-metrics">
+    <title>Metrics</title>
+    <link href="{% static 'redis_metrics/css/bs.min.css' %}" rel="stylesheet">
+    <link href="{% static 'redis_metrics/css/bs-theme.min.css' %}" rel="stylesheet">
+    {% block extrahead %}{% endblock %}
+  </head>
+  <body>
+    <nav class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="{% url 'redis_metrics_default' %}">Metrics</a>
+        </div>
+      </div>
+    </nav>
 
-ul.subnav {padding:0; margin: 5px 10px; border-bottom: 1px solid #aaa; }
-ul.subnav.history:before {content: "Metric History: ";}
-ul.subnav.aggregate:before {content: "Aggregate History: ";}
-ul.subnav.since:before {content: "View data from: ";}
-ul.subnav li { display: inline; margin: 0; padding: 5px 5px 10px 5px; }
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3">{% block nav %}{% metric_list %}{% endblock %}</div>
+        <div class="col-md-9">{% block content %}{% endblock %}</div>
+    </div><!-- /.container -->
 
-div.chart {text-align:center;position:relative;}
-ul.bar-legend, ul.line-legend {
-  margin:0;padding:0;
-  position: absolute; top:0; right:0;
-  list-style-type: none;
-  line-height: 20px;
-  text-align: left;
-  z-index: 100;
-}
-ul.bar-legend li, ul.line-legend li {margin-bottom: 5px;}
-ul.bar-legend li span, ul.line-legend li span {
-  padding:0; margin:0px 5px 0px 0px;
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  vertical-align: middle;
-}
-div.gauge {display: block;float: left;}
-#push { clear: both; position: relative; height: 100px; padding:0; margin:0;}
-#footer {clear: both; position: relative; bottom: 0; left:0; height: 16px;
-  padding: .5em 0; margin:100px 0 0 0; background-color: #ddd; color: #555;
-  text-align: center; width:100%;}
-#footer p { padding:0; margin:0;}
-pre, code { font-family: "Courier New", monospace; background-color: #eee;color:black; }
-</style>
-{% block extrahead %}{% endblock %}
-</head>
-
-<body>
-<div id="banner">
-    {% block banner %}
-    <h1><a href="{% url 'redis_metrics_default' %}">Metrics</a></h1>
-    {% endblock %}
-</div>
-<div id="nav">{% block nav %}{% metric_list %}{% endblock %}</div>
-<div id="content">{% block content %}{% endblock %}</div>
-<div id="push"></div>
-<div id="footer">
-    <p>Powered by <a href="https://github.com/bradmontgomery/django-redis-metrics">django-redis-metrics</a>.</p>
-</div>
-</body>
+    <footer class="footer">
+      <div class="container">
+        <p class="text-muted">Powered by <a href="https://github.com/bradmontgomery/django-redis-metrics">django-redis-metrics</a>.</p>
+      </div>
+    </footer>
+  </body>
 </html>

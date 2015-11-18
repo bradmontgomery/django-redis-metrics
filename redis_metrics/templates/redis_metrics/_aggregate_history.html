@@ -54,7 +54,7 @@ $("div.chart").append(chart.generateLegend());
 </script>
 
 {% if with_data_table %}
-<table>
+<table class="table">
     <caption>
       {{ granularity }} metrics for<br/><code>{{slugs|join:", " }}</code>
       {% if since %}<br/>since {{ since }}{% endif %}

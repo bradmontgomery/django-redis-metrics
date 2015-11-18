@@ -4,14 +4,14 @@
 
 
 {% block content %}
-    <h1><code>{{ slug }}</code> history</h1>
     <ul class="breadcrumb">
     <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
     <li><a href="{% url 'redis_metric_detail' slug %}">{{ slug }} detail</a></li>
     <li class="active">{{ granularity }} history</li>
     </ul>
 
-    <ul class="subnav history">
+    <h1>{{ slug }} <small>history</small></h1>
+    <ul class="nav nav-pills history">
     {% for g in granularities %}
     <li><a href="{% url 'redis_metric_history' slug g %}">{{ g|title }}</a></li>
     {% endfor %}
