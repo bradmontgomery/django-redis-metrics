@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import random
 
 from datetime import datetime, timedelta

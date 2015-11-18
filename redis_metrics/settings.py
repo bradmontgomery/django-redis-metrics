@@ -2,6 +2,7 @@
 This module contains the settings for this app. We'll attempt to pull values
 from django's settings, falling back to the default values.
 """
+from __future__ import unicode_literals
 from django.conf import settings
 
 

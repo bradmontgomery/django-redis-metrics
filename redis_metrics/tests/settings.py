@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import os
 
 # Django 1.7 needs different settings than 1.4 - 1.6; see below.

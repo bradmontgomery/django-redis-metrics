@@ -3,6 +3,7 @@ This app doesn't have any models, per se, but the following ``R`` class is a
 lightweight wrapper around Redis.
 
 """
+from __future__ import unicode_literals
 import redis
 
 from collections import OrderedDict
