@@ -12,6 +12,5 @@ install:
 script:
   - django-admin.py test redis_metrics --settings=redis_metrics.tests.settings
 env:
-  - DJANGO=1.4.22
   - DJANGO=1.7.10
   - DJANGO=1.8.6

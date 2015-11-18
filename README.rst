@@ -32,7 +32,9 @@ similar feature set but:
 Requirements
 ------------
 
-This app works with Python 2.7 and Django 1.4, 1.6, 1.7 and requires `redis-py`_.
+This app works with Python 2.7 - 3.5 and is tested with Django 1.7 - 1.8. It
+also requires `redis-py`_. For support for older versions of Django, see the
+`0.9.0 release <https://github.com/bradmontgomery/django-redis-metrics/releases/tag/0.9.0>`_.
 
 If you'd like to run the tests, install the packages listed in
 ``requirements/test.txt``, which includes coverage and mock.
