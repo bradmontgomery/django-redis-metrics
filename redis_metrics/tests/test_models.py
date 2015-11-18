@@ -558,7 +558,7 @@ class TestR(TestCase):
     def test_get_metrics(self):
         # Set a return value for mget, so all of the method gets exercised.
         prev_return = self.redis.mget.return_value
-        self.redis.mget.return_value = [u'1', u'2']
+        self.redis.mget.return_value = ['1', '2']
 
         # Slugs for metrics we want
         slugs = ['metric-1', 'metric-2']
@@ -585,7 +585,7 @@ class TestR(TestCase):
     def test_get_metrics_with_overridden_granularities(self):
         # Set a return value for mget, so all of the method gets exercised.
         prev_return = self.redis.mget.return_value
-        self.redis.mget.return_value = [u'1', u'2']
+        self.redis.mget.return_value = ['1', '2']
 
         # Slugs for metrics we want
         slugs = ['metric-1', 'metric-2']
@@ -671,10 +671,10 @@ class TestR(TestCase):
         duplicate code from ``get_metric_history`` :-/ """
         if type(slugs) != list:
             slugs = [slugs]
-        keys = set()
+        keys = []
         for slug in slugs:
             for date in self.r._date_range(granularity, since):
-                keys.update(set(self.r._build_keys(slug, date, granularity)))
+                keys += self.r._build_keys(slug, date, granularity)
         return keys
 
     def _test_get_metric_history(self, slugs, granularity):
@@ -723,7 +723,7 @@ class TestR(TestCase):
         """Ensure that None-values get replaced with Zeros in
         ``R.get_metric_history``."""
 
-        # Mock the _date_ranch method so we can specify it's return values.
+        # Mock the _date_range method so we can specify it's return values.
         mock_date_range.return_value = [
             datetime(2000, 1, 1),
             datetime(2000, 1, 2),
@@ -733,7 +733,7 @@ class TestR(TestCase):
 
         # Temporarily change the return value for mget
         mget_return = self.redis.mget.return_value
-        self.redis.mget.return_value = [u'1', u'2', None, u'3']
+        self.redis.mget.return_value = ['1', '2', None, '3']
 
         # Note: we're not providing a since parameter here, since we've
         # mocked the R._date_range method.
@@ -741,10 +741,10 @@ class TestR(TestCase):
 
         # Format the range of dates that for which we should get results
         expected = [
-            ('m:foo:2000-01-01', u'1'),
-            ('m:foo:2000-01-02', u'2'),
+            ('m:foo:2000-01-01', '1'),
+            ('m:foo:2000-01-02', '2'),
             ('m:foo:2000-01-03', 0),
-            ('m:foo:2000-01-04', u'3'),
+            ('m:foo:2000-01-04', '3'),
         ]
         self.assertEqual(results, expected)
 
@@ -826,10 +826,10 @@ class TestR(TestCase):
             ('m:foo:y:2013', '4'),
         ]
         expected_results = {
-            'periods': [u'y:2012', u'y:2013'],
+            'periods': ['y:2012', 'y:2013'],
             'data': [
-                {'slug': u'bar', 'values': ['1', '2']},
-                {'slug': u'foo', 'values': ['3', '4']},
+                {'slug': 'bar', 'values': ['1', '2']},
+                {'slug': 'foo', 'values': ['3', '4']},
             ]
         }
         with patch('redis_metrics.models.redis.StrictRedis'):

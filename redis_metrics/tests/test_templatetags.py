@@ -13,7 +13,6 @@ from redis_metrics.templatetags.redis_metrics_filters import (
 )
 
 
-
 @override_settings(REDIS_METRICS_HOST='localhost')
 @override_settings(REDIS_METRICS_PORT=6379)
 @override_settings(REDIS_METRICS_DB=0)
@@ -279,7 +278,7 @@ class TestTemplateTags(TestCase):
             inst = mock_r.return_value
             inst.get_metric_history_chart_data.return_value = history
 
-            result = taglib.aggregate_history(set(['foo', 'bar']))
+            result = taglib.aggregate_history(['foo', 'bar'])
             expected_result = {
                 'chart_id': 'metric-aggregate-history-foo-bar',
                 'slugs': ['foo', 'bar'],
@@ -359,16 +358,16 @@ class TestTemplateTags(TestCase):
             }
             tabular_history = [
                 ('Period', 'foo', 'bar'),
-                (u'2000-01-01', '100', '200'),
-                (u'2000-01-02', '200', '300'),
-                (u'2000-01-02', '300', '400'),
+                ('2000-01-01', '100', '200'),
+                ('2000-01-02', '200', '300'),
+                ('2000-01-02', '300', '400'),
             ]
             inst = mock_r.return_value
             inst.get_metric_history_chart_data.return_value = history
             inst.get_metric_history_as_columns.return_value = tabular_history
 
             result = taglib.aggregate_history(
-                set(['foo', 'bar']),
+                ['foo', 'bar'],
                 since="2000-01-01 11:30:45",
                 with_data_table=True
             )
