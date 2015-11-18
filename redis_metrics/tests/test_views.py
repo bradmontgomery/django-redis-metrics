@@ -13,14 +13,20 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 
-@override_settings(REDIS_METRICS_HOST='localhost')
-@override_settings(REDIS_METRICS_PORT=6379)
-@override_settings(REDIS_METRICS_DB=0)
-@override_settings(REDIS_METRICS_PASSWORD=None)
-@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
-@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
-@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
-@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
+TEST_SETTINGS = {
+    'HOST': 'localhost',
+    'PORT': 6379,
+    'DB': 0,
+    'PASSWORD': None,
+    'SOCKET_TIMEOUT': None,
+    'SOCKET_CONNECTION_POOL': None,
+    'MIN_GRANULARITY': 'seconds',
+    'MAX_GRANULARITY': 'yearly',
+    'MONDAY_FIRST_DAY_OF_WEEK': False,
+}
+
+
+@override_settings(REDIS_METRICS=TEST_SETTINGS)
 class TestViews(TestCase):
     url = 'redis_metrics.urls'
 

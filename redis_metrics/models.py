@@ -28,32 +28,31 @@ class R(object):
           (default is "metric-slugs")
         * ``gauge_slugs_key`` -- The key storing a set of all slugs for gauges
           (default is "gauge-slugs")
-        * ``host`` -- Redis host (default settings.REDIS_METRICS_HOST)
-        * ``port`` -- Redis port (default settings.REDIS_METRICS_PORT)
-        * ``db``   -- Redis DB (default settings.REDIS_METRICS_DB)
-        * ``password``   -- Redis password
-          (default settings.REDIS_METRICS_PASSWORD)
-        * ``socket_timeout``   -- Redis password
-          (default settings.REDIS_METRICS_SOCKET_TIMEOUT)
-        * ``connection_pool``   -- Redis password
-          (default settings.REDIS_METRICS_SOCKET_CONNECTION_POOL)
+        * ``host`` -- Redis host (set in settings.REDIS_METRICS['HOST'])
+        * ``port`` -- Redis port (set in settings.REDIS_METRICS['PORT'])
+        * ``db`` -- Redis DB (set in settings.REDIS_METRICS['DB'])
+        * ``password`` -- Redis password (set in settings.REDIS_METRICS['PASSWORD'])
+        * ``socket_timeout``   -- Redis password (set in
+          settings.REDIS_METRICS['SOCKET_TIMEOUT'])
+        * ``connection_pool`` -- Redis connection pool info. (set in
+          settings.REDIS_METRICS['SOCKET_CONNECTION_POOL'])
 
         """
         self._categories_key = kwargs.get('categories_key', 'categories')
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        self.host = kwargs.pop('host', app_settings.REDIS_METRICS_HOST)
-        self.port = kwargs.pop('port', app_settings.REDIS_METRICS_PORT)
-        self.db = kwargs.pop('db', app_settings.REDIS_METRICS_DB)
-        self.password = kwargs.pop('password', app_settings.REDIS_METRICS_PASSWORD)
+        self.host = kwargs.pop('host', app_settings.HOST)
+        self.port = kwargs.pop('port', app_settings.PORT)
+        self.db = kwargs.pop('db', app_settings.DB)
+        self.password = kwargs.pop('password', app_settings.PASSWORD)
         self.socket_timeout = kwargs.pop(
             'socket_timeout',
-            app_settings.REDIS_METRICS_SOCKET_TIMEOUT
+            app_settings.SOCKET_TIMEOUT
         )
         self.connection_pool = kwargs.pop(
             'connection_pool',
-            app_settings.REDIS_METRICS_SOCKET_CONNECTION_POOL
+            app_settings.SOCKET_CONNECTION_POOL
         )
 
         # Create the connection to Redis
@@ -151,13 +150,13 @@ class R(object):
 
     def _granularities(self):
         """Returns a generator of all possible granularities based on the
-        REDIS_METRICS_MIN_GRANULARITY and REDIS_METRICS_MAX_GRANULARITY settings.
+        MIN_GRANULARITY and MAX_GRANULARITY settings.
         """
         keep = False
         for g in GRANULARITIES:
-            if g == app_settings.REDIS_METRICS_MIN_GRANULARITY and not keep:
+            if g == app_settings.MIN_GRANULARITY and not keep:
                 keep = True
-            elif g == app_settings.REDIS_METRICS_MAX_GRANULARITY and keep:
+            elif g == app_settings.MAX_GRANULARITY and keep:
                 keep = False
                 yield g
             if keep:
@@ -170,9 +169,10 @@ class R(object):
             "minutes": {"key": "m:{0}:i:{1}", "date_format": "%Y-%m-%d-%H-%M"},
             "hourly": {"key": "m:{0}:h:{1}", "date_format": "%Y-%m-%d-%H"},
             "daily": {"key": "m:{0}:{1}", "date_format": "%Y-%m-%d"},
-            "weekly": {"key": "m:{0}:w:{1}",
-                       "date_format": "%Y-%{0}".format(
-                           'W' if app_settings.REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK else 'U')},
+            "weekly": {
+                "key": "m:{0}:w:{1}",
+                "date_format": "%Y-%{0}".format('W' if app_settings.MONDAY_FIRST_DAY_OF_WEEK else 'U')
+            },
             "monthly": {"key": "m:{0}:m:{1}", "date_format": "%Y-%m"},
             "yearly": {"key": "m:{0}:y:{1}", "date_format": "%Y"},
         }
