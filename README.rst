@@ -53,6 +53,6 @@ This code is distributed under the terms of the MIT license. See the
     :alt: License
     :target: https://pypi.python.org/pypi/django-redis-metrics/
 
-.. |docs| image:: https://readthedocs.org/projects/django-redis-metrics/badge/?version=latest
+.. |docs| image:: https://img.shields.io/badge/Docs-Latest-brightgreen.svg?style=flat-square
     :target: http://django-redis-metrics.readthedocs.org/en/latest/?badge=latest
     :alt: Documentation Status
