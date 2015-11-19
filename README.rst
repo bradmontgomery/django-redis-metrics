@@ -1,7 +1,7 @@
 Django Redis Metrics
 ====================
 
-|version| |travis| |coveralls| |license|
+|docs| |version| |travis| |coveralls| |license|
 
 
 This app allows you do define various named metrics (such as 'New Users',
@@ -23,6 +23,12 @@ Compatibility
 This app works with Python 2.7 - 3.5 and is tested with Django 1.7 - 1.8. For
 support for older versions of Django, see the
 `0.9.0 release <https://github.com/bradmontgomery/django-redis-metrics/releases/tag/0.9.0>`_.
+
+
+Documentation
+-------------
+
+View the full documenation at http://django-redis-metrics.readthedocs.org/en/latest/.
 
 License
 -------
@@ -46,3 +52,7 @@ This code is distributed under the terms of the MIT license. See the
 .. |license| image:: http://img.shields.io/pypi/l/django-redis-metrics.svg?style=flat-square
     :alt: License
     :target: https://pypi.python.org/pypi/django-redis-metrics/
+
+.. |docs| image:: https://readthedocs.org/projects/django-redis-metrics/badge/?version=latest
+    :target: http://django-redis-metrics.readthedocs.org/en/latest/?badge=latest
+    :alt: Documentation Status
