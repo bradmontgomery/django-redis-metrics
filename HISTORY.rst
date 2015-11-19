@@ -1,6 +1,16 @@
 History
 -------
 
+1.0.0 (2015-11-19)
+++++++++++++++++++
+
+- Dropped support for Django versions prior to 1.7
+- Support for Python 3 (issue #28)
+- Testing under Django 1.8 (issue #39)
+- Introduced the ``REDIS_METRICS`` settings (issue #46)
+- Bundled Bootstrap and revised the default templates (issue #38)
+- Created Proper docs for readthedocs.org (issue #29)
+
 0.9.0 (2015-09-14)
 ++++++++++++++++++
 
