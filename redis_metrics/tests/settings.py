@@ -13,6 +13,7 @@ SITE_ID = 1
 DEBUG = True
 SECRET_KEY = "secret"
 ROOT_URLCONF = 'redis_metrics.tests.urls'
+STATIC_URL = '/static/'
 TEMPLATE_DIRS = (
     os.path.join(BASE_PATH, 'templates'),
 )
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
+    'django.contrib.staticfiles',
     'redis_metrics',
 ]
 
