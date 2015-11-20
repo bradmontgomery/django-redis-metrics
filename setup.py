@@ -28,6 +28,7 @@ setup(
             'templates/redis_metrics/email/*.html',
             'templates/redis_metrics/email/*.txt',
             'static/redis_metrics/js/*.js',
+            'static/redis_metrics/css/*.css',
         ],
     },
     include_package_data=True,
