@@ -11,7 +11,7 @@ from mock import call, patch, Mock
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from ..models import R
+from ..models import R, dedupe
 
 
 TEST_SETTINGS = {
@@ -43,6 +43,13 @@ class TestR(TestCase):
     def tearDown(self):
         self.redis = self.redis_patcher.stop()
         super(TestR, self).tearDown()
+
+    def test_dedupe(self):
+        """Test the redis_metrics.models.dedupe function."""
+        self.assertEqual(
+            list(dedupe(['a', 'a', 'b', 'c', 'b', 'c', 'c', 'c'])),
+            ['a', 'b', 'c']
+        )
 
     def test__init__(self):
         """Test creation of an R object with parameters."""
@@ -692,6 +699,7 @@ class TestR(TestCase):
         for slug in slugs:
             for date in self.r._date_range(granularity, since):
                 keys += self.r._build_keys(slug, date, granularity)
+        keys = list(dedupe(keys))
         return keys
 
     def _test_get_metric_history(self, slugs, granularity):

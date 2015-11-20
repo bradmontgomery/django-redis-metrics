@@ -14,6 +14,20 @@ from .settings import app_settings, GRANULARITIES
 from .templatetags import redis_metrics_filters as template_tags
 
 
+def dedupe(items):
+    """Remove duplicates from a sequence (of hashable items) while maintaining
+    order. NOTE: This only works if items in the list are hashable types.
+
+    Taken from the Python Cookbook, 3rd ed. Such a great book!
+
+    """
+    seen = set()
+    for item in items:
+        if item not in seen:
+            yield item
+            seen.add(item)
+
+
 class R(object):
 
     def __init__(self, **kwargs):
@@ -452,6 +466,7 @@ class R(object):
         for slug in slugs:
             for date in self._date_range(granularity, since):
                 keys += self._build_keys(slug, date, granularity)
+        keys = list(dedupe(keys))
 
         # Fetch our data, replacing any None-values with zeros
         results = [0 if v is None else v for v in self.r.mget(keys)]
