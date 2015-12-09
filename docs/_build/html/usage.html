@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Usage &mdash; django-redis-metrics 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="django-redis-metrics 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Contributing" href="contributing.html" />
+    <link rel="prev" title="Installation" href="installation.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">django-redis-metrics 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="usage">
+<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+<p>Use the <code class="docutils literal"><span class="pre">metric</span></code> shortcut to start recording metrics.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">redis_metrics</span> <span class="kn">import</span> <span class="n">metric</span>
+
+<span class="c"># Increment the metric by one</span>
+<span class="n">metric</span><span class="p">(</span><span class="s">&#39;new-user-signup&#39;</span><span class="p">)</span>
+
+<span class="c"># Increment the metric by some other number</span>
+<span class="n">metric</span><span class="p">(</span><span class="s">&#39;new-user-signup&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Metrics can also be categorized. To record a metric and add it to a category,
+specify a <code class="docutils literal"><span class="pre">category</span></code> keyword parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Increment the metric, and add it to a category</span>
+<span class="n">metric</span><span class="p">(</span><span class="s">&#39;new-user-signup&#39;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s">&quot;User Metrics&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Metrics can also expire after a specified number of seconds</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># The &#39;foo&#39; metric will expire in 5 minutes</span>
+<span class="n">metric</span><span class="p">(</span><span class="s">&#39;foo&#39;</span><span class="p">,</span> <span class="n">expire</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also <em>reset</em> a metric with the <code class="docutils literal"><span class="pre">set_metric</span></code> function. This will
+replace any existing values for the metric, rather than incrementing them. It&#8217;s
+api is similar to <code class="docutils literal"><span class="pre">metric</span></code>&#8216;s.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">redis_metrics</span> <span class="kn">import</span> <span class="n">set_metric</span>
+
+<span class="c"># Reset the Download count.</span>
+<span class="n">set_metric</span><span class="p">(</span><span class="s">&quot;downloads&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="gauges">
+<h2>Gauges<a class="headerlink" href="#gauges" title="Permalink to this headline">¶</a></h2>
+<p>There are also <code class="docutils literal"><span class="pre">gauge</span></code>&#8216;s. A <code class="docutils literal"><span class="pre">gauge</span></code> is great for storing a <em>cumulative</em>
+value, and when you don&#8217;t care about keeping a history for the metric. In other
+words, a gauge gives you a snapshot of some current value.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">redis_metrics</span> <span class="kn">import</span> <span class="n">gauge</span>
+
+<span class="c"># Create a gauge</span>
+<span class="n">gauge</span><span class="p">(</span><span class="s">&#39;total-downloads&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+<span class="c"># Update the gauge</span>
+<span class="n">gauge</span><span class="p">(</span><span class="s">&#39;total-downloads&#39;</span><span class="p">,</span> <span class="mi">9999</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-r-class">
+<h2>The R class<a class="headerlink" href="#the-r-class" title="Permalink to this headline">¶</a></h2>
+<p>There&#8217;s also an <code class="docutils literal"><span class="pre">R</span></code> class which is a lightweight wrapper around <code class="docutils literal"><span class="pre">redis</span></code>.
+You can use it directly to set metrics or gauges and to retrieve data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">redis_metrics.models</span> <span class="kn">import</span> <span class="n">R</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">R</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">metric</span><span class="p">(</span><span class="s">&#39;new-user-signup&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">get_metric</span><span class="p">(</span><span class="s">&#39;new-user-signup&#39;</span><span class="p">)</span>
+<span class="go">{</span>
+<span class="go">    &#39;second&#39;: 0,</span>
+<span class="go">    &#39;minute&#39;: 0,</span>
+<span class="go">    &#39;hour&#39;: 1,</span>
+<span class="go">    &#39;day&#39;: &#39;29&#39;,</span>
+<span class="go">    &#39;month&#39;: &#39;29&#39;,</span>
+<span class="go">    &#39;week&#39;: &#39;29&#39;,</span>
+<span class="go">    &#39;year&#39;: &#39;29&#39;</span>
+<span class="go">}</span>
+
+<span class="go"># list the slugs you&#39;ve used to create metrics</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">metric_slugs</span><span class="p">()</span>
+<span class="go">set([&#39;new-user-signup&#39;, &#39;user-logins&#39;])</span>
+
+<span class="go"># Get metrics for multiple slugs</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">get_metrics</span><span class="p">([</span><span class="s">&#39;new-user-signup&#39;</span><span class="p">,</span> <span class="s">&#39;user-logins&#39;</span><span class="p">])</span>
+<span class="go">[</span>
+<span class="go">    {&#39;new-user-signup&#39;: {</span>
+<span class="go">        &#39;second&#39;: &#39;0&#39;, &#39;minute&#39;: &#39;0&#39;, &#39;hour&#39;: &#39;1&#39;,</span>
+<span class="go">        &#39;day&#39;: &#39;7&#39;, &#39;month&#39;: &#39;7&#39;, &#39;week&#39;: &#39;7&#39;, &#39;year&#39;: &#39;7&#39;}},</span>
+<span class="go">    {&#39;user-logins&#39;:</span>
+<span class="go">        &#39;second&#39;: &#39;0&#39;, &#39;minute&#39;: &#39;0&#39;, &#39;hour&#39;: &#39;1&#39;,</span>
+<span class="go">        &#39;day&#39;: &#39;7&#39;, &#39;month&#39;: &#39;7&#39;, &#39;week&#39;: &#39;7&#39;, &#39;year&#39;: &#39;7&#39;}},</span>
+<span class="go">]</span>
+
+<span class="go"># Delete a metric</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">delete_metric</span><span class="p">(</span><span class="s">&quot;app-errors&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="templatetags">
+<h2>Templatetags<a class="headerlink" href="#templatetags" title="Permalink to this headline">¶</a></h2>
+<p>Viewing your data is possible with the built-in views, but these all make use
+of a number of templatetags to display metric data and history.</p>
+<ul>
+<li><p class="first"><code class="docutils literal"><span class="pre">metrics_since(slugs,</span> <span class="pre">years,</span> <span class="pre">link_type=&quot;detail&quot;,</span> <span class="pre">granularity=None)</span></code> Renders
+a template with a menu to view a metric (or a list of metrics) for a given
+number of years. For example:</p>
+<div class="highlight-python"><div class="highlight"><pre>{% metrics_since &quot;downloads&quot; 5 %}  {# downloads for the last 5 years #}
+</pre></div>
+</div>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">gauge(slug,</span> <span class="pre">maximum=9000,</span> <span class="pre">size=200)</span></code>: Includes a donut chart for the specified
+gauge. The maximum represents the largest possible value for the gague, while
+the size is the size of the chart in pixels.:</p>
+<div class="highlight-python"><div class="highlight"><pre>{% gauge &quot;tasks-completed&quot; 10 %}
+</pre></div>
+</div>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">metric_list</span></code> generates a list of all metrics.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">metric_detail(slug,</span> <span class="pre">with_data_table=False)</span></code> displays a metric&#8217;s current
+details. This tag will also generate a table of raw data if the <code class="docutils literal"><span class="pre">with_data_table</span></code>
+option is True.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">metric_history(slug,</span> <span class="pre">granularity=&quot;daily&quot;,</span> <span class="pre">since=None,</span> <span class="pre">with_data_table=False)</span></code>
+displays a given metric&#8217;s history. The <code class="docutils literal"><span class="pre">granularity</span></code> option defines the
+granularity displayed, <code class="docutils literal"><span class="pre">since</span></code> is a string or datetime object that specifies
+how much data to show, and <code class="docutils literal"><span class="pre">with_data_table</span></code> controls wether or not raw
+data is displayed in a table. Examples:</p>
+<div class="highlight-python"><div class="highlight"><pre>{% metric_history &quot;signups&quot; &quot;daily&quot; &quot;2015-01-01&quot; %}
+
+{% metric_history &quot;signups&quot; &quot;monthly&quot; this_year %}
+</pre></div>
+</div>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">aggregate_detail(slug_list,</span> <span class="pre">with_data_table=False)</span></code> is much like <code class="docutils literal"><span class="pre">metric_detail</span></code>,
+but displayes more than one metric on the chart. The <code class="docutils literal"><span class="pre">slug_list</span></code> parameter should
+be a list of metric slugs that you want to display.</p>
+</li>
+<li><p class="first"><code class="docutils literal"><span class="pre">aggregate_history(slug_list,</span> <span class="pre">granularity=&quot;daily&quot;,</span> <span class="pre">since=None,</span> <span class="pre">with_data_table=False)</span></code>
+is similarly like <code class="docutils literal"><span class="pre">metric_history</span></code>, but for multiple metrics on once chart.
+but displayes more than one metric on the chart. The <code class="docutils literal"><span class="pre">slug_list</span></code> parameter should
+be a list of metric slugs that you want to display.</p>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Usage</a><ul>
+<li><a class="reference internal" href="#gauges">Gauges</a></li>
+<li><a class="reference internal" href="#the-r-class">The R class</a></li>
+<li><a class="reference internal" href="#templatetags">Templatetags</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="contributing.html"
+                        title="next chapter">Contributing</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/usage.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="contributing.html" title="Contributing"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">django-redis-metrics 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Brad Montgomery.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

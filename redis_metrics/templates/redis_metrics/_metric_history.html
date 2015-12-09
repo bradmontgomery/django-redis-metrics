@@ -29,7 +29,7 @@ var chart = new Chart(ctx).Line(data, options);
 </script>
 
 {% if with_data_table %}
-<table>
+<table class="table">
     <caption>
       <code>{{ slug }}</code> {{ granularity }} metrics
       {% if since %} since {{ since }}{% endif %}

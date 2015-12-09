@@ -1,6 +1,8 @@
-__version__ = "0.8.3"
+__version__ = "1.0.3"
 
 try:
     from .utils import gauge, metric, set_metric  # NOQA
 except ImportError:  # pragma: no cover
     pass  # pragma: no cover
+
+default_app_config = 'redis_metrics.apps.RedisMetricsConfig'

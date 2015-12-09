@@ -1,10 +1,36 @@
 History
 -------
 
+1.0.3 (2015-11-20)
+++++++++++++++++++
+
+- Fixed regression resulting in duplicate metrics (`issue #48 <https://github.com/bradmontgomery/django-redis-metrics/issues/48>`_)
+
+1.0.1/1.0.2 (2015-11-19)
+++++++++++++++++++
+
+- Fixed setup.py so all static files get distributed.
+- And also fixed the Manifest.
+
+1.0.0 (2015-11-19)
+++++++++++++++++++
+
+- Dropped support for Django versions prior to 1.7
+- Support for Python 3 (`issue #28 <https://github.com/bradmontgomery/django-redis-metrics/issues/28>`_)
+- Testing under Django 1.8 (`issue #39 <https://github.com/bradmontgomery/django-redis-metrics/issues/39>`_)
+- Introduced the ``REDIS_METRICS`` settings (`issue #46 <https://github.com/bradmontgomery/django-redis-metrics/issues/46>`_)
+- Bundled Bootstrap and revised the default templates (`issue #38 <https://github.com/bradmontgomery/django-redis-metrics/issues/38>`_)
+- Created Proper docs for readthedocs.org (`issue #29 <https://github.com/bradmontgomery/django-redis-metrics/issues/29>`_)
+
+0.9.0 (2015-09-14)
+++++++++++++++++++
+
+- Support for importing of historical data (`PR #44 <https://github.com/bradmontgomery/django-redis-metrics/pull/44>`_ thanks @smaccona)
+
 0.8.3 (2015-03-11)
 ++++++++++++++++++
 
-- bugfix: Include javascript static files in setup.py. (`PR #41 <https://github.com/bradmontgomery/django-redis-metrics/pull/41>`)
+- bugfix: Include javascript static files in setup.py. (`PR #41 <https://github.com/bradmontgomery/django-redis-metrics/pull/41>`_)
 
 0.8.2 (2015-01-19)
 ++++++++++++++++++

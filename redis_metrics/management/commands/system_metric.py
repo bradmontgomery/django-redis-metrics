@@ -15,6 +15,7 @@ Examples:
         interface eth0
 
 """
+from __future__ import unicode_literals
 from django.core.management.base import BaseCommand, CommandError
 from redis_metrics.utils import set_metric, metric, gauge
 

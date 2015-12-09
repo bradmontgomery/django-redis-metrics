@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &mdash; django-redis-metrics 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="django-redis-metrics 1.0.0 documentation" href="index.html" />
+    <link rel="next" title="Usage" href="usage.html" />
+    <link rel="prev" title="Welcome to django-redis-metrics’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to django-redis-metrics’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">django-redis-metrics 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>To get started quickly:</p>
+<ol class="arabic simple">
+<li>Run <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">django-redis-metrics</span></code>.</li>
+<li>Adding <code class="docutils literal"><span class="pre">redis_metrics</span></code> to your INSTALLED_APPS.</li>
+<li>Include <code class="docutils literal"><span class="pre">url(r'^metrics/',</span> <span class="pre">include('redis_metrics.urls'))</span></code> in your URLConf.</li>
+</ol>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>This app works with Python 2.7 - 3.5 and is tested with Django 1.7 - 1.8. It
+also requires <a class="reference external" href="https://github.com/andymccurdy/redis-py">redis-py</a>. For support for older versions of Django, see the
+<a class="reference external" href="https://github.com/bradmontgomery/django-redis-metrics/releases/tag/0.9.0">0.9.0 release</a>.</p>
+<p>If you&#8217;d like to run the tests, install the packages listed in
+<code class="docutils literal"><span class="pre">requirements/test.txt</span></code>, which includes coverage and mock.</p>
+</div>
+<div class="section" id="additional-installation">
+<h2>Additional Installation<a class="headerlink" href="#additional-installation" title="Permalink to this headline">¶</a></h2>
+<p>To install the current version, run <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">django-redis-metrics</span></code>.</p>
+<p>You can also install the development version with
+<code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">git://github.com/bradmontgomery/django-redis-metrics.git#egg=redis_metrics-dev</span></code></p>
+<p>To use the built-in views, add <code class="docutils literal"><span class="pre">redis_metrics</span></code> to your <code class="docutils literal"><span class="pre">INSTALLED_APPS</span></code>,
+and include the following in your Root URLconf:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">url</span><span class="p">(</span><span class="s">r&#39;^metrics/&#39;</span><span class="p">,</span> <span class="n">include</span><span class="p">(</span><span class="s">&#39;redis_metrics.urls&#39;</span><span class="p">)),</span>
+</pre></div>
+</div>
+<p>Then, to view your metrics, visit the /metrics/ url, (i.e. run the development
+server and go to <a class="reference external" href="http://127.0.0.1:8000/metrics/">http://127.0.0.1:8000/metrics/</a>)</p>
+</div>
+<div class="section" id="settings">
+<h2>Settings<a class="headerlink" href="#settings" title="Permalink to this headline">¶</a></h2>
+<p>Starting with version 1.0, this app contains a single setting, <code class="docutils literal"><span class="pre">REDIS_METRICS</span></code>,
+which includes a number of options, all wich have the following defaults:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">REDIS_METRICS</span> <span class="o">=</span> <span class="p">{</span>
+   <span class="s">&#39;HOST&#39;</span><span class="p">:</span> <span class="s">&#39;localhost&#39;</span><span class="p">,</span>
+   <span class="s">&#39;PORT&#39;</span><span class="p">:</span> <span class="mi">6379</span><span class="p">,</span>
+   <span class="s">&#39;DB&#39;</span><span class="p">:</span>  <span class="mi">0</span><span class="p">,</span>
+   <span class="s">&#39;PASSWORD&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+   <span class="s">&#39;SOCKET_TIMEOUT&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+   <span class="s">&#39;SOCKET_CONNECTION_POOL&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+   <span class="s">&#39;MIN_GRANULARITY&#39;</span><span class="p">:</span> <span class="s">&#39;daily&#39;</span><span class="p">,</span>
+   <span class="s">&#39;MAX_GRANULARITY&#39;</span><span class="p">:</span> <span class="s">&#39;yearly&#39;</span><span class="p">,</span>
+   <span class="s">&#39;MONDAY_FIRST_DAY_OF_WEEK&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Formerly, each of these were separate settings with a <code class="docutils literal"><span class="pre">REDIS_METRICS_</span></code> prefix.</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">HOST</span></code>: Hostname of redis server that will contain your metrics data; defaults to &#8216;localhost&#8217;</li>
+<li><code class="docutils literal"><span class="pre">PORT</span></code>: Port of your redis server; defaults to &#8216;6379&#8217;</li>
+<li><code class="docutils literal"><span class="pre">DB</span></code>: Your redis database number to use, defaults to 0</li>
+<li><code class="docutils literal"><span class="pre">PASSWORD</span></code>: Your redis password if needed; defaults to None</li>
+<li><code class="docutils literal"><span class="pre">SOCKET_TIMEOUT</span></code>: Your redis database socket timeout; defaults to None</li>
+<li><code class="docutils literal"><span class="pre">SOCKET_CONNECTION_POOL</span></code>: Your redis database socket connection pool; defaults to None</li>
+<li><code class="docutils literal"><span class="pre">MIN_GRANULARITY</span></code>: The minimum-time granularity for your metrics; default is &#8216;daily&#8217;.</li>
+<li><code class="docutils literal"><span class="pre">MAX_GRANULARITY</span></code>: The maximum-time granularity for your metrics; default is &#8216;yearly&#8217;</li>
+<li><code class="docutils literal"><span class="pre">MONDAY_FIRST_DAY_OF_WEEK</span></code>: Set to True if week should start on Monday; default is False</li>
+</ul>
+</div>
+<div class="section" id="upgrading-versions-prior-to-0-8-x">
+<h2>Upgrading versions prior to 0.8.x<a class="headerlink" href="#upgrading-versions-prior-to-0-8-x" title="Permalink to this headline">¶</a></h2>
+<p>If you used a version of this app prior to 0.8.0, it&#8217;s likely that
+you&#8217;ll run into this error:</p>
+<div class="highlight-python"><div class="highlight"><pre>WRONGTYPE Operation against a key holding the wrong kind of value
+</pre></div>
+</div>
+<p>To fix this, run the <code class="docutils literal"><span class="pre">fix_redis_metrics_keys</span></code> command, which should migrate
+data for metrics, gauges, and categories into the format used by the current
+version of the app.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#additional-installation">Additional Installation</a></li>
+<li><a class="reference internal" href="#settings">Settings</a></li>
+<li><a class="reference internal" href="#upgrading-versions-prior-to-0-8-x">Upgrading versions prior to 0.8.x</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to django-redis-metrics&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="usage.html"
+                        title="next chapter">Usage</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/installation.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="usage.html" title="Usage"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to django-redis-metrics’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">django-redis-metrics 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Brad Montgomery.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

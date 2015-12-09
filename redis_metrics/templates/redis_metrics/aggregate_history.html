@@ -11,7 +11,7 @@
     <li class="active">{{ granularity }} history</li>
     </ul>
 
-    <ul class="subnav history">
+    <ul class="nav nav-pills history">
     {% for g in granularities %}
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
     {% endfor %}

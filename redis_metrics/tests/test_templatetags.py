@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
 from django.test import TestCase
@@ -12,15 +13,20 @@ from redis_metrics.templatetags.redis_metrics_filters import (
 )
 
 
+TEST_SETTINGS = {
+    'HOST': 'localhost',
+    'PORT': 6379,
+    'DB': 0,
+    'PASSWORD': None,
+    'SOCKET_TIMEOUT': None,
+    'SOCKET_CONNECTION_POOL': None,
+    'MIN_GRANULARITY': 'seconds',
+    'MAX_GRANULARITY': 'yearly',
+    'MONDAY_FIRST_DAY_OF_WEEK': False,
+}
 
-@override_settings(REDIS_METRICS_HOST='localhost')
-@override_settings(REDIS_METRICS_PORT=6379)
-@override_settings(REDIS_METRICS_DB=0)
-@override_settings(REDIS_METRICS_PASSWORD=None)
-@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
-@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
-@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
-@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
+
+@override_settings(REDIS_METRICS=TEST_SETTINGS)
 class TestTemplateTags(TestCase):
     """Verify that template tags return the expected results."""
     maxDiff = None
@@ -278,7 +284,7 @@ class TestTemplateTags(TestCase):
             inst = mock_r.return_value
             inst.get_metric_history_chart_data.return_value = history
 
-            result = taglib.aggregate_history(set(['foo', 'bar']))
+            result = taglib.aggregate_history(['foo', 'bar'])
             expected_result = {
                 'chart_id': 'metric-aggregate-history-foo-bar',
                 'slugs': ['foo', 'bar'],
@@ -358,16 +364,16 @@ class TestTemplateTags(TestCase):
             }
             tabular_history = [
                 ('Period', 'foo', 'bar'),
-                (u'2000-01-01', '100', '200'),
-                (u'2000-01-02', '200', '300'),
-                (u'2000-01-02', '300', '400'),
+                ('2000-01-01', '100', '200'),
+                ('2000-01-02', '200', '300'),
+                ('2000-01-02', '300', '400'),
             ]
             inst = mock_r.return_value
             inst.get_metric_history_chart_data.return_value = history
             inst.get_metric_history_as_columns.return_value = tabular_history
 
             result = taglib.aggregate_history(
-                set(['foo', 'bar']),
+                ['foo', 'bar'],
                 since="2000-01-01 11:30:45",
                 with_data_table=True
             )

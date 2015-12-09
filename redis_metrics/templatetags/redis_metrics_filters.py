@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import json
 from django import template
 from django.template.defaultfilters import stringfilter, mark_safe

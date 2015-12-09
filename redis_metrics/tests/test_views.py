@@ -4,6 +4,7 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
+from __future__ import unicode_literals
 from datetime import datetime
 from mock import call, patch
 
@@ -12,14 +13,20 @@ from django.test import TestCase, Client
 from django.test.utils import override_settings
 
 
-@override_settings(REDIS_METRICS_HOST='localhost')
-@override_settings(REDIS_METRICS_PORT=6379)
-@override_settings(REDIS_METRICS_DB=0)
-@override_settings(REDIS_METRICS_PASSWORD=None)
-@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
-@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
-@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
-@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
+TEST_SETTINGS = {
+    'HOST': 'localhost',
+    'PORT': 6379,
+    'DB': 0,
+    'PASSWORD': None,
+    'SOCKET_TIMEOUT': None,
+    'SOCKET_CONNECTION_POOL': None,
+    'MIN_GRANULARITY': 'seconds',
+    'MAX_GRANULARITY': 'yearly',
+    'MONDAY_FIRST_DAY_OF_WEEK': False,
+}
+
+
+@override_settings(REDIS_METRICS=TEST_SETTINGS)
 class TestViews(TestCase):
     url = 'redis_metrics.urls'
 
@@ -79,7 +86,7 @@ class TestViews(TestCase):
             # Do the Request and test for content
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
-            self.assertIn('Gauges', resp.content)
+            self.assertIn('Gauges', str(resp.content))
             self.assertEqual(
                 resp.context['gauges'],
                 set(['gauge-a', 'gauge-b'])
@@ -104,8 +111,10 @@ class TestViews(TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertIn('Sample Category', resp.context['metrics'].keys())
-            self.assertIn('test-metric-a', resp.context['metrics'].values()[0])
-            self.assertIn('test-metric-b', resp.context['metrics'].values()[0])
+
+            metrics_values = list(resp.context['metrics'].values())
+            self.assertIn('test-metric-a', metrics_values[0])
+            self.assertIn('test-metric-b', metrics_values[0])
 
             # Make sure our Mock R object called the right methods.
             mock_r.assert_has_calls([
@@ -117,7 +126,7 @@ class TestViews(TestCase):
             inst = mock_get_r.return_value
             inst._granularities.return_value = ['daily', 'weekly']
 
-            slug = u'test-metric'
+            slug = 'test-metric'
             url = reverse('redis_metric_detail', args=[slug])
 
             # Do the Request & test results
@@ -131,8 +140,8 @@ class TestViews(TestCase):
             inst = mock_get_r.return_value
             inst._granularities.return_value = ['daily', 'weekly']
 
-            slug = u'test-metric'
-            granularity = u'daily'
+            slug = 'test-metric'
+            granularity = 'daily'
             url = reverse('redis_metric_history', args=[slug, granularity])
 
             # Do the Request & test results
@@ -146,8 +155,8 @@ class TestViews(TestCase):
 
     def test_metric_history_since(self):
         """Tests the ``MetricHistoryView`` when there's a ``since`` variable"""
-        slug = u'test-metric'
-        granularity = u'daily'
+        slug = 'test-metric'
+        granularity = 'daily'
         url = reverse('redis_metric_history', args=[slug, granularity])
 
         # Do the Request & test results for a Date
@@ -315,8 +324,8 @@ class TestViews(TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertIn('form', resp.context_data)
-            self.assertIn("id_category_name", resp.content)
-            self.assertIn("id_metrics", resp.content)
+            self.assertIn("id_category_name", str(resp.content))
+            self.assertIn("id_metrics", str(resp.content))
 
     def test_category_form_view_with_initial(self):
         """Verifies that GET requests to the ``CategoryFormView`` have the
@@ -336,8 +345,8 @@ class TestViews(TestCase):
             resp = self.client.get(url)
             self.assertEqual(resp.status_code, 200)
             self.assertIn('form', resp.context_data)
-            self.assertIn("id_category_name", resp.content)
-            self.assertIn("id_metrics", resp.content)
+            self.assertIn("id_category_name", str(resp.content))
+            self.assertIn("id_metrics", str(resp.content))
 
             # foo and bar should be pre-selected, but baz should not, since
             # it's not in the "Stuff" category

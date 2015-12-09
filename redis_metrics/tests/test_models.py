@@ -4,24 +4,30 @@ when you run "manage.py test".
 
 Replace this with more appropriate tests for your application.
 """
+from __future__ import unicode_literals
 from datetime import datetime, timedelta
 from mock import call, patch, Mock
 
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from ..models import R
+from ..models import R, dedupe
 
 
-@override_settings(REDIS_METRICS_HOST='localhost')
-@override_settings(REDIS_METRICS_PORT=6379)
-@override_settings(REDIS_METRICS_DB=0)
-@override_settings(REDIS_METRICS_PASSWORD=None)
-@override_settings(REDIS_METRICS_SOCKET_TIMEOUT=None)
-@override_settings(REDIS_METRICS_SOCKET_CONNECTION_POOL=None)
-@override_settings(REDIS_METRICS_MIN_GRANULARITY='seconds')
-@override_settings(REDIS_METRICS_MAX_GRANULARITY='yearly')
-@override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=False)
+TEST_SETTINGS = {
+    'HOST': 'localhost',
+    'PORT': 6379,
+    'DB': 0,
+    'PASSWORD': None,
+    'SOCKET_TIMEOUT': None,
+    'SOCKET_CONNECTION_POOL': None,
+    'MIN_GRANULARITY': 'seconds',
+    'MAX_GRANULARITY': 'yearly',
+    'MONDAY_FIRST_DAY_OF_WEEK': False,
+}
+
+
+@override_settings(REDIS_METRICS=TEST_SETTINGS)
 class TestR(TestCase):
     """Tests for the ``R`` class."""
 
@@ -37,6 +43,13 @@ class TestR(TestCase):
     def tearDown(self):
         self.redis = self.redis_patcher.stop()
         super(TestR, self).tearDown()
+
+    def test_dedupe(self):
+        """Test the redis_metrics.models.dedupe function."""
+        self.assertEqual(
+            list(dedupe(['a', 'a', 'b', 'c', 'b', 'c', 'c', 'c'])),
+            ['a', 'b', 'c']
+        )
 
     def test__init__(self):
         """Test creation of an R object with parameters."""
@@ -208,21 +221,25 @@ class TestR(TestCase):
             ['seconds', 'minutes', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
         )
 
-    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
     def test__granularities_with_altered_min(self):
         """Tests ``R._granularities with an altered minimum value."""
-        self.assertEqual(
-            list(self.r._granularities()),
-            ['daily', 'weekly', 'monthly', 'yearly']
-        )
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MIN_GRANULARITY'] = 'daily'
+        with override_settings(REDIS_METRICS=test_settings):
+            self.assertEqual(
+                list(self.r._granularities()),
+                ['daily', 'weekly', 'monthly', 'yearly']
+            )
 
-    @override_settings(REDIS_METRICS_MAX_GRANULARITY='daily')
     def test__granularities_with_altered_max(self):
         """Tests ``R._granularities with an altered maximum value."""
-        self.assertEqual(
-            list(self.r._granularities()),
-            ['seconds', 'minutes', 'hourly', 'daily']
-        )
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MAX_GRANULARITY'] = 'daily'
+        with override_settings(REDIS_METRICS=test_settings):
+            self.assertEqual(
+                list(self.r._granularities()),
+                ['seconds', 'minutes', 'hourly', 'daily']
+            )
 
     def test_metric_key_patterns(self):
         # These two things should always be the same.
@@ -278,12 +295,14 @@ class TestR(TestCase):
         keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
         self.assertEqual(keys, ['m:test-slug:w:2012-14'])
 
-    @override_settings(REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK=True)
     def test__build_keys_weekly_week_starts_monday(self):
         """Tests ``R._build_keys``. with a *weekly* granularity."""
-        d = datetime(2012, 4, 1)  # April Fools!
-        keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
-        self.assertEqual(keys, ['m:test-slug:w:2012-13'])
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MONDAY_FIRST_DAY_OF_WEEK'] = True
+        with override_settings(REDIS_METRICS=test_settings):
+            d = datetime(2012, 4, 1)  # April Fools!
+            keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
+            self.assertEqual(keys, ['m:test-slug:w:2012-13'])
 
     def test__build_keys_monthly(self):
         """Tests ``R._build_keys``. with a *monthly* granularity."""
@@ -444,28 +463,30 @@ class TestR(TestCase):
         # Expiration should not have gotten called
         self.assertFalse(self.redis.expire.called)
 
-    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
-    @override_settings(REDIS_METRICS_MAX_GRANULARITY='weekly')
     def test_metric_with_overridden_granularities(self):
-        slug = 'test-metric'
-        n = 1
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MIN_GRANULARITY'] = 'daily'
+        test_settings['MAX_GRANULARITY'] = 'weekly'
+        with override_settings(REDIS_METRICS=test_settings):
+            slug = 'test-metric'
+            n = 1
 
-        # get the keys used for the metric, so we can check for the appropriate
-        # calls
-        daily, weekly = self.r._build_keys(slug)
-        self.r.metric(slug, num=n)
+            # get the keys used for the metric, so we can check for the appropriate
+            # calls
+            daily, weekly = self.r._build_keys(slug)
+            self.r.metric(slug, num=n)
 
-        # Verify that setting a metric adds the appropriate slugs to the keys
-        # set and then incrememts each key
-        self.redis.assert_has_calls([
-            call.sadd(self.r._metric_slugs_key, slug),
-            call.pipeline(),
-            call.pipeline().incr(daily, n),
-            call.pipeline().incr(weekly, n),
-        ])
+            # Verify that setting a metric adds the appropriate slugs to the keys
+            # set and then incrememts each key
+            self.redis.assert_has_calls([
+                call.sadd(self.r._metric_slugs_key, slug),
+                call.pipeline(),
+                call.pipeline().incr(daily, n),
+                call.pipeline().incr(weekly, n),
+            ])
 
-        # Expiration should not have gotten called
-        self.assertFalse(self.redis.expire.called)
+            # Expiration should not have gotten called
+            self.assertFalse(self.redis.expire.called)
 
     @patch.object(R, '_categorize')
     def test_metric_with_category(self, mock_categorize):
@@ -541,23 +562,25 @@ class TestR(TestCase):
             call.get(year),
         ])
 
-    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
-    @override_settings(REDIS_METRICS_MAX_GRANULARITY='weekly')
     def test_get_metric_with_overridden_granularities(self):
-        slug = 'test-metric'
-        self.r.get_metric(slug)
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MIN_GRANULARITY'] = 'daily'
+        test_settings['MAX_GRANULARITY'] = 'weekly'
+        with override_settings(REDIS_METRICS=test_settings):
+            slug = 'test-metric'
+            self.r.get_metric(slug)
 
-        # Verify that we GET the keys from redis
-        day, week = self.r._build_keys(slug)
-        self.redis.assert_has_calls([
-            call.get(day),
-            call.get(week),
-        ])
+            # Verify that we GET the keys from redis
+            day, week = self.r._build_keys(slug)
+            self.redis.assert_has_calls([
+                call.get(day),
+                call.get(week),
+            ])
 
     def test_get_metrics(self):
         # Set a return value for mget, so all of the method gets exercised.
         prev_return = self.redis.mget.return_value
-        self.redis.mget.return_value = [u'1', u'2']
+        self.redis.mget.return_value = ['1', '2']
 
         # Slugs for metrics we want
         slugs = ['metric-1', 'metric-2']
@@ -579,32 +602,34 @@ class TestR(TestCase):
         # Reset mget's previous return value
         self.redis.mget.return_value = prev_return
 
-    @override_settings(REDIS_METRICS_MIN_GRANULARITY='daily')
-    @override_settings(REDIS_METRICS_MAX_GRANULARITY='weekly')
     def test_get_metrics_with_overridden_granularities(self):
-        # Set a return value for mget, so all of the method gets exercised.
-        prev_return = self.redis.mget.return_value
-        self.redis.mget.return_value = [u'1', u'2']
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MIN_GRANULARITY'] = 'daily'
+        test_settings['MAX_GRANULARITY'] = 'weekly'
+        with override_settings(REDIS_METRICS=test_settings):
+            # Set a return value for mget, so all of the method gets exercised.
+            prev_return = self.redis.mget.return_value
+            self.redis.mget.return_value = ['1', '2']
 
-        # Slugs for metrics we want
-        slugs = ['metric-1', 'metric-2']
+            # Slugs for metrics we want
+            slugs = ['metric-1', 'metric-2']
 
-        # Build the various keys for each metric
-        keys_list = []
-        for s in slugs:
-            keys_list.append(self.r._build_keys(s))
+            # Build the various keys for each metric
+            keys_list = []
+            for s in slugs:
+                keys_list.append(self.r._build_keys(s))
 
-        # construct the calls to redis.mget
-        calls = [call(*keys) for keys in keys_list]
+            # construct the calls to redis.mget
+            calls = [call(*keys) for keys in keys_list]
 
-        # Test our method
-        self.r.get_metrics(slugs)
-        self.assertEqual(self.redis.mget.call_args_list, calls)
-        self.assertTrue(self.redis.mget.called)  # mget was called...
-        self.assertEqual(self.redis.mget.call_count, 2)  # ...twice
+            # Test our method
+            self.r.get_metrics(slugs)
+            self.assertEqual(self.redis.mget.call_args_list, calls)
+            self.assertTrue(self.redis.mget.called)  # mget was called...
+            self.assertEqual(self.redis.mget.call_count, 2)  # ...twice
 
-        # Reset mget's previous return value
-        self.redis.mget.return_value = prev_return
+            # Reset mget's previous return value
+            self.redis.mget.return_value = prev_return
 
     def test_get_category_metrics(self):
         """returns metrics for a given category"""
@@ -670,10 +695,11 @@ class TestR(TestCase):
         duplicate code from ``get_metric_history`` :-/ """
         if type(slugs) != list:
             slugs = [slugs]
-        keys = set()
+        keys = []
         for slug in slugs:
             for date in self.r._date_range(granularity, since):
-                keys.update(set(self.r._build_keys(slug, date, granularity)))
+                keys += self.r._build_keys(slug, date, granularity)
+        keys = list(dedupe(keys))
         return keys
 
     def _test_get_metric_history(self, slugs, granularity):
@@ -722,7 +748,7 @@ class TestR(TestCase):
         """Ensure that None-values get replaced with Zeros in
         ``R.get_metric_history``."""
 
-        # Mock the _date_ranch method so we can specify it's return values.
+        # Mock the _date_range method so we can specify it's return values.
         mock_date_range.return_value = [
             datetime(2000, 1, 1),
             datetime(2000, 1, 2),
@@ -732,7 +758,7 @@ class TestR(TestCase):
 
         # Temporarily change the return value for mget
         mget_return = self.redis.mget.return_value
-        self.redis.mget.return_value = [u'1', u'2', None, u'3']
+        self.redis.mget.return_value = ['1', '2', None, '3']
 
         # Note: we're not providing a since parameter here, since we've
         # mocked the R._date_range method.
@@ -740,10 +766,10 @@ class TestR(TestCase):
 
         # Format the range of dates that for which we should get results
         expected = [
-            ('m:foo:2000-01-01', u'1'),
-            ('m:foo:2000-01-02', u'2'),
+            ('m:foo:2000-01-01', '1'),
+            ('m:foo:2000-01-02', '2'),
             ('m:foo:2000-01-03', 0),
-            ('m:foo:2000-01-04', u'3'),
+            ('m:foo:2000-01-04', '3'),
         ]
         self.assertEqual(results, expected)
 
@@ -825,10 +851,10 @@ class TestR(TestCase):
             ('m:foo:y:2013', '4'),
         ]
         expected_results = {
-            'periods': [u'y:2012', u'y:2013'],
+            'periods': ['y:2012', 'y:2013'],
             'data': [
-                {'slug': u'bar', 'values': ['1', '2']},
-                {'slug': u'foo', 'values': ['3', '4']},
+                {'slug': 'bar', 'values': ['1', '2']},
+                {'slug': 'foo', 'values': ['3', '4']},
             ]
         }
         with patch('redis_metrics.models.redis.StrictRedis'):

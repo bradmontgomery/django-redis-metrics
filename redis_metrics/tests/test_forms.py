@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from mock import call, patch
 from django.test import TestCase
 

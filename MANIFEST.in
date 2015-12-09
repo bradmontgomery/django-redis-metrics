@@ -1,2 +1,2 @@
 include README.rst LICENSE.txt
-recursive-include redis_metrics *.py *.html *.txt
+recursive-include redis_metrics *.py *.html *.txt *.js *.css

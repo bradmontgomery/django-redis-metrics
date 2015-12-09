@@ -6,6 +6,7 @@ the views here are extended from ``TemplateView`` in order to keep things
 simple.
 
 """
+from __future__ import unicode_literals
 from datetime import datetime
 
 from django.contrib.auth.decorators import user_passes_test
