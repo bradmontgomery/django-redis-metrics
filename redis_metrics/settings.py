@@ -24,6 +24,7 @@ class AppSettings(object):
 
     # list of (setting name, default value)
     _default_settings = {
+        'CONNECTION_CLASS': None,
         'HOST': 'localhost',
         'PORT': 6379,
         'DB': 0,
@@ -37,6 +38,7 @@ class AppSettings(object):
 
     # A mapping of our old settings names to the new name
     _old_settings = {
+        'CONNECTION_CLASS': 'REDIS_METRICS_CONNECTION_CLASS',
         'HOST': 'REDIS_METRICS_HOST',
         'PORT': 'REDIS_METRICS_PORT',
         'DB': 'REDIS_METRICS_DB',
