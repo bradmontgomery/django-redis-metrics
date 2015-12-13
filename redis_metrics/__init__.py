@@ -1,4 +1,4 @@
-__version__ = "1.0.3"
+__version__ = "1.1.0"
 
 try:
     from .utils import gauge, metric, set_metric  # NOQA

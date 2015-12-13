@@ -1,6 +1,11 @@
 History
 -------
 
+1.1.0 (2015-12-13)
+++++++++++++++++++
+
+- This release introduces pluggable Redis backends. See `Issue #49 <https://github.com/bradmontgomery/django-redis-metrics/issues/49>`_ and `PR #50 <https://github.com/bradmontgomery/django-redis-metrics/pull/50>`_. Thanks Seamus Mac Conaonaigh!
+
 1.0.3 (2015-11-20)
 ++++++++++++++++++
 
