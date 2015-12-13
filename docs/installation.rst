@@ -46,6 +46,7 @@ Starting with version 1.0, this app contains a single setting, ``REDIS_METRICS``
 which includes a number of options, all wich have the following defaults::
 
     REDIS_METRICS = {
+       'CONNECTION_CLASS': None,
        'HOST': 'localhost',
        'PORT': 6379,
        'DB':  0,
@@ -59,6 +60,11 @@ which includes a number of options, all wich have the following defaults::
 
 Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
 
+* ``CONNECTION_CLASS``: Optional name of a function which returns an instance of a Redis client. 
+    * If you are using `django-redis`_ for caching, for example, then you can set this to ``'django_redis.get_redis_connection'`` to automatically use whatever `django-redis`_ is using to get its Redis client instances (`django-redis`_ supports pluggable back ends for Redis). 
+    * This can also be used to enable the use of Redis clients that support Redis Sentinel (e.g. use `django-redis-sentinel`_ along with `django-redis`_), Redis Clustering or Hiredis, for example.
+    * You can also create your own class/function that returns a valid Redis client.
+    * **Note that if you specify this setting, then all other Redis-related settings will be ignored** (namely ``HOST``, ``PORT``, ``DB``, ``PASSWORD``, ``SOCKET_TIMEOUT`` and ``SOCKET_CONNECTION_POOL``).
 * ``HOST``: Hostname of redis server that will contain your metrics data; defaults to 'localhost'
 * ``PORT``: Port of your redis server; defaults to '6379'
 * ``DB``: Your redis database number to use, defaults to 0
@@ -69,6 +75,8 @@ Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
 * ``MAX_GRANULARITY``: The maximum-time granularity for your metrics; default is 'yearly'
 * ``MONDAY_FIRST_DAY_OF_WEEK``: Set to True if week should start on Monday; default is False
 
+.. _`django-redis`: https://github.com/niwinz/django-redis
+.. _`django-redis-sentinel`: https://github.com/KabbageInc/django-redis-sentinel
 
 Upgrading versions prior to 0.8.x
 ---------------------------------

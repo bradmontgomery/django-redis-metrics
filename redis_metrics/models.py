@@ -6,6 +6,7 @@ lightweight wrapper around Redis.
 from __future__ import unicode_literals
 import redis
 
+from importlib import import_module
 from collections import OrderedDict
 from datetime import datetime, timedelta
 from django.template.defaultfilters import slugify
@@ -42,6 +43,7 @@ class R(object):
           (default is "metric-slugs")
         * ``gauge_slugs_key`` -- The key storing a set of all slugs for gauges
           (default is "gauge-slugs")
+        * ``connection_class`` -- class to use to obtain a Redis connection (set in settings.REDIS_METRICS['CONNECTION_CLASS'])
         * ``host`` -- Redis host (set in settings.REDIS_METRICS['HOST'])
         * ``port`` -- Redis port (set in settings.REDIS_METRICS['PORT'])
         * ``db`` -- Redis DB (set in settings.REDIS_METRICS['DB'])
@@ -56,29 +58,35 @@ class R(object):
         self._metric_slugs_key = kwargs.get('metric_slugs_key', 'metric-slugs')
         self._gauge_slugs_key = kwargs.get('gauge_slugs_key', 'gauge-slugs')
 
-        self.host = kwargs.pop('host', app_settings.HOST)
-        self.port = kwargs.pop('port', app_settings.PORT)
-        self.db = kwargs.pop('db', app_settings.DB)
-        self.password = kwargs.pop('password', app_settings.PASSWORD)
-        self.socket_timeout = kwargs.pop(
-            'socket_timeout',
-            app_settings.SOCKET_TIMEOUT
-        )
-        self.connection_pool = kwargs.pop(
-            'connection_pool',
-            app_settings.SOCKET_CONNECTION_POOL
-        )
+        self.connection_class = kwargs.pop('connection_class', app_settings.CONNECTION_CLASS)
 
-        # Create the connection to Redis
-        self.r = redis.StrictRedis(
-            host=self.host,
-            port=self.port,
-            db=self.db,
-            password=self.password,
-            socket_timeout=self.socket_timeout,
-            connection_pool=self.connection_pool,
-            decode_responses=True
-        )
+        if self.connection_class:
+            package, module = self.connection_class.rsplit('.', 1)
+            self.r = getattr(import_module(package), module)()
+        else:
+            self.host = kwargs.pop('host', app_settings.HOST)
+            self.port = kwargs.pop('port', app_settings.PORT)
+            self.db = kwargs.pop('db', app_settings.DB)
+            self.password = kwargs.pop('password', app_settings.PASSWORD)
+            self.socket_timeout = kwargs.pop(
+                'socket_timeout',
+                app_settings.SOCKET_TIMEOUT
+            )
+            self.connection_pool = kwargs.pop(
+                'connection_pool',
+                app_settings.SOCKET_CONNECTION_POOL
+            )
+
+            # Create the connection to Redis
+            self.r = redis.StrictRedis(
+                host=self.host,
+                port=self.port,
+                db=self.db,
+                password=self.password,
+                socket_timeout=self.socket_timeout,
+                connection_pool=self.connection_pool,
+                decode_responses=True
+            )
 
     def _date_range(self, granularity, since):
         """Returns a generator that yields ``datetime.datetime`` objects from
