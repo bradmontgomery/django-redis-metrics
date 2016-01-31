@@ -104,6 +104,9 @@ You can use it directly to set metrics or gauges and to retrieve data.
 Templatetags
 ------------
 
+Load the templatetags in your template::
+``{% load redis_metric_tags %}``
+
 Viewing your data is possible with the built-in views, but these all make use
 of a number of templatetags to display metric data and history.
 
