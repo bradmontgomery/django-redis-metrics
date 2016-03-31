@@ -12,3 +12,4 @@ In no particular order:
 - vlinhart `<https://github.com/vlinhart>`_
 - Dr. Stefan Schimanski `<https://github.com/sttts>`_
 - Seamus Mac Conaonaigh `<https://github.com/smaccona>`_
+- Phoebe Bright `<https://github.com/phoebebright>`_

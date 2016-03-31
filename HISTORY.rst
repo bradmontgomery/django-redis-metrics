@@ -1,6 +1,11 @@
 History
 -------
 
+1.2.0 (2016-03-31)
+++++++++++++++++++
+
+- Removed `{% load url from future %}` to be compatible with django 1.9 (`PR #52 <https://github.com/bradmontgomery/django-redis-metrics/pull/52>`_, thanks Phoebe Bright!)
+
 1.1.0 (2015-12-13)
 ++++++++++++++++++
 
