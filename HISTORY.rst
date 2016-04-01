@@ -1,6 +1,14 @@
 History
 -------
 
+1.3.0 (2016-04-01)
+++++++++++++++++++
+
+- Added a ``coerce`` parameter to the ``gauge`` template tag, and changed the
+  default behavior so that guage values are listed at floats.
+- Included a better default layout for gauges.
+- Updating documentation.
+
 1.2.0 (2016-03-31)
 ++++++++++++++++++
 
