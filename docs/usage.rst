@@ -104,6 +104,9 @@ You can use it directly to set metrics or gauges and to retrieve data.
 Templatetags
 ------------
 
+The included templatetags are useful for visualizing your stored metrics.
+
+
 Load the templatetags in your template::
 ``{% load redis_metric_tags %}``
 
@@ -116,11 +119,14 @@ of a number of templatetags to display metric data and history.
 
     {% metrics_since "downloads" 5 %}  {# downloads for the last 5 years #}
 
-* ``gauge(slug, maximum=9000, size=200)``: Includes a donut chart for the specified
-  gauge. The maximum represents the largest possible value for the gague, while
-  the size is the size of the chart in pixels.::
+* ``gauge(slug, maximum=9000, size=200, coerce='float')``: Includes a donut
+  chart for the specified gauge. The maximum represents the largest possible
+  value for the gague, while the size is the size of the chart in pixels. The
+  coerce parameter tells the template tag how to coerce numeric data. By default
+  values are converted to floats, but you can include ``coerce='int'`` to force
+  values to be listed as integers.::
 
-    {% gauge "tasks-completed" 10 %}
+    {% gauge "tasks-completed" 10 size=300 coerce='int' %}
 
 * ``metric_list`` generates a list of all metrics.
 * ``metric_detail(slug, with_data_table=False)`` displays a metric's current

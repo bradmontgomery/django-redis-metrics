@@ -12,7 +12,7 @@ Requirements
 ------------
 
 This app works with Python 2 & 3 (tested on 2.7 and 3.4) and is tested with
-Django 1.7 - 1.8. It also requires `redis-py`_. For support for older versions
+Django 1.7 - 1.9. It also requires `redis-py`_. For support for older versions
 of Django, see the `0.9.0 release <https://github.com/bradmontgomery/django-redis-metrics/releases/tag/0.9.0>`_.
 
 If you'd like to run the tests, install the packages listed in
@@ -60,8 +60,8 @@ which includes a number of options, all wich have the following defaults::
 
 Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
 
-* ``CONNECTION_CLASS``: Optional name of a function which returns an instance of a Redis client. 
-    * If you are using `django-redis`_ for caching, for example, then you can set this to ``'django_redis.get_redis_connection'`` to automatically use whatever `django-redis`_ is using to get its Redis client instances (`django-redis`_ supports pluggable back ends for Redis). 
+* ``CONNECTION_CLASS``: Optional name of a function which returns an instance of a Redis client.
+    * If you are using `django-redis`_ for caching, for example, then you can set this to ``'django_redis.get_redis_connection'`` to automatically use whatever `django-redis`_ is using to get its Redis client instances (`django-redis`_ supports pluggable back ends for Redis).
     * This can also be used to enable the use of Redis clients that support Redis Sentinel (e.g. use `django-redis-sentinel`_ along with `django-redis`_), Redis Clustering or Hiredis, for example.
     * You can also create your own class/function that returns a valid Redis client.
     * **Note that if you specify this setting, then all other Redis-related settings will be ignored** (namely ``HOST``, ``PORT``, ``DB``, ``PASSWORD``, ``SOCKET_TIMEOUT`` and ``SOCKET_CONNECTION_POOL``).
