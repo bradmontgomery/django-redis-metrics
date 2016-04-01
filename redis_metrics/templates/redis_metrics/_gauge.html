@@ -13,13 +13,13 @@ following context:
 
 {% endcomment %}
 
-<div class="chart gauge" style="width: {{size}}px; height: {{size}}px;">
+<div class="chart gauge" style="width: {{size}}px; height: {{size}}px; text-align:center;">
   <canvas id="gauge-{{ slug }}"></canvas>
+  <strong>{{ slug }}</strong>
 </div>
 <script type="text/javascript" src="{% static 'redis_metrics/js/chart.min.js' %}"></script>
 <script type="text/javascript">
 var ctx = document.getElementById("gauge-{{slug}}").getContext("2d");
-//var options = {animation:false, responsive: true};
 var options = {responsive: true};
 var data = [
   {
