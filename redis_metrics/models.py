@@ -88,9 +88,9 @@ class R(object):
                 decode_responses=True
             )
 
-    def _date_range(self, granularity, since):
+    def _date_range(self, granularity, since, to=None):
         """Returns a generator that yields ``datetime.datetime`` objects from
-        the ``since`` date until *now*.
+        the ``since`` date until ``to`` (default: *now*).
 
         * ``granularity`` -- The granularity at which the generated datetime
           objects should be created: seconds, minutes, hourly, daily, weekly,
@@ -98,6 +98,9 @@ class R(object):
         * ``since`` -- a ``datetime.datetime`` object, from which we start
           generating periods of time. This can also be ``None``, and will
           default to the past 7 days if that's the case.
+        * ``to`` -- a ``datetime.datetime`` object, from which we start
+          generating periods of time. This can also be ``None``, and will
+          default to now if that's the case.
 
         If ``granularity`` is one of daily, weekly, monthly, or yearly, this
         function gives objects at the daily level.
@@ -117,8 +120,9 @@ class R(object):
         if since is None:
             since = datetime.utcnow() - timedelta(days=7)  # Default to 7 days
 
-        now = datetime.utcnow()
-        elapsed = (now - since)
+        if to is None:
+            to = datetime.utcnow()
+        elapsed = (to - since)
 
         # Figure out how many units to generate for the elapsed time.
         # I'm going to use `granularity` as a keyword parameter to timedelta,
@@ -137,7 +141,7 @@ class R(object):
             granularity = "days"
             units = elapsed.days + 1
 
-        return (now - timedelta(**{granularity: u}) for u in range(int(units)))
+        return (to - timedelta(**{granularity: u}) for u in range(int(units)))
 
     def categories(self):
         """Returns a set of Categories under which metrics may have been
@@ -439,11 +443,12 @@ class R(object):
             self.r.sadd(key, *metric_slugs)
             self.r.sadd(self._categories_key, category)
 
-    def get_metric_history(self, slugs, since=None, granularity='daily'):
+    def get_metric_history(self, slugs, since=None, to=None, granularity='daily'):
         """Get history for one or more metrics.
 
         * ``slugs`` -- a slug OR a list of slugs
         * ``since`` -- the date from which we start pulling metrics
+        * ``to`` -- the date until which we start pulling metrics
         * ``granularity`` -- seconds, minutes, hourly,
                              daily, weekly, monthly, yearly
 
@@ -472,7 +477,7 @@ class R(object):
         # Build the set of Redis keys that we need to get.
         keys = []
         for slug in slugs:
-            for date in self._date_range(granularity, since):
+            for date in self._date_range(granularity, since, to):
                 keys += self._build_keys(slug, date, granularity)
         keys = list(dedupe(keys))
 
@@ -506,7 +511,7 @@ class R(object):
         Charts LineChart).
 
         """
-        history = self.get_metric_history(slugs, since, granularity)
+        history = self.get_metric_history(slugs, since, granularity=granularity)
         _history = []  # new, columnar history
         periods = ['Period']  # A separate, single column for the time period
         for s in slugs:
@@ -559,7 +564,7 @@ class R(object):
 
         """
         slugs = sorted(slugs)
-        history = self.get_metric_history(slugs, since, granularity)
+        history = self.get_metric_history(slugs, since, granularity=granularity)
 
         # Convert the history into an intermediate data structure organized
         # by periods. Since the history is sorted by key (which includes both
