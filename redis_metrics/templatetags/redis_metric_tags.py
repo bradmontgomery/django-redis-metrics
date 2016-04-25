@@ -106,7 +106,8 @@ def metric_detail(slug, with_data_table=False):
 
 
 @register.inclusion_tag("redis_metrics/_metric_history.html")
-def metric_history(slug, granularity="daily", since=None, with_data_table=False):
+def metric_history(slug, granularity="daily", since=None, to=None,
+                   with_data_table=False):
     """Template Tag to display a metric's history.
 
     * ``slug`` -- the metric's unique slug
@@ -114,6 +115,7 @@ def metric_history(slug, granularity="daily", since=None, with_data_table=False)
     * ``since`` -- a datetime object or a string string matching one of the
       following patterns: "YYYY-mm-dd" for a date or "YYYY-mm-dd HH:MM:SS" for
       a date & time.
+    * ``to`` -- the date until which we start pulling metrics
     * ``with_data_table`` -- if True, prints the raw data in a table.
 
     """
@@ -123,6 +125,12 @@ def metric_history(slug, granularity="daily", since=None, with_data_table=False)
             since = datetime.strptime(since, "%Y-%m-%d")
         elif since and len(since) == 19:  # yyyy-mm-dd HH:MM:ss
             since = datetime.strptime(since, "%Y-%m-%d %H:%M:%S")
+
+        if to and len(to) == 10:  # yyyy-mm-dd
+            to = datetime.strptime(since, "%Y-%m-%d")
+        elif to and len(to) == 19:  # yyyy-mm-dd HH:MM:ss
+            to = datetime.strptime(to, "%Y-%m-%d %H:%M:%S")
+
     except (TypeError, ValueError):
         # assume we got a datetime object or leave since = None
         pass
@@ -130,11 +138,13 @@ def metric_history(slug, granularity="daily", since=None, with_data_table=False)
     metric_history = r.get_metric_history(
         slugs=slug,
         since=since,
+        to=to,
         granularity=granularity
     )
 
     return {
         'since': since,
+        'to': to,
         'slug': slug,
         'granularity': granularity,
         'metric_history': metric_history,

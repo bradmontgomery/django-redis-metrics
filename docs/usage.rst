@@ -132,15 +132,25 @@ of a number of templatetags to display metric data and history.
 * ``metric_detail(slug, with_data_table=False)`` displays a metric's current
   details. This tag will also generate a table of raw data if the ``with_data_table``
   option is True.
-* ``metric_history(slug, granularity="daily", since=None, with_data_table=False)``
+* ``metric_history(slug, granularity="daily", since=None, to=None, with_data_table=False)``
   displays a given metric's history. The ``granularity`` option defines the
   granularity displayed, ``since`` is a string or datetime object that specifies
-  how much data to show, and ``with_data_table`` controls wether or not raw
-  data is displayed in a table. Examples::
+  the date and/or time from which we start displaying data, the ``to`` argument
+  indicates to date or time to which we display data, and ``with_data_table``
+  controls wether or not raw data is displayed in a table. Examples::
 
+    {# dainly signups since Jan 1, 2015 #}
     {% metric_history "signups" "daily" "2015-01-01" %}
 
+    {# daily signups between Jan 1, 2015 & Jan, 1 2016 #}
+    {% metric_history "signups" "daily" "2015-01-01" "2016-01-01" %}
+
+    {# monthly signups for a given year #}
     {% metric_history "signups" "monthly" this_year %}
+
+
+    {# monthly signups for a given year, including data  #}
+    {% metric_history "signups" "monthly" this_year with_data_table=True %}
 
 * ``aggregate_detail(slug_list, with_data_table=False)`` is much like ``metric_detail``,
   but displayes more than one metric on the chart. The ``slug_list`` parameter should

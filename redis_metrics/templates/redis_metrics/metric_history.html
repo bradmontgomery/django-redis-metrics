@@ -21,6 +21,6 @@
     {% metrics_since slug 5 "history" granularity %}
 
     {# Include the metrics chart #}
-    {% metric_history slug granularity since True %}
+    {% metric_history slug granularity since with_data_table=True %}
 
 {% endblock %}
