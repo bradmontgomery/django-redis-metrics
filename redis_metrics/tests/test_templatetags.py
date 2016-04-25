@@ -191,6 +191,7 @@ class TestTemplateTags(TestCase):
                 'granularity': "daily",
                 'metric_history': history,
                 'since': None,
+                'to': None,
                 'with_data_table': False,
             }
             self.assertEqual(result, expected_result)
@@ -198,7 +199,8 @@ class TestTemplateTags(TestCase):
             inst.get_metric_history.assert_called_once_with(
                 slugs='test',
                 granularity='daily',
-                since=None
+                since=None,
+                to=None
             )
 
     def test_metric_history_with_date(self):
@@ -211,6 +213,7 @@ class TestTemplateTags(TestCase):
                 'granularity': "daily",
                 'metric_history': history,
                 'since': None,
+                'to': None,
                 'with_data_table': False,
             }
 
@@ -222,7 +225,8 @@ class TestTemplateTags(TestCase):
             inst.get_metric_history.assert_called_once_with(
                 slugs='test',
                 granularity='daily',
-                since=since
+                since=since,
+                to=None,
             )
             inst.reset_mock()
 
@@ -234,7 +238,8 @@ class TestTemplateTags(TestCase):
             inst.get_metric_history.assert_called_once_with(
                 slugs='test',
                 granularity='daily',
-                since=since
+                since=since,
+                to=None
             )
             inst.reset_mock()
 
@@ -246,7 +251,23 @@ class TestTemplateTags(TestCase):
             inst.get_metric_history.assert_called_once_with(
                 slugs='test',
                 granularity='daily',
-                since=since
+                since=since,
+                to=None
+            )
+            inst.reset_mock()
+
+            # With both a since and to parameter
+            since = datetime(2000, 1, 2, 11, 30, 45)
+            to = datetime(2001, 1, 2, 11, 30, 45)
+            expected_result['since'] = since
+            expected_result['to'] = to
+            result = taglib.metric_history('test', since=since, to=to)
+            self.assertEqual(result, expected_result)
+            inst.get_metric_history.assert_called_once_with(
+                slugs='test',
+                granularity='daily',
+                since=since,
+                to=to
             )
 
     def test_aggregate_detail(self):
