@@ -133,7 +133,6 @@ class TestR(TestCase):
         self.assertEqual(len(list(self.r._date_range('monthly', since, to))), 366)
         self.assertEqual(len(list(self.r._date_range('yearly', since, to))), 366)
 
-
     def test__date_range_seconds(self):
         """Tests ``R._date_range`` at the "seconds" granularity."""
         since = datetime.utcnow() - timedelta(seconds=5)
@@ -698,7 +697,8 @@ class TestR(TestCase):
                 call().sadd('categories', 'Stuff'),
             ])
 
-    def _metric_history_keys(self, slugs, since=None, granularity='daily'):
+    def _metric_history_keys(self, slugs, since=None, to=None,
+                             granularity='daily'):
         """generates the same list of keys used in ``get_metric_history``.
         These can then be used to test for calls to redis. Note: This is
         duplicate code from ``get_metric_history`` :-/ """
@@ -706,51 +706,133 @@ class TestR(TestCase):
             slugs = [slugs]
         keys = []
         for slug in slugs:
-            for date in self.r._date_range(granularity, since):
+            for date in self.r._date_range(granularity, since, to):
                 keys += self.r._build_keys(slug, date, granularity)
         keys = list(dedupe(keys))
         return keys
 
-    def _test_get_metric_history(self, slugs, granularity):
+    def _test_get_metric_history(self, slugs, since=None, to=None,
+                                 granularity=None):
         """actual test code for ``R.get_metric_history``."""
-        keys = self._metric_history_keys(slugs, granularity=granularity)
-        self.r.get_metric_history(slugs, granularity=granularity)
+        keys = self._metric_history_keys(slugs, since, to, granularity)
+        self.r.get_metric_history(
+            slugs, since=since, to=to, granularity=granularity)
         self.redis.assert_has_calls([call.mget(keys)])
 
     def test_get_metric_history_hourly(self):
         """Tests ``R.get_metric_history`` with hourly granularity."""
-        self._test_get_metric_history('test-slug', 'hourly')
+        self._test_get_metric_history('test-slug', granularity='hourly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            'test-slug',
+            since=datetime(2014, 1, 1),
+            to=datetime(2016, 1, 1),
+            granularity='hourly'
+        )
 
     def test_get_metric_history_daily(self):
         """Tests ``R.get_metric_history`` with daily granularity."""
-        self._test_get_metric_history('test-slug', 'daily')
+        self._test_get_metric_history('test-slug', granularity='daily')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            'test-slug',
+            since=datetime(2014, 1, 1),
+            to=datetime(2016, 1, 1),
+            granularity='daily'
+        )
 
     def test_get_metric_history_weekly(self):
         """Tests ``R.get_metric_history`` with weekly granularity."""
-        self._test_get_metric_history('test-slug', 'weekly')
+        self._test_get_metric_history('test-slug', granularity='weekly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            'test-slug',
+            since=datetime(2014, 1, 1),
+            to=datetime(2016, 1, 1),
+            granularity='weekly'
+        )
 
     def test_get_metric_history_monthly(self):
         """Tests ``R.get_metric_history`` with monthly granularity."""
-        self._test_get_metric_history('test-slug', 'monthly')
+        self._test_get_metric_history('test-slug', granularity='monthly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            'test-slug',
+            since=datetime(2014, 1, 1),
+            to=datetime(2016, 1, 1),
+            granularity='monthly'
+        )
 
     def test_get_metric_history_yearly(self):
         """Tests ``R.get_metric_history`` with yearly granularity."""
-        self._test_get_metric_history('test-slug', 'yearly')
+        self._test_get_metric_history('test-slug', granularity='yearly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            'test-slug',
+            since=datetime(2014, 1, 1),
+            to=datetime(2016, 1, 1),
+            granularity='yearly'
+        )
 
     def test_get_metric_multiple_history_hourly(self):
-        self._test_get_metric_history(['foo', 'bar'], 'hourly')
+        self._test_get_metric_history(['foo', 'bar'], granularity='hourly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            ['foo', 'bar'],
+            since=datetime(2015, 1, 1),
+            to=datetime(2015, 2, 1),
+            granularity='hourly'
+        )
 
     def test_get_metric_multiple_history_daily(self):
-        self._test_get_metric_history(['foo', 'bar'], 'daily')
+        self._test_get_metric_history(['foo', 'bar'], granularity='daily')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            ['foo', 'bar'],
+            since=datetime(2015, 1, 1),
+            to=datetime(2015, 2, 1),
+            granularity='daily'
+        )
 
     def test_get_metric_multiple_history_weekly(self):
-        self._test_get_metric_history(['foo', 'bar'], 'weekly')
+        self._test_get_metric_history(['foo', 'bar'], granularity='weekly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            ['foo', 'bar'],
+            since=datetime(2015, 1, 1),
+            to=datetime(2015, 2, 1),
+            granularity='weekly'
+        )
 
     def test_get_metric_multiple_history_monthly(self):
-        self._test_get_metric_history(['foo', 'bar'], 'monthly')
+        self._test_get_metric_history(['foo', 'bar'], granularity='monthly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            ['foo', 'bar'],
+            since=datetime(2015, 1, 1),
+            to=datetime(2015, 12, 1),
+            granularity='monthly'
+        )
 
     def test_get_metric_multiple_history_yearly(self):
-        self._test_get_metric_history(['foo', 'bar'], 'yearly')
+        self._test_get_metric_history(['foo', 'bar'], granularity='yearly')
+
+        # with specified to/since dates
+        self._test_get_metric_history(
+            ['foo', 'bar'],
+            since=datetime(2015, 1, 1),
+            to=datetime(2016, 1, 1),
+            granularity='yearly'
+        )
 
     @patch.object(R, '_date_range')
     def test_get_metric_history_replaces_none_with_zero(self, mock_date_range):
