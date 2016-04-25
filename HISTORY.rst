@@ -1,6 +1,14 @@
 History
 -------
 
+1.4.0 (2016-04-25)
+++++++++++++++++++
+
+- Added support for a ``to`` argument in ``R.get_metric_history``, so you can
+  specify a date range for metrics. (`PR #54 <https://github.com/bradmontgomery/django-redis-metrics/pull/54>`_, Thanks @stephanpoetschner).
+- Updated the ``metric_history`` tag so that it also accepts a ``to`` argument.
+
+
 1.3.0 (2016-04-01)
 ++++++++++++++++++
 
