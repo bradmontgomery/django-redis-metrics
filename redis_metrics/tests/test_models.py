@@ -125,6 +125,15 @@ class TestR(TestCase):
         self.assertEqual(len(list(self.r._date_range('monthly', None))), 8)
         self.assertEqual(len(list(self.r._date_range('yearly', None))), 8)
 
+        # Test with a specified `to` argument.
+        since = datetime(2014, 1, 1)
+        to = datetime(2015, 1, 1)
+        self.assertEqual(len(list(self.r._date_range('daily', since, to))), 366)
+        self.assertEqual(len(list(self.r._date_range('weekly', since, to))), 366)
+        self.assertEqual(len(list(self.r._date_range('monthly', since, to))), 366)
+        self.assertEqual(len(list(self.r._date_range('yearly', since, to))), 366)
+
+
     def test__date_range_seconds(self):
         """Tests ``R._date_range`` at the "seconds" granularity."""
         since = datetime.utcnow() - timedelta(seconds=5)
