@@ -28,7 +28,7 @@ Django 1.7 - 1.9. For support for older versions of Django, see the
 Documentation
 -------------
 
-View the full documenation at http://django-redis-metrics.readthedocs.org/en/latest/.
+View the full documenation at http://django-redis-metrics.readthedocs.io/en/latest/.
 
 License
 -------
