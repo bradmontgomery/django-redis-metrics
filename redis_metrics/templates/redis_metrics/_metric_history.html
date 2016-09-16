@@ -41,7 +41,7 @@ var chart = new Chart(ctx).Line(data, options);
         {% for key, value in metric_history %}
             <tr>
                 <td>{{ key|strip_metric_prefix }}</td>
-                <td class="value">{{ value|default_if_none:"-" }}</td>
+                <td class="value">{{ value|default:"-" }}</td>
             </tr>
         {% endfor %}
     </tbody>

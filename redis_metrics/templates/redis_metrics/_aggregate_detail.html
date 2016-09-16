@@ -1,4 +1,5 @@
 {% load static %}
+{% load redis_metrics_filters %}
 {% comment %}
 
 Context for this Template:
@@ -28,7 +29,19 @@ Context for this Template:
 <script type="text/javascript" src="{% static 'redis_metrics/js/zepto.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'redis_metrics/js/chart.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'redis_metrics/js/colors.js' %}"></script>
-
+<style type="text/css">
+ul.bar-legend {list-style-type:none; clear:both; margin:0;padding:0;}
+ul.bar-legend li {
+  width: 300px;
+  float:left;
+}
+ul.bar-legend li span {
+    display: inline-block;
+    width: 20px;
+    height: 18px;
+    margin: 0 10px 0 0;
+}
+</style>
 <script type="text/javascript">
 var ctx = document.getElementById("{{chart_id}}").getContext("2d");
 var options = {animation:false, responsive: true,};
@@ -43,13 +56,13 @@ var data = {
       highlightFill:Color({{forloop.counter0}}).highlightFill,
       highlightStroke:Color({{forloop.counter0}}).highlightStroke,
       data: [
-        {{ d.seconds|default_if_none:0 }},
-        {{ d.minutes|default_if_none:0 }},
-        {{ d.hours|default_if_none:0 }},
-        {{ d.day|default_if_none:0 }},
-        {{ d.week|default_if_none:0 }},
-        {{ d.month|default_if_none:0 }},
-        {{ d.year|default_if_none:0 }},
+        {{ d.seconds|default:0 }},
+        {{ d.minutes|default:0 }},
+        {{ d.hours|default:0 }},
+        {{ d.day|default:0 }},
+        {{ d.week|default:0 }},
+        {{ d.month|default:0 }},
+        {{ d.year|default:0 }},
       ]
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
@@ -58,10 +71,11 @@ var data = {
 var chart = new Chart(ctx).Bar(data, options);
 $("div.chart").append(chart.generateLegend());
 </script>
+<hr style="clear:both;"/>
 
 {% if with_data_table %}
-<table class="table">
-    <caption>Metric Data for <code>{{ slugs|join:", " }}</code></caption>
+<table class="table table-striped">
+    <caption>Metric Data</caption>
     <thead>
         <tr><th>Metric</th><th>Time Period</th><th>Value</th></tr>
     </thead>
@@ -71,7 +85,7 @@ $("div.chart").append(chart.generateLegend());
             <tr>
             <td><code>{{ slug }}</code></td>
             <td>{{ period|capfirst }}</td>
-            <td class="value">{{ value|default_if_none:"-" }}</td>
+            <td class="value">{{ value|default:"-" }}</td>
             </tr>
         {% endfor %}
     {% endfor %}

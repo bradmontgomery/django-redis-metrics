@@ -33,7 +33,7 @@ var myBarChart = new Chart(ctx).Bar(data, options);
     {% for metric, value in metrics.items %}
         <tr>
             <td>{{ metric|title }}</td>
-            <td class="value">{{ value|default_if_none:"-" }}</td>
+            <td class="value">{{ value|default:"-" }}</td>
         </tr>
     {% endfor %}
     </tbody>
