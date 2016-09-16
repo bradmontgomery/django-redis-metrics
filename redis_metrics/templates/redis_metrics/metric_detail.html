@@ -2,13 +2,13 @@
 
 {% load redis_metric_tags %}
 
-{% block content %}
-    <ul class="breadcrumb">
-    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+{% block titletext %}{{ slug }} <small>metrics</small>{% endblock %}
+{% block breadcrumb %}
     <li class="active">{{ slug }}</li>
-    </ul>
+{% endblock %}
 
-    <h1>{{ slug }} <small>metrics</small></h1>
+{% block content %}
+
     <ul class="nav nav-pills history">
     {% for g in granularities %}
     <li><a href="{% url 'redis_metric_history' slug g %}">{{ g|title }}</a></li>

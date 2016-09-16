@@ -2,15 +2,14 @@
 
 {% load redis_metric_tags %}
 
-{% block content %}
-    <h1>Aggregate History</h1>
-    <ul class="breadcrumb">
-    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+{% block titletext %}Aggregate History{% endblock %}
+{% block breadcrumb %}
     <li><a href="{% url 'redis_metric_aggregate' %}">Select Metrics</a></li>
     <li><a href="{% url 'redis_metric_aggregate_detail' slugs|join:"+" %}">Detail</a></li>
     <li class="active">{{ granularity }} history</li>
-    </ul>
+{% endblock %}
 
+{% block content %}
     <ul class="nav nav-pills history">
     {% for g in granularities %}
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
