@@ -9,6 +9,7 @@
 {% endblock %}
 
 {% block content %}
+    {% if category %}<h2>{{ category }}</h2>{% endif %}
     <ul class="nav nav-pills history">
     {% for g in granularities %}
     <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>

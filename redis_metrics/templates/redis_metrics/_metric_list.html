@@ -19,8 +19,8 @@
 <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">
-        {# TODO: link to category aggregate? #}
-        <a href="#" title="{{ category }}">{{ category }}</a>
+        <a href="{% url 'redis_metric_aggregate_detail_by_category' category %}"
+           title="{{ category }}">{{ category }}</a>
 
         <a href="{% url 'redis_metrics_categorize' category %}"
            class="pull-right" title="Edit {{ category}}">
