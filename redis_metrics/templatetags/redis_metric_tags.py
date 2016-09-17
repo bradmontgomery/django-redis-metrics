@@ -98,10 +98,16 @@ def metric_detail(slug, with_data_table=False):
 
     """
     r = get_r()
+    granularities = list(r._granularities())
+    metrics = r.get_metric(slug)
+    metrics_data = []
+    for g in granularities:
+        metrics_data.append((g, metrics[g]))
+
     return {
-        'granularities': list(r._granularities()),
+        'granularities': [g.title() for g in granularities],
         'slug': slug,
-        'metrics': r.get_metric(slug),
+        'metrics': metrics_data,
         'with_data_table': with_data_table,
     }
 
@@ -201,10 +207,6 @@ def aggregate_history(slugs, granularity="daily", since=None, with_data_table=Fa
       a date & time.
     * ``with_data_table`` -- if True, prints the raw data in a table.
 
-    NOTE: If you specify with_data_table=True, this code will make an additional
-    call out to retreive metrics and format them properly, which could be a
-    little slow.
-
     """
     r = get_r()
     slugs = list(slugs)
@@ -223,14 +225,6 @@ def aggregate_history(slugs, granularity="daily", since=None, with_data_table=Fa
         since=since,
         granularity=granularity
     )
-    # If we want to display the raw data, fetch it in a columnar format
-    tabular_data = None
-    if with_data_table:
-        tabular_data = r.get_metric_history_as_columns(
-            slugs=slugs,
-            since=since,
-            granularity=granularity
-        )
 
     return {
         'chart_id': "metric-aggregate-history-{0}".format("-".join(slugs)),
@@ -239,5 +233,4 @@ def aggregate_history(slugs, granularity="daily", since=None, with_data_table=Fa
         'granularity': granularity,
         'metric_history': history,
         'with_data_table': with_data_table,
-        'tabular_data': tabular_data,
     }
