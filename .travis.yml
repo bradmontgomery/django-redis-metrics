@@ -1,7 +1,7 @@
 language: python
 python:
   - "2.7"
-  - "3.4"
+  - "3.5"
 before_install:
   - export PIP_USE_MIRRORS=true
   - sudo apt-get update
@@ -11,6 +11,6 @@ install:
 script:
   - django-admin.py test redis_metrics --settings=redis_metrics.tests.settings
 env:
-  - DJANGO=1.7.10
-  - DJANGO=1.8.6
+  - DJANGO=1.8
   - DJANGO=1.9
+  - DJANGO=1.10

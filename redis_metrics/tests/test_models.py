@@ -6,7 +6,10 @@ Replace this with more appropriate tests for your application.
 """
 from __future__ import unicode_literals
 from datetime import datetime, timedelta
-from mock import call, patch, Mock
+try:
+    from unittest.mock import call, patch, Mock
+except ImportError:
+    from mock import call, patch, Mock
 
 from django.test import TestCase
 from django.test.utils import override_settings

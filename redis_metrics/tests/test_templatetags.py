@@ -6,7 +6,10 @@ from datetime import datetime, timedelta
 
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import call, patch  # NOQA
 from redis_metrics.templatetags import redis_metric_tags as taglib
 from redis_metrics.templatetags.redis_metrics_filters import (
     metric_slug, strip_metric_prefix, to_int, to_int_list
@@ -165,17 +168,21 @@ class TestTemplateTags(TestCase):
     def test_metric_detail(self):
         with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             inst = mock_r.return_value
-            inst.get_metric.return_value = "RESULT"
             inst._granularities.return_value = ['daily', 'weekly']
+            inst.get_metric.return_value = {
+                'daily': 1,
+                'weekly': 2,
+            }
 
             result = taglib.metric_detail('test')
             expected_result = {
-                'granularities': ['daily', 'weekly'],
+                'granularities': ['Daily', 'Weekly'],
+                'metrics': [('daily', 1), ('weekly', 2)],
                 'slug': 'test',
-                'metrics': "RESULT",
                 'with_data_table': False,
             }
-            self.assertEqual(result, expected_result)
+
+            self.assertDictEqual(result, expected_result)
             mock_r.assert_called_once_with()
             inst.get_metric.assert_called_once_with('test')
 
@@ -274,16 +281,25 @@ class TestTemplateTags(TestCase):
         with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
             slugs = ['a1', 'a2']
             inst = mock_r.return_value
-            inst.get_metrics.return_value = 'RESULTS'
+            inst._granularities.return_value = ['daily', 'weekly', 'monthly', 'yearly']
+            inst.get_metrics.return_value = [
+                ('a1', {'day': 1, 'week': 2, 'month': 3, 'year': 4}),
+                ('a2', {'day': 3, 'week': 6, 'month': 9, 'year': 12}),
+            ]
 
             result = taglib.aggregate_detail(slugs)
             expected_result = {
                 'chart_id': 'metric-aggregate-a1-a2',
+                'granularities': ['Day', 'Week', 'Month', 'Year'],
                 'slugs': slugs,
-                'metrics': 'RESULTS',
+                'metrics': [
+                    ('a1', [1, 2, 3, 4]),
+                    ('a2', [3, 6, 9, 12]),
+                ],
                 'with_data_table': False,
             }
-            self.assertEqual(result, expected_result)
+
+            self.assertDictEqual(result, expected_result)
             mock_r.assert_called_once_with()
             inst.get_metrics.assert_called_once_with(slugs)
 
@@ -312,7 +328,6 @@ class TestTemplateTags(TestCase):
                 'since': None,
                 'granularity': "daily",
                 'metric_history': history,
-                'tabular_data': None,
                 'with_data_table': False,
             }
 
@@ -348,7 +363,6 @@ class TestTemplateTags(TestCase):
                 'since': None,
                 'granularity': "daily",
                 'metric_history': history,
-                'tabular_data': None,
                 'with_data_table': False,
             }
 
@@ -367,59 +381,6 @@ class TestTemplateTags(TestCase):
             result = taglib.aggregate_history(slugs, since=d)
             expected_result['since'] = d
             self.assertEqual(result, expected_result)
-
-    def test_aggregate_history_with_tabular_data(self):
-        with patch("redis_metrics.templatetags.redis_metric_tags.get_r") as mock_r:
-            history = {
-                'periods': ['2000-01-01', '2000-01-02', '2000-01-03'],
-                'data': [
-                    {
-                        'slug': 'bar',
-                        'values': [1, 2, 3]
-                    },
-                    {
-                        'slug': 'foo',
-                        'values': [4, 5, 6]
-                    },
-                ]
-            }
-            tabular_history = [
-                ('Period', 'foo', 'bar'),
-                ('2000-01-01', '100', '200'),
-                ('2000-01-02', '200', '300'),
-                ('2000-01-02', '300', '400'),
-            ]
-            inst = mock_r.return_value
-            inst.get_metric_history_chart_data.return_value = history
-            inst.get_metric_history_as_columns.return_value = tabular_history
-
-            result = taglib.aggregate_history(
-                ['foo', 'bar'],
-                since="2000-01-01 11:30:45",
-                with_data_table=True
-            )
-            expected_result = {
-                'chart_id': 'metric-aggregate-history-foo-bar',
-                'slugs': ['foo', 'bar'],
-                'since': datetime(2000, 1, 1, 11, 30, 45),
-                'granularity': "daily",
-                'metric_history': history,
-                'tabular_data': tabular_history,
-                'with_data_table': True,
-            }
-
-            self.assertEqual(result, expected_result)
-            mock_r.assert_called_once_with()  # Create the R object
-            inst.get_metric_history_chart_data.assert_called_once_with(
-                slugs=['foo', 'bar'],
-                since=datetime(2000, 1, 1, 11, 30, 45),
-                granularity='daily'
-            )
-            inst.get_metric_history_as_columns.assert_called_once_with(
-                slugs=['foo', 'bar'],
-                since=datetime(2000, 1, 1, 11, 30, 45),
-                granularity='daily'
-            )
 
 
 class TestTemplateFilters(TestCase):

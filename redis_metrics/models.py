@@ -246,8 +246,8 @@ class R(object):
             {<category_name>: set(<slug1>, <slug2>, ...)}
 
         """
-        result = {}
-        categories = self.r.smembers(self._categories_key)
+        result = OrderedDict()
+        categories = sorted(self.r.smembers(self._categories_key))
         for category in categories:
             result[category] = self._category_slugs(category)
 

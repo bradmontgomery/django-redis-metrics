@@ -1,14 +1,11 @@
 {% extends "redis_metrics/base.html" %}
 
-
+{% block titletext %}Aggregate Metrics{% endblock %}
+{% block breadcrumb %}
+    <li class="active">Aggregate Metrics</li>
+{% endblock %}
 
 {% block content %}
-    <h1>Aggregate</h1>
-    <ul class="breadcrumb">
-    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
-    <li class="active">Aggregate Metrics</li>
-    </ul>
-
     {% if form %}
         <form action="" method="post">{% csrf_token %}
         <p>Select the metrics that you wish to view:</p>

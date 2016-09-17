@@ -1,6 +1,9 @@
 from __future__ import unicode_literals
-from mock import call, patch
 from django.test import TestCase
+try:
+    from unittest.mock import call, patch
+except ImportError:
+    from mock import call, patch
 
 from ..forms import AggregateMetricForm, MetricCategoryForm
 

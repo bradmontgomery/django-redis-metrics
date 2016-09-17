@@ -1,16 +1,19 @@
 {% extends "redis_metrics/base.html" %}
 
+{% block titletext %}Hi, there!{% endblock %}
+{% block breadcrumb %}
+    <li class="active">Welcome!</li>
+{% endblock %}
 
 {% block content %}
-
-    <h1>Hi, there!</h1>
     <p class="lead">Thank you for using
     <a href="https://github.com/bradmontgomery/django-redis-metrics">
-    django-redis-metrics</a>. Read on for tips on getting started. If you
-    discover any bugs, please submit an
+    django-redis-metrics</a>. Read on for tips on getting started or visit the
+    <a href="http://django-redis-metrics.readthedocs.io/en/latest/">documentation</a>.
+    If you discover any bugs, please submit an
     <a href="https://github.com/bradmontgomery/django-redis-metrics/issues">
     Issue on Github</a>.</p>
-
+    <hr/>
 
     <h2>Getting Started</h2>
     <p>Congratulations on installing <code>redis_metrics</code>! Now, you can

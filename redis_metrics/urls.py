@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
-from django.conf.urls import patterns, url
+from django.conf.urls import url
+
 from .views import (
     AggregateHistoryView, AggregateDetailView, AggregateFormView,
     CategoryFormView, DefaultView, GaugesView, MetricDetailView,
@@ -7,7 +8,7 @@ from .views import (
 )
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(
         r'^categorize/(?P<category_name>.*)/$',
         CategoryFormView.as_view(),
@@ -17,6 +18,11 @@ urlpatterns = patterns('',
         r'^categorize/$',
         CategoryFormView.as_view(),
         name='redis_metrics_categorize'
+    ),
+    url(
+        r'^aggregate/category/(?P<category>.*)/$',
+        AggregateDetailView.as_view(),
+        name='redis_metric_aggregate_detail_by_category'
     ),
     url(
         r'^aggregate/(?P<slugs>.*)/(?P<granularity>.*)/$',
@@ -58,4 +64,4 @@ urlpatterns = patterns('',
         DefaultView.as_view(),
         name='redis_metrics_default'
     ),
-)
+]

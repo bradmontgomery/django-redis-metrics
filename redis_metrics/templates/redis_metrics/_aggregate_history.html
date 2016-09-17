@@ -1,4 +1,3 @@
-
 {% load redis_metrics_filters %}
 {% load static %}
 
@@ -29,53 +28,64 @@ NOTE: This template gets a `metric_history` context that's organized like so:
 <script type="text/javascript" src="{% static 'redis_metrics/js/colors.js' %}"></script>
 <script type="text/javascript">
 var ctx = document.getElementById("{{chart_id}}").getContext("2d");
-var options = {animation:false, responsive: true, datasetFill: false};
+var options = {
+  animation:false,
+  responsive: true,
+  legend: {display:false},
+  scales: {
+    yAxes: [{stacked: true}]
+  }
+};
 var data = {
   labels: {{metric_history.periods|json}},
   datasets: [
     {% for d in metric_history.data %}
+    {% with counter=forloop.counter0 %}
     {
         label: '{{d.slug}}',  {# the metric key, eg. time period #}
-        fillColor: Color({{forloop.counter0}}).fillColor,
-        strokeColor: Color({{forloop.counter0}}).fillColor,
-        highlightFill:Color({{forloop.counter0}}).highlightFill,
-        highlightStroke:Color({{forloop.counter0}}).highlightFill,
-        pointColor: Color({{forloop.counter0}}).fillColor,
-        pointStrokeColor: "#fff",
-        pointHighlightFill: Color({{forloop.counter0}}).highlightFill,
-        pointHighlightStroke: "#eee",
+        backgroundColor: DefaultColor({{counter}}).fillColor,
+        borderColor: DefaultColor({{counter}}).fillColor,
+        hoverBackgroundColor: DefaultColor({{counter}}).highlightFill,
+        hoverBorderColor: DefaultColor({{counter}}).highlightFill,
+        pointBackgroundColor: DefaultColor({{counter}}).fillColor,
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: DefaultColor({{forloop.counter0}}).highlightFill,
+        pointHoverBorderColor: "#eee",
         data: {{ d.values|json }}
-    },
+    }{% if not forloop.last %},{% endif %}
+    {% endwith %}
     {% endfor %}
   ]
 };
-var chart = new Chart(ctx).Line(data, options);
-$("div.chart").append(chart.generateLegend());
+var chart = new Chart(ctx, {
+  type:'line',
+  data: data,
+  options: options
+});
 </script>
+<hr style="clear:both;"/>
 
 {% if with_data_table %}
-<table class="table">
+<table class="table table-striped" style="overflow:scroll">
     <caption>
-      {{ granularity }} metrics for<br/><code>{{slugs|join:", " }}</code>
-      {% if since %}<br/>since {{ since }}{% endif %}
+      {{ granularity|title }} metrics {% if since %}since {{ since }}{% endif %}
     </caption>
     <thead>
-        <tr>
-            <th>Period</th>
-            {% for slug in slugs %}
-            <th><code>{{ slug }}</code></th>
-            {% endfor %}
-        </tr>
+      <tr>
+        <th>Metric</th>
+        {% for period in metric_history.periods %}
+          <th>{{ period }}</th>
+        {% endfor %}
+      </tr>
     </thead>
     <tbody>
-    {% for row in tabular_data %}
-        <tr>
-        {% for column in row %}
-            <td>
-            {{ column|default_if_none:"-" }}
-            </td>
+    {% for item in metric_history.data %}
+      <tr>
+        <td><code>{{ item.slug }}</code></td>
+        {% for value in item.values %}
+          <td>{{ value|default:"-" }}</td>
         {% endfor %}
-        </tr>
+      </tr>
     {% endfor %}
     </tbody>
 </table>

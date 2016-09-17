@@ -1,12 +1,11 @@
 {% extends "redis_metrics/base.html" %}
 
-{% block content %}
-    <h1>Categorize</h1>
-    <ul class="breadcrumb">
-    <li><a href="{% url 'redis_metrics_list' %}">Metrics List</a></li>
+{% block titletext %}Categorize{% endblock %}
+{% block breadcrumb %}
     <li class="active">Categorize Metrics</li>
-    </ul>
+{% endblock %}
 
+{% block content %}
     {% if form %}
         <form action="{% url 'redis_metrics_categorize' %}" method="post">
         {% csrf_token %}
