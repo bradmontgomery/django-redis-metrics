@@ -1,27 +1,53 @@
 {% load static %}
+{% load redis_metrics_filters %}
+
 <div class="chart">
   <canvas id="metric-detail-chart-{{slug}}"></canvas>
 </div>
+<script type="text/javascript" src="{% static 'redis_metrics/js/colors.js' %}"></script>
 <script type="text/javascript" src="{% static 'redis_metrics/js/chart.min.js' %}"></script>
 <script type="text/javascript">
 var ctx = document.getElementById("metric-detail-chart-{{slug}}").getContext("2d");
-var options = {animation:false, responsive: true};
+var options = {animation:false, responsive: true, legend: {display:false}};
 var data = {
-  labels: [{% for g in granularities %}'{{g|title}}'{% if not forloop.last %},{% endif %}{% endfor %}],
+  labels: {{granularities|json}},
   datasets: [
     {
-      label: "Metrics",
-      fillColor: "rgba(220,110,110,0.5)",
-      strokeColor: "rgba(220,220,220,0.8)",
-      highlightFill: "rgba(220,110,110,0.75)",
-      highlightStroke: "rgba(220,220,220,1)",
-      data: [{% for v in metrics.values %}
-        {{ v|default:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}
+      label: "{{ slug }}",
+      backgroundColor: [
+        {% for item in metrics %}
+          DefaultColor({{forloop.counter0}}).fillColor{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      borderColor: [
+        {% for item in metrics %}
+          DefaultColor({{forloop.counter0}}).strokeColor{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      hoverBackgroundColor: [
+        {% for item in metrics %}
+          DefaultColor({{forloop.counter0}}).highlightFill{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      hoverBorderColor: [
+        {% for item in metrics %}
+          DefaultColor({{forloop.counter0}}).highlightStroke{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      borderWidth: 1,
+      data: [
+        {% for slug, value in metrics %}
+          {{ value|default:0 }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
       ]
     }
   ]
 };
-var myBarChart = new Chart(ctx).Bar(data, options);
+var chart = new Chart(ctx, {
+  type: 'bar',
+  data: data,
+  options: options
+});
 </script>
 {% if with_data_table %}
 <table class="table">
@@ -30,7 +56,7 @@ var myBarChart = new Chart(ctx).Bar(data, options);
         <tr><th>Time Period</th><th>Value</th></tr>
     </thead>
     <tbody>
-    {% for metric, value in metrics.items %}
+    {% for metric, value in metrics %}
         <tr>
             <td>{{ metric|title }}</td>
             <td class="value">{{ value|default:"-" }}</td>

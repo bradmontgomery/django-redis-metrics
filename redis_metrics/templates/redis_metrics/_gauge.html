@@ -20,20 +20,20 @@ following context:
 <script type="text/javascript" src="{% static 'redis_metrics/js/chart.min.js' %}"></script>
 <script type="text/javascript">
 var ctx = document.getElementById("gauge-{{slug}}").getContext("2d");
-var options = {responsive: true};
-var data = [
-  {
-    value: {{ diff }},
-    color: "#ccc",
-    highlight: "#ccc",
-    label: "Until Max"
-  },
-  {
-    value: {{ current_value }},
-    color: "#f88",
-    highlight: "#f00",
-    label: "{{ slug }}"
-  }
-];
-var chart = new Chart(ctx).Doughnut(data,options);
+var options = {responsive: true, legend: {display:false}};
+var data = {
+  labels: ["Max", "{{slug}}"],
+  datasets: [
+    {
+      data: [{{diff}}, {{current_value|floatformat}}],
+      backgroundColor: ["#ccc", "#f88"],
+      hoverBackgroundColor: ["#ccc", "#f00"]
+    }
+  ]
+};
+var chart = new Chart(ctx, {
+  type: 'doughnut',
+  data: data,
+  options: options
+});
 </script>

@@ -24,39 +24,48 @@ Context for this Template:
 <script type="text/javascript" src="{% static 'redis_metrics/js/zepto.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'redis_metrics/js/chart.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'redis_metrics/js/colors.js' %}"></script>
-<style type="text/css">
-ul.bar-legend {list-style-type:none; clear:both; margin:0;padding:0;}
-ul.bar-legend li {
-  width: 300px;
-  float:left;
-}
-ul.bar-legend li span {
-    display: inline-block;
-    width: 20px;
-    height: 18px;
-    margin: 0 10px 0 0;
-}
-</style>
 <script type="text/javascript">
 var ctx = document.getElementById("{{chart_id}}").getContext("2d");
-var options = {animation:false, responsive: true,};
+var options = {animation:false, responsive: true, legend: {display:false}};
 var data = {
   labels: {{granularities|json}},
   datasets: [
     {% for slug, values in metrics %}
+    {% with counter=forloop.counter0 %}
     {
       label: "{{ slug }}",
-      fillColor: Color({{forloop.counter0}}).fillColor,
-      strokeColor: Color({{forloop.counter0}}).strokeColor,
-      highlightFill:Color({{forloop.counter0}}).highlightFill,
-      highlightStroke:Color({{forloop.counter0}}).highlightStroke,
+      backgroundColor: [
+        {% for v in values %}
+          DefaultColor({{counter}}).fillColor{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      borderColor: [
+        {% for v in values %}
+          DefaultColor({{counter}}).strokeColor{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      hoverBackgroundColor: [
+        {% for v in values %}
+          DefaultColor({{counter}}).highlightFill{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      hoverBorderColor: [
+        {% for v in values %}
+          DefaultColor({{counter}}).highlightStroke{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ],
+      borderWidth: 1,
       data: {{values|json}}
     }{% if not forloop.last %},{% endif %}
+    {% endwith %}
     {% endfor %}
   ]
 };
-var chart = new Chart(ctx).Bar(data, options);
-$("div.chart").append(chart.generateLegend());
+var chart = new Chart(ctx, {
+  type: 'bar',
+  data: data,
+  options: options
+});
 </script>
 <hr style="clear:both;"/>
 

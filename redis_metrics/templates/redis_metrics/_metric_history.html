@@ -15,17 +15,22 @@ var data = {
   datasets: [
     {
         label: "{{ slug }}",
-        fillColor: "rgba(220,110,110,0.2)",
-        strokeColor: "rgba(220,220,220,1)",
-        pointColor: "rgba(220,110,110,1)",
-        pointStrokeColor: "#fff",
-        pointHighlightFill: "#fff",
-        pointHighlightStroke: "rgba(220,220,220,1)",
+        fill: true,
+        backgroundColor: "rgba(220,110,110,0.2)",
+        borderColor: "rgba(220,220,220,1)",
+        pointBackgroundColor: "rgba(220,110,110,1)",
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "rgba(220,220,220,1)",
         data: [{% for k,v in metric_history %}{{v|default:0}},{% endfor %}]
     },
   ]
 };
-var chart = new Chart(ctx).Line(data, options);
+var chart = new Chart(ctx, {
+  type: 'line',
+  data: data,
+  options: options
+});
 </script>
 
 {% if with_data_table %}
