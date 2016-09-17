@@ -9,17 +9,12 @@ Context for this Template:
     * ``with_data_table`` -- True or False; whether or not to show raw metric
       data in a table.
     * ``metrics`` -- the metric data. It's a list of two-tuples that looks
-      something like this::
+      something like this, where the 2nd item is a list of values for the
+      configured Granularties (e.g. [day, week, month, year])
 
     [
-      ('foo', {
-          'seconds': 0, 'minutes': 0, 'hours': 4, 'day': '42',
-          'month': '90', 'week': '50', 'year': '9991'
-      }),
-      ('bar', {
-          'seconds': 0, 'minutes': 0, 'hours': 4, 'day': '42',
-          'month': '10', 'week': '5',  'year': '90'
-      })
+      ('foo', [42, 90, 50, 991])
+      ('bar', [42, 10, 5, 90])
     ]
 
 {% endcomment %}
@@ -46,24 +41,16 @@ ul.bar-legend li span {
 var ctx = document.getElementById("{{chart_id}}").getContext("2d");
 var options = {animation:false, responsive: true,};
 var data = {
-  labels: ['Seconds', 'Minutes', 'Hours', 'Day', 'Week', 'Month', 'Year'],
+  labels: {{granularities|json}},
   datasets: [
-    {% for s,d in metrics %}
+    {% for slug, values in metrics %}
     {
-      label: "{{ s }}",
+      label: "{{ slug }}",
       fillColor: Color({{forloop.counter0}}).fillColor,
       strokeColor: Color({{forloop.counter0}}).strokeColor,
       highlightFill:Color({{forloop.counter0}}).highlightFill,
       highlightStroke:Color({{forloop.counter0}}).highlightStroke,
-      data: [
-        {{ d.seconds|default:0 }},
-        {{ d.minutes|default:0 }},
-        {{ d.hours|default:0 }},
-        {{ d.day|default:0 }},
-        {{ d.week|default:0 }},
-        {{ d.month|default:0 }},
-        {{ d.year|default:0 }},
-      ]
+      data: {{values|json}}
     }{% if not forloop.last %},{% endif %}
     {% endfor %}
   ]
@@ -77,17 +64,19 @@ $("div.chart").append(chart.generateLegend());
 <table class="table table-striped">
     <caption>Metric Data</caption>
     <thead>
-        <tr><th>Metric</th><th>Time Period</th><th>Value</th></tr>
+      <tr>
+        <th>Metric</th>
+        {% for t in granularities %}<th>{{ t }}</th>{% endfor %}
+      </tr>
     </thead>
     <tbody>
-    {% for slug, metric_dict in metrics %}
-        {% for period, value in metric_dict.items %}
-            <tr>
-            <td><code>{{ slug }}</code></td>
-            <td>{{ period|capfirst }}</td>
-            <td class="value">{{ value|default:"-" }}</td>
-            </tr>
+    {% for slug, values in metrics %}
+      <tr>
+        <td><code>{{ slug }}</code></td>
+        {% for v in values %}
+          <td class="value">{{ v|default:"-" }}</td>
         {% endfor %}
+      </tr>
     {% endfor %}
     </tbody>
     </table>
