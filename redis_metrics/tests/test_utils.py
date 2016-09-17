@@ -3,7 +3,7 @@ from datetime import datetime
 try:
     from unittest.mock import call, patch, Mock
 except ImportError:
-    from mock import call, patch
+    from mock import call, patch, Mock
 
 from django.test import TestCase
 from django.test.utils import override_settings
