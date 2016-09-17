@@ -6,7 +6,10 @@ from datetime import datetime, timedelta
 
 from django.test import TestCase
 from django.test.utils import override_settings
-from mock import patch
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import call, patch
 from redis_metrics.templatetags import redis_metric_tags as taglib
 from redis_metrics.templatetags.redis_metrics_filters import (
     metric_slug, strip_metric_prefix, to_int, to_int_list
