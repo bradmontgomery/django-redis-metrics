@@ -1,6 +1,18 @@
 History
 -------
 
+1.5.0 (2016-09-16)
+++++++++++++++++++
+
+- UI improvements for default templates (see `Issue #55 <https://github.com/bradmontgomery/django-redis-metrics/issues/55>`_.) including viewing aggregates per Category.
+- Changed the formatting of `aggregate_detail` and `aggregate_history` template tags.
+- Removed the returned `tabular_data` value from the `aggregate_history` template tag.
+- Included inline styles for template tags so chart legends display correctly.
+- Updated Bootstrap to 3.3.7
+- Upgrade to Chart.js 2.2.2
+- Added font-awesome.
+
+
 1.4.0 (2016-04-25)
 ++++++++++++++++++
 
