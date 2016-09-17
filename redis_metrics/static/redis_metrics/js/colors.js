@@ -10,7 +10,7 @@
  *
  */
 
-var Color = function(index) {
+var DefaultColor = function(index) {
     // Basic Colors
     var colors = [
         "255,102,102", // Red
@@ -35,9 +35,9 @@ var Color = function(index) {
     ];
 
     return {
-        fillColor: "rgba(" + colors[index % 8] + ",0.5)",
+        fillColor: "rgba(" + colors[index % colors.length] + ",0.5)",
         strokeColor: "rgba(220,220,220,0.8)",
-        highlightFill: "rgba(" + hl_colors[index % 8] + ",0.75)",
+        highlightFill: "rgba(" + hl_colors[index % colors.length] + ",0.75)",
         highlightStroke: "rgba(220,220,220,1)",
     };
 };
