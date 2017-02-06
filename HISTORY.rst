@@ -1,6 +1,12 @@
 History
 -------
 
+1.6.0 (2017-02-06)
+++++++++++++++++++
+
+- Removed the bundled font-awesome files in favor of using the CDN-hosted version. (see `Issue #57 <https://github.com/bradmontgomery/django-redis-metrics/issues/57>`_ and `PR #58 <https://github.com/bradmontgomery/django-redis-metrics/pull/58>`_).
+
+
 1.5.0 (2016-09-16)
 ++++++++++++++++++
 
