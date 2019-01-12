@@ -27,6 +27,7 @@ TEST_SETTINGS = {
     'MIN_GRANULARITY': 'seconds',
     'MAX_GRANULARITY': 'yearly',
     'MONDAY_FIRST_DAY_OF_WEEK': False,
+    'USE_ISO_WEEK_NUMBER': False,
 }
 
 
@@ -252,12 +253,85 @@ class TestR(TestCase):
                 ['seconds', 'minutes', 'hourly', 'daily']
             )
 
-    def test_metric_key_patterns(self):
-        # These two things should always be the same.
-        from ..settings import GRANULARITIES
+    def test_get_metric_key_pattern_seconds(self):
+        slug = "test-slug"
+        date = datetime(2019, 1, 2, 3, 4, 5)
         self.assertEqual(
-            sorted(self.r._metric_key_patterns().keys()),
-            sorted(GRANULARITIES)
+            self.r._get_metric_key_pattern('seconds', slug, date),
+            "m:test-slug:s:2019-01-02-03-04-05"
+        )
+
+    def test_get_metric_key_pattern_minutes(self):
+        slug = "test-slug"
+        date = datetime(2019, 1, 2, 3, 4, 5)
+        self.assertEqual(
+            self.r._get_metric_key_pattern('minutes', slug, date),
+            "m:test-slug:i:2019-01-02-03-04"
+        )
+
+    def test_get_metric_key_pattern_hourly(self):
+        slug = "test-slug"
+        date = datetime(2019, 1, 2, 3, 4, 5)
+        self.assertEqual(
+            self.r._get_metric_key_pattern('hourly', slug, date),
+            "m:test-slug:h:2019-01-02-03"
+        )
+
+    def test_get_metric_key_pattern_daily(self):
+        slug = "test-slug"
+        date = datetime(2019, 1, 2, 3, 4, 5)
+        self.assertEqual(
+            self.r._get_metric_key_pattern('daily', slug, date),
+            "m:test-slug:2019-01-02"
+        )
+
+    def test_get_metric_key_pattern_weekly_sunday_as_first(self):
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MONDAY_FIRST_DAY_OF_WEEK'] = False
+        with override_settings(REDIS_METRICS=test_settings):
+            slug = "test-slug"
+            date = datetime(2012, 4, 1, 3, 4, 5)
+            self.assertEqual(
+                self.r._get_metric_key_pattern('weekly', slug, date),
+                "m:test-slug:w:2012-14"
+            )
+
+    def test_get_metric_key_pattern_weekly_monday_at_first(self):
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['MONDAY_FIRST_DAY_OF_WEEK'] = True
+        with override_settings(REDIS_METRICS=test_settings):
+            slug = "test-slug"
+            date = datetime(2012, 4, 1, 3, 4, 5)
+            self.assertEqual(
+                self.r._get_metric_key_pattern('weekly', slug, date),
+                "m:test-slug:w:2012-13"
+            )
+
+    def test_get_metric_key_pattern_weekly_iso_week(self):
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['USE_ISO_WEEK_NUMBER'] = True
+        with override_settings(REDIS_METRICS=test_settings):
+            slug = "test-slug"
+            date = datetime(2019, 1, 2, 3, 4, 5)
+            self.assertEqual(
+                self.r._get_metric_key_pattern('weekly', slug, date),
+                "m:test-slug:w:2019-1"
+            )
+
+    def test_get_metric_key_pattern_monthly(self):
+        slug = "test-slug"
+        date = datetime(2019, 1, 2, 3, 4, 5)
+        self.assertEqual(
+            self.r._get_metric_key_pattern('monthly', slug, date),
+            "m:test-slug:m:2019-01"
+        )
+
+    def test_get_metric_key_pattern_yearly(self):
+        slug = "test-slug"
+        date = datetime(2019, 1, 2, 3, 4, 5)
+        self.assertEqual(
+            self.r._get_metric_key_pattern('yearly', slug, date),
+            "m:test-slug:y:2019"
         )
 
     def test__build_keys(self):
@@ -314,6 +388,21 @@ class TestR(TestCase):
             d = datetime(2012, 4, 1)  # April Fools!
             keys = self.r._build_keys('test-slug', date=d, granularity='weekly')
             self.assertEqual(keys, ['m:test-slug:w:2012-13'])
+
+    def test__build_keys_weekly_iso_week(self):
+        """Tests ``R._build_keys``. with a *weekly* granularity."""
+        test_settings = TEST_SETTINGS.copy()
+        test_settings['USE_ISO_WEEK_NUMBER'] = True
+        with override_settings(REDIS_METRICS=test_settings):
+            d1 = datetime(2018, 12, 30)
+            keys = self.r._build_keys('test-slug', date=d1, granularity='weekly')
+            self.assertEqual(keys, ['m:test-slug:w:2018-52'])
+            d2 = datetime(2018, 12, 31)
+            keys = self.r._build_keys('test-slug', date=d2, granularity='weekly')
+            self.assertEqual(keys, ['m:test-slug:w:2019-1'])
+            d3 = datetime(2019, 1, 1)
+            keys = self.r._build_keys('test-slug', date=d3, granularity='weekly')
+            self.assertEqual(keys, ['m:test-slug:w:2019-1'])
 
     def test__build_keys_monthly(self):
         """Tests ``R._build_keys``. with a *monthly* granularity."""

@@ -22,6 +22,7 @@ TEST_SETTINGS = {
     'MIN_GRANULARITY': 'seconds',
     'MAX_GRANULARITY': 'yearly',
     'MONDAY_FIRST_DAY_OF_WEEK': False,
+    'USE_ISO_WEEK_NUMBER': False,
 }
 
 

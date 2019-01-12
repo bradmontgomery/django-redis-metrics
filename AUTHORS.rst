@@ -14,3 +14,4 @@ In no particular order:
 - Seamus Mac Conaonaigh `<https://github.com/smaccona>`_
 - Phoebe Bright `<https://github.com/phoebebright>`_
 - Stephan Pötschner `<https://github.com/stephanpoetschner>`_
+- Elias Laitinen `<https://github.com/eliasla>`_
