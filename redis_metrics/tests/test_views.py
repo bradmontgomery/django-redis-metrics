@@ -11,7 +11,7 @@ try:
 except ImportError:
     from mock import call, patch
 
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import TestCase, Client
 from django.test.utils import override_settings
 

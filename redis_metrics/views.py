@@ -10,7 +10,7 @@ from __future__ import unicode_literals
 from datetime import datetime
 
 from django.contrib.auth.decorators import user_passes_test
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic.edit import FormView
 from django.views.generic import TemplateView
@@ -23,7 +23,7 @@ class ProtectedTemplateView(TemplateView):
     """Ensures that Users are authenticated and that they're staff users. This
     is used as a parent class for the rest of the views in this app."""
 
-    _logged_in_staff = lambda u: u.is_authenticated() and u.is_staff
+    _logged_in_staff = lambda u: u.is_authenticated and u.is_staff
 
     @method_decorator(user_passes_test(_logged_in_staff))
     def dispatch(self, *args, **kwargs):
@@ -34,7 +34,7 @@ class ProtectedFormView(FormView):
     """Ensures that Users are authenticated and that they're staff users. This
     is used as a parent class for the rest of the views in this app."""
 
-    _logged_in_staff = lambda u: u.is_authenticated() and u.is_staff
+    _logged_in_staff = lambda u: u.is_authenticated and u.is_staff
 
     @method_decorator(user_passes_test(_logged_in_staff))
     def dispatch(self, *args, **kwargs):
