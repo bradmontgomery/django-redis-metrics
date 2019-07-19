@@ -11,9 +11,9 @@ To get started quickly:
 Requirements
 ------------
 
-This app works with Python 2 & 3 (tested on 2.7 and 3.5) and is tested with
-Django 1.8 - 1.10. It also requires `redis-py`_. For support for older versions
-of Django, see the `0.9.0 release <https://github.com/bradmontgomery/django-redis-metrics/releases/tag/0.9.0>`_.
+This app works with Python 3.6+ and is tested with Django 2.x. It also
+requires `redis-py`_. For support for older versions of Django, see the
+`1.7.0 release <https://github.com/bradmontgomery/django-redis-metrics/releases/tag/v1.7.0>`_.
 
 If you'd like to run the tests, install the packages listed in
 ``requirements/test.txt``, which includes coverage and mock.
@@ -32,7 +32,9 @@ You can also install the development version with
 To use the built-in views, add ``redis_metrics`` to your ``INSTALLED_APPS``,
 and include the following in your Root URLconf::
 
-    url(r'^metrics/', include('redis_metrics.urls')),
+    from django.urls import re_path, include
+
+    re_path(r'^metrics/', include('redis_metrics.urls')),
 
 Then, to view your metrics, visit the /metrics/ url, (i.e. run the development
 server and go to http://127.0.0.1:8000/metrics/)
@@ -75,10 +77,11 @@ Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
 * ``MIN_GRANULARITY``: The minimum-time granularity for your metrics; default is 'daily'.
 * ``MAX_GRANULARITY``: The maximum-time granularity for your metrics; default is 'yearly'
 * ``MONDAY_FIRST_DAY_OF_WEEK``: Set to True if week should start on Monday; default is False
-* ``USE_ISO_WEEK_NUMBER``: Set to True to use ISO calendar weeks (see: https://docs.python.org/2/library/datetime.html#datetime.date.isocalendar)
+* ``USE_ISO_WEEK_NUMBER``: Set to True to use ISO calendar weeks (see the `isocalendar`_ docs).
 
 .. _`django-redis`: https://github.com/niwinz/django-redis
 .. _`django-redis-sentinel`: https://github.com/KabbageInc/django-redis-sentinel
+.. _`isocalendar`: https://docs.python.org/3/library/datetime.html#datetime.date.isocalendar
 
 Upgrading versions prior to 0.8.x
 ---------------------------------
