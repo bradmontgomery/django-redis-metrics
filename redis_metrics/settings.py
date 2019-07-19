@@ -8,8 +8,8 @@ from django.conf import settings
 import warnings
 
 
-class AppSettings(object):
-    """This application-specific settings class will acts just like a
+class AppSettings:
+    """This application-specific settings class will act just like a
     dictionary or an object. It provides access to settings values via:
 
         app_settings['HOST']
@@ -49,6 +49,7 @@ class AppSettings(object):
         'MIN_GRANULARITY': 'REDIS_METRICS_MIN_GRANULARITY',
         'MAX_GRANULARITY': 'REDIS_METRICS_MAX_GRANULARITY',
         'MONDAY_FIRST_DAY_OF_WEEK': 'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK',
+        'USE_ISO_WEEK_NUMBER': 'USE_ISO_WEEK_NUMBER',
     }
 
     def __getattr__(self, name):
@@ -61,6 +62,7 @@ class AppSettings(object):
 
     def __getitem__(self, key):
         """Access settings as a dictionary key."""
+
         try:
             # First try the project settings...
             return settings.REDIS_METRICS[key]

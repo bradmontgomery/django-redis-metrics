@@ -1,6 +1,15 @@
 History
 -------
 
+2.0.0 (2019-07-19)
+++++++++++++++++++
+
+- Dropped support for Python 2 (Python 3.6+ only)
+- Support for Django 2.2. Thanks to `Derek Marsh <https://github.com/dmarsh19>`_ for
+`PR #62 <https://github.com/bradmontgomery/django-redis-metrics/pull/62>_`.
+- Updated Docs.
+
+
 1.7.0 (2019-07-19)
 ++++++++++++++++++
 
