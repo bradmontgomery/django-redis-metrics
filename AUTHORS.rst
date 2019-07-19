@@ -15,3 +15,4 @@ In no particular order:
 - Phoebe Bright `<https://github.com/phoebebright>`_
 - Stephan Pötschner `<https://github.com/stephanpoetschner>`_
 - Elias Laitinen `<https://github.com/eliasla>`_
+- Derek Marsh `<https://github.com/dmarsh19>`_
