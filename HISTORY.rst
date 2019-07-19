@@ -1,6 +1,11 @@
 History
 -------
 
+1.7.0 (2019-07-19)
+++++++++++++++++++
+
+- Added support for using ISO Week numbers. Thanks to `Elias Laitinen <https://github.com/eliasla>`_ for `PR #61 <https://github.com/bradmontgomery/django-redis-metrics/pull/61>_`)
+
 1.6.0 (2017-02-06)
 ++++++++++++++++++
 
