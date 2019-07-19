@@ -8,8 +8,8 @@ from django.conf import settings
 import warnings
 
 
-class AppSettings(object):
-    """This application-specific settings class will acts just like a
+class AppSettings:
+    """This application-specific settings class will act just like a
     dictionary or an object. It provides access to settings values via:
 
         app_settings['HOST']
@@ -54,7 +54,7 @@ class AppSettings(object):
     def __getattr__(self, name):
         """Access settings as an attribute."""
         try:
-            return self[name]
+            return getattr(settings, name, self._default_settings[name])
         except KeyError as e:
             # Failed attribute access should raise an AttributeError
             raise AttributeError(e)
