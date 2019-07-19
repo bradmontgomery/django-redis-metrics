@@ -49,18 +49,20 @@ class AppSettings:
         'MIN_GRANULARITY': 'REDIS_METRICS_MIN_GRANULARITY',
         'MAX_GRANULARITY': 'REDIS_METRICS_MAX_GRANULARITY',
         'MONDAY_FIRST_DAY_OF_WEEK': 'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK',
+        'USE_ISO_WEEK_NUMBER': 'USE_ISO_WEEK_NUMBER',
     }
 
     def __getattr__(self, name):
         """Access settings as an attribute."""
         try:
-            return getattr(settings, name, self._default_settings[name])
+            return self[name]
         except KeyError as e:
             # Failed attribute access should raise an AttributeError
             raise AttributeError(e)
 
     def __getitem__(self, key):
         """Access settings as a dictionary key."""
+
         try:
             # First try the project settings...
             return settings.REDIS_METRICS[key]
