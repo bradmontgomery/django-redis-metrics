@@ -15,6 +15,7 @@ TEST_SETTINGS = {
     'MIN_GRANULARITY': 'seconds',
     'MAX_GRANULARITY': 'yearly',
     'MONDAY_FIRST_DAY_OF_WEEK': False,
+    'USE_ISO_WEEK_NUMBER': False,
 }
 
 
@@ -31,6 +32,7 @@ class TestAppSettings(TestCase):
         self.assertEquals(rs.app_settings.MIN_GRANULARITY, 'seconds')
         self.assertEquals(rs.app_settings.MAX_GRANULARITY, 'yearly')
         self.assertEquals(rs.app_settings.MONDAY_FIRST_DAY_OF_WEEK, False)
+        self.assertEqual(rs.app_settings.USE_ISO_WEEK_NUMBER, False)
 
     def test_settings_getitem(self):
         self.assertEquals(rs.app_settings['HOST'], 'localhost')
@@ -42,6 +44,7 @@ class TestAppSettings(TestCase):
         self.assertEquals(rs.app_settings['MIN_GRANULARITY'], 'seconds')
         self.assertEquals(rs.app_settings['MAX_GRANULARITY'], 'yearly')
         self.assertEquals(rs.app_settings['MONDAY_FIRST_DAY_OF_WEEK'], False)
+        self.assertEqual(rs.app_settings['USE_ISO_WEEK_NUMBER'], False)
 
     def test_settings_getattr_raises_attribute_error(self):
         with self.assertRaises(AttributeError):
