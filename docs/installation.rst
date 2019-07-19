@@ -56,6 +56,7 @@ which includes a number of options, all wich have the following defaults::
        'MIN_GRANULARITY': 'daily',
        'MAX_GRANULARITY': 'yearly',
        'MONDAY_FIRST_DAY_OF_WEEK': False,
+       'USE_ISO_WEEK_NUMBER': False,
     }
 
 Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
@@ -74,6 +75,7 @@ Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
 * ``MIN_GRANULARITY``: The minimum-time granularity for your metrics; default is 'daily'.
 * ``MAX_GRANULARITY``: The maximum-time granularity for your metrics; default is 'yearly'
 * ``MONDAY_FIRST_DAY_OF_WEEK``: Set to True if week should start on Monday; default is False
+* ``USE_ISO_WEEK_NUMBER``: Set to True to use ISO calendar weeks (see: https://docs.python.org/2/library/datetime.html#datetime.date.isocalendar)
 
 .. _`django-redis`: https://github.com/niwinz/django-redis
 .. _`django-redis-sentinel`: https://github.com/KabbageInc/django-redis-sentinel

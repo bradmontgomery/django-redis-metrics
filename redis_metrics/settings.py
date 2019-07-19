@@ -34,6 +34,7 @@ class AppSettings(object):
         'MIN_GRANULARITY': 'daily',
         'MAX_GRANULARITY': 'yearly',
         'MONDAY_FIRST_DAY_OF_WEEK': False,
+        'USE_ISO_WEEK_NUMBER': False,
     }
 
     # A mapping of our old settings names to the new name

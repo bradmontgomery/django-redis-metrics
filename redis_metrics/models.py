@@ -188,30 +188,38 @@ class R(object):
             if keep:
                 yield g
 
-    def _metric_key_patterns(self):
+    def _get_metric_key_pattern(self, granularity, slug, date):
         """ The Redis metric key and date formatting patterns for each key, by granularity"""
-        return {
+        patterns_by_granularity = {
             "seconds": {"key": "m:{0}:s:{1}", "date_format": "%Y-%m-%d-%H-%M-%S"},
             "minutes": {"key": "m:{0}:i:{1}", "date_format": "%Y-%m-%d-%H-%M"},
             "hourly": {"key": "m:{0}:h:{1}", "date_format": "%Y-%m-%d-%H"},
             "daily": {"key": "m:{0}:{1}", "date_format": "%Y-%m-%d"},
             "weekly": {
                 "key": "m:{0}:w:{1}",
-                "date_format": "%Y-%{0}".format('W' if app_settings.MONDAY_FIRST_DAY_OF_WEEK else 'U')
+                "date_format": self._get_weekly_date_format(date),
             },
             "monthly": {"key": "m:{0}:m:{1}", "date_format": "%Y-%m"},
             "yearly": {"key": "m:{0}:y:{1}", "date_format": "%Y"},
         }
+        pattern_for_granularity = patterns_by_granularity[granularity]
+        fmt = pattern_for_granularity["date_format"]
+        date_string = date.strftime(fmt)
+        return pattern_for_granularity["key"].format(slug, date_string)
+
+    def _get_weekly_date_format(self, date):
+        if app_settings.USE_ISO_WEEK_NUMBER:
+            # We can return instantly because ISO week start on monday
+            return "{year}-{week_no}".format(year=date.isocalendar()[0], week_no=date.isocalendar()[1])
+        return "%Y-%{0}".format('W' if app_settings.MONDAY_FIRST_DAY_OF_WEEK else 'U')
 
     def _build_key_patterns(self, slug, date):
         """Builds an OrderedDict of metric keys and patterns for the given slug
         and date."""
         # we want to keep the order, from smallest to largest granularity
         patts = OrderedDict()
-        metric_key_patterns = self._metric_key_patterns()
         for g in self._granularities():
-            date_string = date.strftime(metric_key_patterns[g]["date_format"])
-            patts[g] = metric_key_patterns[g]["key"].format(slug, date_string)
+            patts[g] = self._get_metric_key_pattern(g, slug, date)
         return patts
 
     def _build_keys(self, slug, date=None, granularity='all'):
