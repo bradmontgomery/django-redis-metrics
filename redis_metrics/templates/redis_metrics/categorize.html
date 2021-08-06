@@ -2,15 +2,43 @@
 
 {% block titletext %}Categorize{% endblock %}
 {% block breadcrumb %}
-    <li class="active">Categorize Metrics</li>
+    <li class="is-active"><a>Categorize Metrics</a></li>
 {% endblock %}
 
 {% block content %}
     {% if form %}
         <form action="{% url 'redis_metrics_categorize' %}" method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <p><input type="submit" value="Categorize Metrics" class="btn btn-default"/></p>
+        <div class="field">
+            <label class="label">Category Name</label>
+            <div class="control">
+                {{ form.category_name }}
+            </div>
+        </div>
+        <div class="field">
+            <label class="label">Metrics</label>
+            <div class="control">
+        <div class="columns is-multiline">
+        {% for slug, choice in form.metrics.field.choices %}
+        <div class="column is-3-desktop is-4-tablet is-2-mobile">
+            <label class="checkbox" style="width: 100%;" for="id_options_{{ forloop.counter0 }}">
+                <div class="box">
+                    <div class="columns">
+                        <div class="column is-1">
+                            <input {% if slug in form.metrics.field.initial %}checked="checked"{% endif %} type="checkbox" id="id_options_{{ forloop.counter0 }}" value="{{ slug }}" name="metrics" />
+                        </div>
+                        <div class="column">
+                            {{ choice }}
+                        </div>
+                    </div>
+                </div>
+            </label>
+        </div>
+        {% endfor %}
+        </div>
+        </div>
+        </div>
+        <p><input type="submit" value="Categorize Metrics" class="button is-primary mt-2"/></p>
         </form>
     {% endif %}
 

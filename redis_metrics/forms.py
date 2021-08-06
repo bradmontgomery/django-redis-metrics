@@ -38,6 +38,7 @@ class MetricCategoryForm(forms.Form):
         self.r = R()  # Keep a connection to our Redis wrapper
         # The list of available choices should include all metrics
         choices = [(slug, slug) for slug in self.r.metric_slugs()]
+        self.fields['category_name'].widget.attrs.update({'class': 'input'})
         self.fields['metrics'].choices = choices
 
         # If a "category" is provided, set inital values (pre-selected)
