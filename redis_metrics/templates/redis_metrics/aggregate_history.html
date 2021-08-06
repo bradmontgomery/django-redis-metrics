@@ -6,15 +6,17 @@
 {% block breadcrumb %}
     <li><a href="{% url 'redis_metric_aggregate' %}">Select Metrics</a></li>
     <li><a href="{% url 'redis_metric_aggregate_detail' slugs|join:"+" %}">Detail</a></li>
-    <li class="active">{{ granularity }} history</li>
+    <li class="is-active"><a>{{ granularity }} history</a></li>
 {% endblock %}
 
 {% block content %}
-    <ul class="nav nav-pills history">
-    {% for g in granularities %}
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
-    {% endfor %}
-    </ul>
+    <div class="tabs">
+        <ul>
+        {% for g in granularities %}
+        <li {% if g in request.path %}class="is-active"{% endif %}><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
 
     {# Menu for viewing metrics at different levels #}
     {% metrics_since slugs 5 "aggregate_history" granularity %}

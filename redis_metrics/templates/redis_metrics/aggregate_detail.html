@@ -5,16 +5,18 @@
 {% block titletext %}Aggregate Metrics{% endblock %}
 {% block breadcrumb %}
     <li><a href="{% url 'redis_metric_aggregate' %}">Select Metrics</a></li>
-    <li class="active">Aggregate Metrics</li>
+    <li class="is-active"><a>Aggregate Metrics</a></li>
 {% endblock %}
 
 {% block content %}
     {% if category %}<h2>{{ category }}</h2>{% endif %}
-    <ul class="nav nav-pills history">
-    {% for g in granularities %}
-    <li><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
-    {% endfor %}
-    </ul>
+    <div class="tabs">
+        <ul>
+        {% for g in granularities %}
+            <li {% if g in request.path %}class="is-active"{% endif %}><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
 
     {% aggregate_detail slugs True %}
 

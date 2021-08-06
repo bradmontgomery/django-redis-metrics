@@ -1,44 +1,53 @@
-<h2><i class="fa fa-cog"></i> Admin</h2>
-<ul style="list-style-type:none;">
-  <li>
-    <i class="fa fa-plus"></i>
-    <a href="{% url 'redis_metrics_categorize' %}">Create Category</a>
-  </li>
-  <li>
-    <i class="fa fa-bar-chart"></i>
-    <a href="{% url 'redis_metric_aggregate' %}">Metric Aggregates</a>
-  </li>
-  <li>
-    <i class="fa fa-pie-chart"></i>
-    <a href="{% url 'redis_metrics_gauges' %}">Gauges</a>
-  </li>
-</ul>
+ <div>
+  <ul class="mx-2 my-4">
+    <li><span class="columns"><span class="column is-1"><i class="fa fa-cog"></i></span> <span class="column">Admin</span></span></li>
+    <li>
+      <span class="columns">
+        <span class="column is-1">
+          <i class="fa fa-plus"></i>
+        </span>
+        <span class="column">
+          <a href="{% url 'redis_metrics_categorize' %}">Create Category</a>
+        </span>
+    </li>
+    <li>
+      <span class="columns">
+        <span class="column is-1">
+          <i class="fa fa-bar-chart"></i>
+        </span>
+        <span class="column">
+          <a href="{% url 'redis_metric_aggregate' %}">Metric Aggregates</a>
+        </span>
+    </li>
+    <li>
+      <span class="columns">
+        <span class="column is-1">
+          <i class="fa fa-pie-chart"></i>
+        </span>
+        <span class="column">
+          <a href="{% url 'redis_metrics_gauges' %}">Gauges</a>
+        </span>
+    </li>
+  </ul>
 
 {% if metrics %}
 {% for category, slugs in metrics.items %}
-<div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">
-        <a href="{% url 'redis_metric_aggregate_detail_by_category' category %}"
-           title="{{ category }}">{{ category }}</a>
+<article class="panel is-white">
+    <h3 class="panel-heading pb-2">
+      <a href="{% url 'redis_metric_aggregate_detail_by_category' category %}"
+          title="{{ category }}">{{ category }}</a>
 
-        <a href="{% url 'redis_metrics_categorize' category %}"
-           class="pull-right" title="Edit {{ category}}">
-           <i class="fa fa-edit"></i></a>
-      </h3>
-    </div>
-    <div class="panel-body">
-      <ul>
+      <a href="{% url 'redis_metrics_categorize' category %}"
+          class="pull-right" title="Edit {{ category}}">
+          <i class="fa fa-edit"></i></a>
+    </h3>
       {% for slug in slugs %}
-        <li>
-          <a title="{{ slug }}" href="{% url 'redis_metric_detail' slug %}">
+          <a class="panel-block px-4" title="{{ slug }}" href="{% url 'redis_metric_detail' slug %}">
             {{ slug|truncatechars:28 }}</a>
-        </li>
       {% endfor %}
-      </ul>
-    </div>
-</div>
+</article>
 {% endfor %}
 {% else %}
     <p>There are No Metrics</p>
 {% endif %}
+</div>

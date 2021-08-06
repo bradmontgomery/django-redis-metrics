@@ -8,8 +8,8 @@ from redis_metrics.settings import GRANULARITIES
 register = template.Library()
 
 
-@register.inclusion_tag("redis_metrics/_since.html")
-def metrics_since(slugs, years, link_type="detail", granularity=None):
+@register.inclusion_tag("redis_metrics/_since.html", takes_context=True)
+def metrics_since(context, slugs, years, link_type="detail", granularity=None):
     """Renders a template with a menu to view a metric (or metrics) for a
     given number of years.
 
@@ -46,7 +46,11 @@ def metrics_since(slugs, years, link_type="detail", granularity=None):
         t = now - timedelta(days=365 * y)
         text = "{0} Years".format(y)
         slug_values.append((slugs, t, text, granularity))
-    return {'slug_values': slug_values, 'link_type': link_type.lower().strip()}
+    return {
+        'slug_values': slug_values, 
+        'link_type': link_type.lower().strip(), 
+        'request': context['request']
+    }
 
 
 @register.inclusion_tag("redis_metrics/_gauge.html")

@@ -34,6 +34,7 @@ var chart = new Chart(ctx, {
 </script>
 
 {% if with_data_table %}
+<div class="box">
 <table class="table">
     <caption>
       <code>{{ slug }}</code> {{ granularity }} metrics
@@ -51,4 +52,5 @@ var chart = new Chart(ctx, {
         {% endfor %}
     </tbody>
 </table>
+</div>
 {% endif %}

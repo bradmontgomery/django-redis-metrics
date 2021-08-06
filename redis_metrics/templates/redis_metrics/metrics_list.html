@@ -3,7 +3,7 @@
 
 {% block titletext %}Metrics{% endblock %}
 {% block breadcrumb %}
-    <li class="active">Metrics List</li>
+    <li class="is-active"><a>Metrics List</a></li>
 {% endblock %}
 
 {% block content %}
@@ -12,11 +12,15 @@
     Check out the <a href="{% url 'redis_metric_aggregate' %}">Aggregates</a>
     </p>
     <p>Click a metric below to view more data.</p>
+    <div class="columns is-multiline">
     {% for category, slugs in metrics.items %}
+    <div class="column is-4">
+        <div class="box" style="border-radius: 8px;">
         <h2>
             <a href="{% url 'redis_metrics_categorize' category %}"
                title="Edit {{ category}}">{{ category }}</a>
         </h2>
+        <div style="height: 280px; overflow-y: scroll;">
         <ul>
         {% for slug in slugs %}
             <li>
@@ -24,7 +28,11 @@
             </li>
         {% endfor %}
         </ul>
+        </div>
+        </div>
+    </div>
     {% endfor %}
+</div>
 {% else %}
     <p>You don't have any metrics set up yet!</p>
 {% endif %}

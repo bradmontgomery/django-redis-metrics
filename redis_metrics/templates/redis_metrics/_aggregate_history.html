@@ -66,27 +66,29 @@ var chart = new Chart(ctx, {
 <hr style="clear:both;"/>
 
 {% if with_data_table %}
-<table class="table table-striped" style="overflow:scroll">
-    <caption>
-      {{ granularity|title }} metrics {% if since %}since {{ since }}{% endif %}
-    </caption>
-    <thead>
-      <tr>
-        <th>Metric</th>
-        {% for period in metric_history.periods %}
-          <th>{{ period }}</th>
-        {% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-    {% for item in metric_history.data %}
-      <tr>
-        <td><code>{{ item.slug }}</code></td>
-        {% for value in item.values %}
-          <td>{{ value|default:"-" }}</td>
-        {% endfor %}
-      </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div style="overflow-x: scroll;">
+  <table class="table is-striped">
+      <caption>
+        {{ granularity|title }} metrics {% if since %}since {{ since }}{% endif %}
+      </caption>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          {% for period in metric_history.periods %}
+            <th>{{ period }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for item in metric_history.data %}
+        <tr>
+          <td><code>{{ item.slug }}</code></td>
+          {% for value in item.values %}
+            <td>{{ value|default:"-" }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+  </table>
+</div>
 {% endif %}

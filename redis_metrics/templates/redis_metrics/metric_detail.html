@@ -4,16 +4,17 @@
 
 {% block titletext %}{{ slug }} <small>metrics</small>{% endblock %}
 {% block breadcrumb %}
-    <li class="active">{{ slug }}</li>
+    <li class="is-active"><a>{{ slug }}</a></li>
 {% endblock %}
 
 {% block content %}
-
-    <ul class="nav nav-pills history">
-    {% for g in granularities %}
-    <li><a href="{% url 'redis_metric_history' slug g %}">{{ g|title }}</a></li>
-    {% endfor %}
-    </ul>
+    <div class="tabs">
+        <ul>
+        {% for g in granularities %}
+            <li {% if g in request.path %}class="is-active"{% endif %}><a href="{% url 'redis_metric_history' slug g %}">{{ g|title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
 
     {% metric_detail slug True %}
 

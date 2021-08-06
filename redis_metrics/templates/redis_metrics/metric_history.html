@@ -5,15 +5,17 @@
 {% block titletext %}{{ slug }} <small>history</small>{% endblock %}
 {% block breadcrumb %}
     <li><a href="{% url 'redis_metric_detail' slug %}">{{ slug }} detail</a></li>
-    <li class="active">{{ granularity }} history</li>
+    <li class="is-active"><a>{{ granularity }} history</a></li>
 {% endblock %}
 
 {% block content %}
-    <ul class="nav nav-pills history">
-    {% for g in granularities %}
-    <li><a href="{% url 'redis_metric_history' slug g %}">{{ g|title }}</a></li>
-    {% endfor %}
-    </ul>
+    <div class="tabs">
+        <ul>
+        {% for g in granularities %}
+            <li {% if g in request.path %}class="is-active"{% endif %}><a href="{% url 'redis_metric_history' slug g %}">{{ g|title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
 
     {# Menu to control the date from which we display metrics #}
     {% metrics_since slug 5 "history" granularity %}
