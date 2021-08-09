@@ -5,3 +5,13 @@
 .panel-heading {
     border-bottom: 1px solid #ededed !important;
 }
+
+.search-box {
+    width: 30%; 
+    margin-left: auto;
+    position: relative;
+}
+
+input[type="text"] {
+    border-radius: 12px;
+}

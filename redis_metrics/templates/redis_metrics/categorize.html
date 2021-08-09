@@ -20,11 +20,16 @@
             </div>
         </div>
         <div class="field">
-            <label class="label">Metrics</label>
+            <div style="align-items: center; display: flex;" class="control has-icons-left">
+                <label class="label mb-0">Metrics</label>
+                <div class="search-box mt-3">
+                    <span class="icon is-small" style="position: absolute;">
+                        <i class="fa fa-search"></i>
+                    </span>
+                    <input id="metrics_search" class="input mb-3" type="text" placeholder="Search" autocomplete="off">
+                </div>
+            </div>
         <div class="control">
-        <div class="search-box">
-            <input id="metrics_search" class="input mb-3" type="text" placeholder="Search" autocomplete="off">
-        </div>
         <div class="columns is-multiline" id="metrics_list">
         {% for slug, choice in form.metrics.field.choices %}
         <div class="column is-3-desktop is-4-tablet is-2-mobile searchable-metric" id="id_{{ slug }}">
