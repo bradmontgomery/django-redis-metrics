@@ -1,0 +1,7 @@
+.rounded-corners {
+    border-radius: 12px;
+}
+
+.panel-heading {
+    border-bottom: 1px solid #ededed !important;
+}
