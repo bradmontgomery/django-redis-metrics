@@ -1,5 +1,9 @@
 {% extends "redis_metrics/base.html" %}
 
+{% block extrahead %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+{% endblock %}
+
 {% block titletext %}Aggregate Metrics{% endblock %}
 {% block breadcrumb %}
     <li class="is-active"><a>Aggregate Metrics</a></li>
@@ -12,10 +16,13 @@
         <p>Select the metrics that you wish to view:</p>
         <div class="field">
             <label class="label">Metrics</label>
-            <div class="control">
+        <div class="control">
+        <div class="search-box">
+            <input id="metrics_search" class="input mb-3" type="text" placeholder="Search" autocomplete="off">
+        </div>
         <div class="columns is-multiline">
         {% for slug, choice in form.metrics.field.choices %}
-        <div class="column is-3-desktop is-4-tablet is-2-mobile">
+        <div class="column is-3-desktop is-4-tablet is-2-mobile searchable-metric" id="id_{{ slug }}">
             <label class="checkbox" style="width: 100%;" for="id_options_{{ forloop.counter0 }}">
                 <div class="box">
                     <div class="columns">
@@ -36,4 +43,20 @@
         <p><input type="submit" value="View Metrics" class="button is-primary mt-2"/></p>
         </form>
     {% endif %}
+{% endblock %}
+
+{% block bodyjs %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#metrics_search").on("input", function() {
+        const value = $(this).val()
+        if (value === "") {
+            $('.searchable-metric').show();
+        } else {
+            $('.searchable-metric').hide();
+            $('.searchable-metric[id*="' + value + '"]').show()
+        }
+    });
+});
+</script>
 {% endblock %}
