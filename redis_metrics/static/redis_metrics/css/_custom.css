@@ -15,3 +15,11 @@
 input[type="text"] {
     border-radius: 12px;
 }
+
+.sidebar {
+    position: sticky; 
+    height: 98vh; 
+    overflow-y: auto; 
+    top: 5px; 
+    padding: 1rem;
+}

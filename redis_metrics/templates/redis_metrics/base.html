@@ -23,6 +23,11 @@
           <span class="is-size-4 has-text-weight-bold">Metrics</span>
         </a>
       </div>
+      <div class="navbar-end">
+        <div class="navbar-item">
+            <p class="text-muted">Powered by <a class="has-text-white has-text-weight-bold" href="https://github.com/bradmontgomery/django-redis-metrics">django-redis-metrics</a></p>
+        </div>
+      </div>
     </div>
     </nav>
     <div class="container is-widescreen">
@@ -37,16 +42,12 @@
           </nav>
           <h1 class="title">{% block titletext %}{% endblock %}</h1>
 
-          <div class="content">{% block content %}{% endblock %}</div>
+          <div class="content mb-5">{% block content %}{% endblock %}</div>
         </div>
       </div>
     </div><!-- /.container -->
 
-    <footer class="footer" style="z-index: 999;">
-      <div class="content has-text-centered">
-        <p class="text-muted">Powered by <a href="https://github.com/bradmontgomery/django-redis-metrics">django-redis-metrics</a>.</p>
-      </div>
-    </footer>
+
     {% block bodyjs %}{% endblock %}
   </body>
 </html>
