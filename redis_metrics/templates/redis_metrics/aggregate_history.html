@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="tabs">
+    <div class="tabs mb-1">
         <ul>
         {% for g in granularities %}
         <li {% if g in request.path %}class="is-active"{% endif %}><a href="{% url 'redis_metric_aggregate_history' slugs|join:"+" g %}">{{ g|title }}</a></li>

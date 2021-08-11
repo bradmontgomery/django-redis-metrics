@@ -34,8 +34,7 @@ var chart = new Chart(ctx, {
 </script>
 
 {% if with_data_table %}
-<div class="box">
-<table class="table">
+<table class="table mt-6">
     <caption>
       <code>{{ slug }}</code> {{ granularity }} metrics
       {% if since %} since {{ since }}{% endif %}
@@ -52,5 +51,4 @@ var chart = new Chart(ctx, {
         {% endfor %}
     </tbody>
 </table>
-</div>
 {% endif %}
