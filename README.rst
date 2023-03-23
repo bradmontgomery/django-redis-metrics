@@ -41,10 +41,6 @@ This code is distributed under the terms of the MIT license. See the
     :alt: Current Release
     :target: https://pypi.python.org/pypi/django-redis-metrics/
 
-.. |travis| image:: http://img.shields.io/travis/bradmontgomery/django-redis-metrics/master.svg?style=flat-square
-    :alt: Build Status
-    :target: https://travis-ci.org/bradmontgomery/django-redis-metrics
-
 .. |coveralls| image:: http://img.shields.io/coveralls/bradmontgomery/django-redis-metrics/master.svg?style=flat-square
     :alt: Code Coverage
     :target: https://coveralls.io/r/bradmontgomery/django-redis-metrics

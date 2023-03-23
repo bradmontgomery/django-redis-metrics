@@ -1,0 +1,12 @@
+setuptools
+build
+pip-tools
+black
+flake8
+isort
+coverage
+redis
+django
+sphinx
+toml; python_version < '3.11'
+twine
