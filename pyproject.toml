@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["redis_metrics", ]
+include-package-data = true
+
+[project]
+name = "django-redis_metrics"
+license = {text = "MIT"}
+keywords = [
+    "django", "redis_metrics", "redis", "metrics", "performance",
+]
+requires-python = ">=3.8"
+authors = [
+  { name="Brad Montgomery", email="brad@bradmontgomery.net" },
+]
+description = "django-redis-metrics is a Django application for tracking application metrics backed by Redis."
+dependencies = [
+    "django",
+    "redis"
+]
+classifiers = [
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Framework :: Django',
+]
+dynamic = ["version", "readme"]
+
+[project.urls]
+"Homepage" = "https://github.com/bradmontgomery/django-redis_metrics"
+"Bug Tracker" = "https://github.com/bradmontgomery/django-redis_metrics/issues"
+
+[tool.setuptools.packages.find]
+where = ["redis_metrics"]
+
+[tool.setuptools.dynamic]
+version = {attr = "redis_metrics.VERSION"}
+readme = {file = ["README.rst"]}
