@@ -1,7 +1,7 @@
 Django Redis Metrics
 ====================
 
-|docs| |version| |travis| |coveralls| |license|
+|docs| |version| |coveralls| |license|
 
 
 This app allows you do define various named metrics (such as 'New Users',
