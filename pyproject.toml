@@ -2,10 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["redis_metrics", ]
-include-package-data = true
-
 [project]
 name = "django-redis_metrics"
 license = {text = "MIT"}
@@ -41,8 +37,10 @@ dynamic = ["version", "readme"]
 "Homepage" = "https://github.com/bradmontgomery/django-redis_metrics"
 "Bug Tracker" = "https://github.com/bradmontgomery/django-redis_metrics/issues"
 
-[tool.setuptools.packages.find]
-where = ["redis_metrics"]
+
+[tool.setuptools]
+packages = ["redis_metrics", ]
+include-package-data = true
 
 [tool.setuptools.dynamic]
 version = {attr = "redis_metrics.VERSION"}
