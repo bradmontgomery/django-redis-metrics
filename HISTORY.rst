@@ -1,6 +1,14 @@
 History
 -------
 
+2.1.0 (2023-03-23)
+++++++++++++++++++
+
+- Updated to work with Django 3+
+- Added pyproject.toml setup configuration.
+- Removed travis setup
+- Added pip-tools to manage requirements.
+
 2.0.0 (2019-07-19)
 ++++++++++++++++++
 
