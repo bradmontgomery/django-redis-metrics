@@ -1,3 +1,0 @@
-coverage==4.5.3
-mock==3.0.5
-redis==3.2.1

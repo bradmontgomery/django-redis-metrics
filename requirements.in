@@ -1,0 +1,6 @@
+pip-tools
+coverage
+black
+isort
+redis
+django
