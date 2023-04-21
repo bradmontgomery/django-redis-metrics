@@ -135,7 +135,7 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-sqlparse==0.4.3
+sqlparse==0.4.4
     # via django
 toml==0.10.2 ; python_version < "3.11"
     # via -r requirements.in
