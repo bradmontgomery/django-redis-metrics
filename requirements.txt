@@ -104,7 +104,7 @@ readme-renderer==37.3
     # via twine
 redis==4.5.4
     # via -r requirements.in
-requests==2.28.2
+requests==2.31.0
     # via
     #   requests-toolbelt
     #   sphinx
