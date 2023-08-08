@@ -1,4 +1,4 @@
-VERSION = "2.1.0"
+VERSION = "2.2.0"
 __version__ = VERSION
 
 try:
@@ -6,4 +6,4 @@ try:
 except ImportError:  # pragma: no cover
     pass  # pragma: no cover
 
-default_app_config = 'redis_metrics.apps.RedisMetricsConfig'
+default_app_config = "redis_metrics.apps.RedisMetricsConfig"
