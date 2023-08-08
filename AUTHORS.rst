@@ -16,3 +16,4 @@ In no particular order:
 - Stephan Pötschner `<https://github.com/stephanpoetschner>`_
 - Elias Laitinen `<https://github.com/eliasla>`_
 - Derek Marsh `<https://github.com/dmarsh19>`_
+- Joe Ferguson `<https://github.com/svpernova09/>`_
