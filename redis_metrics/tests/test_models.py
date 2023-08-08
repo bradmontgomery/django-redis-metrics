@@ -22,6 +22,7 @@ TEST_SETTINGS = {
     'PORT': 6379,
     'DB': 0,
     'PASSWORD': None,
+    'SSL': None,
     'SOCKET_TIMEOUT': None,
     'SOCKET_CONNECTION_POOL': None,
     'MIN_GRANULARITY': 'seconds',
@@ -67,6 +68,7 @@ class TestR(TestCase):
                 'port': 'PORT',
                 'db': 'DB',
                 'password': 'PASSWORD',
+                'ssl': 'SSL',
                 'socket_timeout': 1,
                 'connection_pool': 1
             }
@@ -75,6 +77,7 @@ class TestR(TestCase):
             self.assertEqual(inst.port, "PORT")
             self.assertEqual(inst.db, "DB")
             self.assertEqual(inst.password, 'PASSWORD')
+            self.assertEqual(inst.ssl, 'SSL')
             self.assertEqual(inst.socket_timeout, 1)
             self.assertEqual(inst.connection_pool, 1)
             self.assertEqual(inst._categories_key, "CAT")
@@ -86,6 +89,7 @@ class TestR(TestCase):
                 port='PORT',
                 db='DB',
                 password="PASSWORD",
+                ssl="SSL",
                 socket_timeout=1,
                 connection_pool=1
             )
