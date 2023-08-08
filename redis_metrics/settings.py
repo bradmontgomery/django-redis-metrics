@@ -24,32 +24,33 @@ class AppSettings:
 
     # list of (setting name, default value)
     _default_settings = {
-        'CONNECTION_CLASS': None,
-        'HOST': 'localhost',
-        'PORT': 6379,
-        'DB': 0,
-        'PASSWORD': None,
-        'SOCKET_TIMEOUT': None,
-        'SOCKET_CONNECTION_POOL': None,
-        'MIN_GRANULARITY': 'daily',
-        'MAX_GRANULARITY': 'yearly',
-        'MONDAY_FIRST_DAY_OF_WEEK': False,
-        'USE_ISO_WEEK_NUMBER': False,
+        "CONNECTION_CLASS": None,
+        "HOST": "localhost",
+        "PORT": 6379,
+        "DB": 0,
+        "PASSWORD": None,
+        "SSL": False,
+        "SOCKET_TIMEOUT": None,
+        "SOCKET_CONNECTION_POOL": None,
+        "MIN_GRANULARITY": "daily",
+        "MAX_GRANULARITY": "yearly",
+        "MONDAY_FIRST_DAY_OF_WEEK": False,
+        "USE_ISO_WEEK_NUMBER": False,
     }
 
     # A mapping of our old settings names to the new name
     _old_settings = {
-        'CONNECTION_CLASS': 'REDIS_METRICS_CONNECTION_CLASS',
-        'HOST': 'REDIS_METRICS_HOST',
-        'PORT': 'REDIS_METRICS_PORT',
-        'DB': 'REDIS_METRICS_DB',
-        'PASSWORD': 'REDIS_METRICS_PASSWORD',
-        'SOCKET_TIMEOUT': 'REDIS_METRICS_SOCKET_TIMEOUT',
-        'SOCKET_CONNECTION_POOL': 'REDIS_METRICS_SOCKET_CONNECTION_POOL',
-        'MIN_GRANULARITY': 'REDIS_METRICS_MIN_GRANULARITY',
-        'MAX_GRANULARITY': 'REDIS_METRICS_MAX_GRANULARITY',
-        'MONDAY_FIRST_DAY_OF_WEEK': 'REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK',
-        'USE_ISO_WEEK_NUMBER': 'USE_ISO_WEEK_NUMBER',
+        "CONNECTION_CLASS": "REDIS_METRICS_CONNECTION_CLASS",
+        "HOST": "REDIS_METRICS_HOST",
+        "PORT": "REDIS_METRICS_PORT",
+        "DB": "REDIS_METRICS_DB",
+        "PASSWORD": "REDIS_METRICS_PASSWORD",
+        "SOCKET_TIMEOUT": "REDIS_METRICS_SOCKET_TIMEOUT",
+        "SOCKET_CONNECTION_POOL": "REDIS_METRICS_SOCKET_CONNECTION_POOL",
+        "MIN_GRANULARITY": "REDIS_METRICS_MIN_GRANULARITY",
+        "MAX_GRANULARITY": "REDIS_METRICS_MAX_GRANULARITY",
+        "MONDAY_FIRST_DAY_OF_WEEK": "REDIS_METRICS_MONDAY_FIRST_DAY_OF_WEEK",
+        "USE_ISO_WEEK_NUMBER": "USE_ISO_WEEK_NUMBER",
     }
 
     def __getattr__(self, name):
@@ -86,4 +87,4 @@ app_settings = AppSettings()
 
 
 # All possible granularity values.
-GRANULARITIES = ['seconds', 'minutes', 'hourly', 'daily', 'weekly', 'monthly', 'yearly']
+GRANULARITIES = ["seconds", "minutes", "hourly", "daily", "weekly", "monthly", "yearly"]
