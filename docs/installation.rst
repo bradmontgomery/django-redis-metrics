@@ -53,6 +53,7 @@ which includes a number of options, all wich have the following defaults::
        'PORT': 6379,
        'DB':  0,
        'PASSWORD': None,
+       'SSL': False,
        'SOCKET_TIMEOUT': None,
        'SOCKET_CONNECTION_POOL': None,
        'MIN_GRANULARITY': 'daily',
@@ -72,6 +73,7 @@ Formerly, each of these were separate settings with a ``REDIS_METRICS_`` prefix.
 * ``PORT``: Port of your redis server; defaults to '6379'
 * ``DB``: Your redis database number to use, defaults to 0
 * ``PASSWORD``: Your redis password if needed; defaults to None
+* ``SSL``: Use SSL to connect to Redis; defaults to False
 * ``SOCKET_TIMEOUT``: Your redis database socket timeout; defaults to None
 * ``SOCKET_CONNECTION_POOL``: Your redis database socket connection pool; defaults to None
 * ``MIN_GRANULARITY``: The minimum-time granularity for your metrics; default is 'daily'.

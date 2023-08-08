@@ -48,6 +48,7 @@ class R(object):
         * ``port`` -- Redis port (set in settings.REDIS_METRICS['PORT'])
         * ``db`` -- Redis DB (set in settings.REDIS_METRICS['DB'])
         * ``password`` -- Redis password (set in settings.REDIS_METRICS['PASSWORD'])
+        * ``ssl`` -- Use SSL when connecting (set in settings.REDIS_METRICS['SSL'])
         * ``socket_timeout``   -- Redis password (set in
           settings.REDIS_METRICS['SOCKET_TIMEOUT'])
         * ``connection_pool`` -- Redis connection pool info. (set in
@@ -68,6 +69,7 @@ class R(object):
             self.port = kwargs.pop('port', app_settings.PORT)
             self.db = kwargs.pop('db', app_settings.DB)
             self.password = kwargs.pop('password', app_settings.PASSWORD)
+            self.ssl = kwargs.pop('ssl', app_settings.SSL)
             self.socket_timeout = kwargs.pop(
                 'socket_timeout',
                 app_settings.SOCKET_TIMEOUT
@@ -83,6 +85,7 @@ class R(object):
                 port=self.port,
                 db=self.db,
                 password=self.password,
+                ssl=self.ssl,
                 socket_timeout=self.socket_timeout,
                 connection_pool=self.connection_pool,
                 decode_responses=True
