@@ -5,13 +5,13 @@ To get started quickly:
 
 1. Run ``pip install django-redis-metrics``.
 2. Adding ``redis_metrics`` to your INSTALLED_APPS.
-3. Include ``url(r'^metrics/', include('redis_metrics.urls'))`` in your URLConf.
+3. Include ``re_path(r'^metrics/', include('redis_metrics.urls'))`` in your URLConf.
 
 
 Requirements
 ------------
 
-This app works with Python 3.6+ and is tested with Django 2.x. It also
+This app works with Python 3.11+ and is tested with Django 4.2.x. It also
 requires `redis-py`_. For support for older versions of Django, see the
 `1.7.0 release <https://github.com/bradmontgomery/django-redis-metrics/releases/tag/v1.7.0>`_.
 
