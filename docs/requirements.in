@@ -1,0 +1,6 @@
+# Requirements for building documentation.
+setuptools
+build
+pip-tools
+sphinx
+toml; python_version < '3.11'

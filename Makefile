@@ -13,6 +13,7 @@ requirements:
 	pip install --upgrade pip
 	pip install --upgrade pip-tools
 	pip-compile -rU --no-emit-index-url requirements.in
+	pip-compile -rU --no-emit-index-url docs/requirements.in -o docs/requirements.txt
 
 .PHONY: build
 build:
