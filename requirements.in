@@ -7,6 +7,8 @@ isort
 coverage
 redis
 django
+django-redis
+django-user-sessions
 sphinx
-toml; python_version < '3.11'
+toml
 twine

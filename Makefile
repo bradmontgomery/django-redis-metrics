@@ -22,3 +22,13 @@ build:
 .PHONY: upload
 upload:
 	python -m twine upload --repository pypi dist/*
+
+.PHONY: test
+test:
+	python runtest.py
+
+.PHONY: install_requirements
+install_requirements:
+	pip install --upgrade pip
+	pip install --upgrade pip-tools
+	pip install -r requirements.txt
