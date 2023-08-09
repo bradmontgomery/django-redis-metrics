@@ -8,8 +8,6 @@ alabaster==0.7.13
     # via sphinx
 asgiref==3.7.2
     # via django
-async-timeout==4.0.2
-    # via redis
 babel==2.12.1
     # via sphinx
 black==23.7.0
@@ -22,8 +20,6 @@ build==0.10.0
     #   pip-tools
 certifi==2023.7.22
     # via requests
-cffi==1.15.1
-    # via cryptography
 charset-normalizer==3.2.0
     # via requests
 click==8.1.6
@@ -32,9 +28,14 @@ click==8.1.6
     #   pip-tools
 coverage==7.2.7
     # via -r requirements.in
-cryptography==41.0.3
-    # via secretstorage
 django==4.2.4
+    # via
+    #   -r requirements.in
+    #   django-redis
+    #   django-user-sessions
+django-redis==5.3.0
+    # via -r requirements.in
+django-user-sessions==2.0.0
     # via -r requirements.in
 docutils==0.20.1
     # via
@@ -54,10 +55,6 @@ isort==5.12.0
     # via -r requirements.in
 jaraco-classes==3.3.0
     # via keyring
-jeepney==0.8.0
-    # via
-    #   keyring
-    #   secretstorage
 jinja2==3.1.2
     # via sphinx
 keyring==24.2.0
@@ -81,7 +78,7 @@ packaging==23.1
     #   sphinx
 pathspec==0.11.2
     # via black
-pip-tools==7.2.0
+pip-tools==7.3.0
     # via -r requirements.in
 pkginfo==1.9.6
     # via twine
@@ -89,8 +86,6 @@ platformdirs==3.10.0
     # via black
 pycodestyle==2.11.0
     # via flake8
-pycparser==2.21
-    # via cffi
 pyflakes==3.1.0
     # via flake8
 pygments==2.16.1
@@ -103,7 +98,9 @@ pyproject-hooks==1.0.0
 readme-renderer==40.0
     # via twine
 redis==4.6.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   django-redis
 requests==2.31.0
     # via
     #   requests-toolbelt
@@ -115,8 +112,6 @@ rfc3986==2.0.0
     # via twine
 rich==13.5.2
     # via twine
-secretstorage==3.3.3
-    # via keyring
 six==1.16.0
     # via bleach
 snowballstemmer==2.2.0
@@ -129,20 +124,22 @@ sphinx==7.1.2
     #   sphinxcontrib-htmlhelp
     #   sphinxcontrib-qthelp
     #   sphinxcontrib-serializinghtml
-sphinxcontrib-applehelp==1.0.5
+sphinxcontrib-applehelp==1.0.6
     # via sphinx
-sphinxcontrib-devhelp==1.0.3
+sphinxcontrib-devhelp==1.0.4
     # via sphinx
-sphinxcontrib-htmlhelp==2.0.2
+sphinxcontrib-htmlhelp==2.0.3
     # via sphinx
 sphinxcontrib-jsmath==1.0.1
     # via sphinx
-sphinxcontrib-qthelp==1.0.4
+sphinxcontrib-qthelp==1.0.5
     # via sphinx
-sphinxcontrib-serializinghtml==1.1.6
+sphinxcontrib-serializinghtml==1.1.7
     # via sphinx
 sqlparse==0.4.4
     # via django
+toml==0.10.2
+    # via -r requirements.in
 twine==4.0.2
     # via -r requirements.in
 urllib3==2.0.4
