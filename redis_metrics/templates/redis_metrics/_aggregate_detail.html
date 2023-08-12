@@ -70,23 +70,25 @@ var chart = new Chart(ctx, {
 <hr style="clear:both;"/>
 
 {% if with_data_table %}
-<table class="table table-striped">
-    <caption>Metric Data</caption>
-    <thead>
-      <tr>
-        <th>Metric</th>
-        {% for t in granularities %}<th>{{ t }}</th>{% endfor %}
-      </tr>
-    </thead>
-    <tbody>
-    {% for slug, values in metrics %}
-      <tr>
-        <td><code>{{ slug }}</code></td>
-        {% for v in values %}
-          <td class="value">{{ v|default:"-" }}</td>
-        {% endfor %}
-      </tr>
-    {% endfor %}
-    </tbody>
-    </table>
+<div style="overflow-x: scroll;">
+  <table class="table is-striped">
+      <caption>Metric Data</caption>
+      <thead>
+        <tr>
+          <th>Metric</th>
+          {% for t in granularities %}<th>{{ t }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+      {% for slug, values in metrics %}
+        <tr>
+          <td><code>{{ slug }}</code></td>
+          {% for v in values %}
+            <td class="value">{{ v|default:"-" }}</td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+      </tbody>
+  </table>
+  </div>
 {% endif %}

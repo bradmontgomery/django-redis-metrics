@@ -10,45 +10,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Metrics, powered by django-redis-metrics">
     <title>Metrics</title>
-    <link href="{% static 'redis_metrics/css/bs.min.css' %}" rel="stylesheet">
-    <link href="{% static 'redis_metrics/css/bs-theme.min.css' %}" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link href="{% static 'redis_metrics/css/_custom.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     {% block extrahead %}{% endblock %}
   </head>
   <body>
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar is-primary mb-4" role="navigation">
       <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{% url 'redis_metrics_default' %}">Metrics</a>
+      <div class="navbar-brand">
+        <a class="navbar-item" href="{% url 'redis_metrics_default' %}">
+          <span class="is-size-4 has-text-weight-bold">Metrics</span>
+        </a>
+      </div>
+      <div class="navbar-end">
+        <div class="navbar-item">
+            <p class="text-muted">Powered by <a class="has-text-white has-text-weight-bold" href="https://github.com/bradmontgomery/django-redis-metrics">django-redis-metrics</a></p>
         </div>
       </div>
+    </div>
     </nav>
+    <div class="container is-widescreen">
+      <div class="columns">
+        <div class="column is-3">{% block nav %}{% metric_list %}{% endblock %}</div>
+        <div class="column is-9">
+          <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+              <li><a href="{% url 'redis_metrics_default' %}">Metrics</a></li>
+              {% block breadcrumb %}{% endblock %}
+            </ul>
+          </nav>
+          <h1 class="title">{% block titletext %}{% endblock %}</h1>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-md-3">{% block nav %}{% metric_list %}{% endblock %}</div>
-        <div class="col-md-9">
-          <h1>{% block titletext %}{% endblock %}</h1>
-
-          <ul class="breadcrumb">
-          <li><a href="{% url 'redis_metrics_default' %}">Metrics</a></li>
-          {% block breadcrumb %}{% endblock %}
-          </ul>
-
-          {% block content %}{% endblock %}
+          <div class="content mb-5">{% block content %}{% endblock %}</div>
         </div>
+      </div>
     </div><!-- /.container -->
 
-    <footer class="footer">
-      <div class="container">
-        <p class="text-muted">Powered by <a href="https://github.com/bradmontgomery/django-redis-metrics">django-redis-metrics</a>.</p>
-      </div>
-    </footer>
+
+    {% block bodyjs %}{% endblock %}
   </body>
 </html>

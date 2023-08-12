@@ -2,17 +2,18 @@
 
 {% block titletext %}Hi, there!{% endblock %}
 {% block breadcrumb %}
-    <li class="active">Welcome!</li>
+    <li class="is-active"><a href="#" aria-current="page">Welcome!</a></li>
 {% endblock %}
 
 {% block content %}
-    <p class="lead">Thank you for using
-    <a href="https://github.com/bradmontgomery/django-redis-metrics">
-    django-redis-metrics</a>. Read on for tips on getting started or visit the
-    <a href="http://django-redis-metrics.readthedocs.io/en/latest/">documentation</a>.
-    If you discover any bugs, please submit an
-    <a href="https://github.com/bradmontgomery/django-redis-metrics/issues">
-    Issue on Github</a>.</p>
+    <p class="subtitle mt-2">Thank you for using
+        <a href="https://github.com/bradmontgomery/django-redis-metrics">
+        django-redis-metrics</a>. Read on for tips on getting started or visit the
+        <a href="http://django-redis-metrics.readthedocs.io/en/latest/">documentation</a>.
+        If you discover any bugs, please submit an
+        <a href="https://github.com/bradmontgomery/django-redis-metrics/issues">
+        Issue on Github</a>.
+    </p>
     <hr/>
 
     <h2>Getting Started</h2>
@@ -49,6 +50,8 @@
         # Then store it in a Gauge
         gauge('some-value', num)
     </code></pre>
+
+    <hr/>
 
     <h2>Viewing Metrics</h2>
     <p>There are a couple of ways to view your metrics. Out of the box, you

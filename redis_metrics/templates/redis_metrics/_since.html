@@ -1,21 +1,27 @@
 
 {% if slug_values %}
-<ul class="nav nav-pills since">
+<div class="tabs">
+    <ul>
+    {# Metric History #}
+    {% if link_type == "history" %}
+        {% for slug, since, text, granularity in slug_values %}
+        <li {% if since|date:"Y-m-d" in request.get_full_path %}class="is-active"{% endif %}>
+            <a href="{% url 'redis_metric_history' slug granularity %}?since={{ since|date:"Y-m-d" }}">
+                {{ text }}
+            </a>
+        </li>
+        {% endfor %}
 
-{# Metric History #}
-{% if link_type == "history" %}
-    {% for slug, since, text, granularity in slug_values %}
-    <li><a href="{% url 'redis_metric_history' slug granularity %}?since={{ since|date:"Y-m-d" }}">
-    {{ text }}</a></li>
-    {% endfor %}
-
-{# Aggregate History #}
-{% elif link_type == "aggregate_history" %}
-    {% for slug, since, text, granularity in slug_values %}
-    <li><a href="{% url 'redis_metric_aggregate_history' slug granularity %}?since={{ since|date:"Y-m-d" }}">
-    {{ text }}</a></li>
-    {% endfor %}
-{% endif %}
-
-</ul>
+    {# Aggregate History #}
+    {% elif link_type == "aggregate_history" %}
+        {% for slug, since, text, granularity in slug_values %}
+        <li {% if since|date:"Y-m-d" in request.get_full_path %}class="is-active"{% endif %}>
+            <a href="{% url 'redis_metric_aggregate_history' slug granularity %}?since={{ since|date:"Y-m-d" }}">
+                {{ text }}
+            </a>
+        </li>
+        {% endfor %}
+    {% endif %}
+    </ul>
+</div>
 {% endif %}

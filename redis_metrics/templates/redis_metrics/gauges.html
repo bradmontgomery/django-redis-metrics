@@ -3,14 +3,14 @@
 
 {% block titletext %}Gauges{% endblock %}
 {% block breadcrumb %}
-    <li class="active">Gauges</li>
+    <li class="is-active"><a>Gauges</a></li>
 {% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="columns is-multiline">
 {% for slug in gauges %}
-    <div class="col-lg-4 col-md-4 col-sm-2">
-      {% gauge slug %}
+    <div class="column is-3-desktop is-6-mobile is-4-tablet">
+        {% gauge slug %}
     </div>
 {% empty %}
     <p>You don't have any gauges set up yet!</p>
