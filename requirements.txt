@@ -20,6 +20,8 @@ build==0.10.0
     #   pip-tools
 certifi==2023.7.22
     # via requests
+cffi==1.16.0
+    # via cryptography
 charset-normalizer==3.2.0
     # via requests
 click==8.1.6
@@ -28,7 +30,9 @@ click==8.1.6
     #   pip-tools
 coverage==7.2.7
     # via -r requirements.in
-django==4.2.4
+cryptography==41.0.5
+    # via secretstorage
+django==4.2.7
     # via
     #   -r requirements.in
     #   django-redis
@@ -55,6 +59,10 @@ isort==5.12.0
     # via -r requirements.in
 jaraco-classes==3.3.0
     # via keyring
+jeepney==0.8.0
+    # via
+    #   keyring
+    #   secretstorage
 jinja2==3.1.2
     # via sphinx
 keyring==24.2.0
@@ -86,6 +94,8 @@ platformdirs==3.10.0
     # via black
 pycodestyle==2.11.0
     # via flake8
+pycparser==2.21
+    # via cffi
 pyflakes==3.1.0
     # via flake8
 pygments==2.16.1
@@ -112,6 +122,8 @@ rfc3986==2.0.0
     # via twine
 rich==13.5.2
     # via twine
+secretstorage==3.3.3
+    # via keyring
 six==1.16.0
     # via bleach
 snowballstemmer==2.2.0
